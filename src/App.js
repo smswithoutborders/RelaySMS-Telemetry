@@ -7,6 +7,8 @@ import Dashboard from "./Pages/Dashboard";
 import ResponsiveDrawer from "./Components/Nav";
 import Chart from "./Pages/Charts";
 import Loader from "./Components/Loader";
+import DialogTable from "./Pages/TableDialog";
+import Footer from "./Components/Footer";
 
 const darkTheme = createTheme({
   palette: {
@@ -18,7 +20,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate an async operation
     setTimeout(() => {
       setIsLoading(false);
     }, 3000);
@@ -32,15 +33,14 @@ function App() {
         <ThemeProvider theme={darkTheme}>
           <CssBaseline />
           <Router>
-            {" "}
-            {/* Use Router component */}
             <ResponsiveDrawer />
             <Routes>
               {" "}
-              {/* Use Routes component */}
               <Route path="/" element={<Dashboard />} />
               <Route path="/charts" element={<Chart />} />
+              <Route path="/data" element={<DialogTable />} />
             </Routes>
+            <Footer />
           </Router>
         </ThemeProvider>
       )}

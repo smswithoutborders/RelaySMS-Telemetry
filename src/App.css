@@ -1,5 +1,4 @@
 body {
-  height: 110vh;
   background-image: linear-gradient(to left, #170624 0%, #170624 0%, #1E0041 21%, #3B009F 52%, #170624 78%, #170624 100%);
 }
 
@@ -11,5 +10,4 @@ background-image: url(/public/3d.jpg);
 
 .cards {
   background-image: linear-gradient( 109.6deg,  #100A36 11.2%, #250766 91.1% );
-  /* background-image: linear-gradient(to left, #100A36 50%, #110B38 12%, #250766  12%) ; */
 }

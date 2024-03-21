@@ -1,7 +1,5 @@
 import * as React from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { useDrawingArea } from "@mui/x-charts/hooks";
-import { styled } from "@mui/material/styles";
 import { Grid, Typography, Box } from "@mui/material";
 
 const data = [
@@ -21,13 +19,6 @@ const size = {
   width: 400,
   height: 200,
 };
-
-const StyledText = styled("text")(({ theme }) => ({
-  fill: theme.palette.text.primary,
-  textAnchor: "middle",
-  dominantBaseline: "central",
-  fontSize: 20,
-}));
 
 export default function Chart() {
   return (
