@@ -1,260 +1,253 @@
 import * as React from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Grid } from "@mui/material";
 import FreeSolo from "../Components/SearchInput";
 
 function createData(
-  testID,
+  id,
+  testid,
   senttime,
   smssent,
   smsrecieved,
   published,
   operatordiff,
-  pubdiff,
-  total
+  publisherdiff,
+  totaldiff
 ) {
   return {
-    testID,
+    id,
+    testid,
     senttime,
     smssent,
     smsrecieved,
     published,
     operatordiff,
-    pubdiff,
-    total,
+    publisherdiff,
+    totaldiff,
   };
 }
 
 const rows = [
   createData(
+    1,
     "Test 001",
     "10:20",
     "10:21",
-    "10:21",
     "10:22",
+    "10:23",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    2,
+    "Test 002",
+    "10:24",
+    "10:25",
+    "10:26",
+    "10:27",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    3,
+    "Test 003",
+    "10:28",
+    "10:29",
+    "10:30",
+    "10:31",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    4,
+    "Test 004",
+    "10:32",
+    "10:33",
+    "10:34",
+    "10:35",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    5,
+    "Test 005",
+    "10:36",
+    "10:37",
+    "10:38",
+    "10:39",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    6,
+    "Test 006",
+    "10:40",
+    "10:41",
+    "10:42",
+    "10:43",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    7,
+    "Test 007",
+    "10:44",
+    "10:45",
+    "10:46",
+    "10:47",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    8,
+    "Test 008",
+    "10:48",
+    "10:49",
+    "10:50",
+    "10:51",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    9,
+    "Test 009",
+    "10:52",
+    "10:53",
+    "10:54",
+    "10:55",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    10,
+    "Test 010",
+    "10:56",
+    "10:57",
+    "10:58",
+    "10:59",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    11,
+    "Test 011",
+    "11:00",
+    "11:01",
+    "11:02",
+    "11:03",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    12,
+    "Test 012",
+    "11:04",
+    "11:05",
+    "11:06",
+    "11:07",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    13,
+    "Test 013",
+    "11:08",
+    "11:09",
+    "11:10",
+    "11:11",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    14,
+    "Test 014",
+    "11:12",
+    "11:13",
+    "11:14",
+    "11:15",
     "0.1",
     "0.1",
     "0.2"
   ),
   createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
-    "0.1",
-    "0.1",
-    "0.2"
-  ),
-  createData(
-    "Test 001",
-    "10:20",
-    "10:21",
-    "10:21",
-    "10:22",
+    15,
+    "Test 015",
+    "11:16",
+    "11:17",
+    "11:18",
+    "11:19",
     "0.1",
     "0.1",
     "0.2"
   ),
 ];
 
-export default function DialogTable() {
+const columns = [
+  { field: "testid", headerName: "Test ID", width: 120 },
+  {
+    field: "senttime",
+    headerName: "Sent Time",
+    width: 120,
+  },
+  { field: "smssent", headerName: "SMS Sent", width: 120 },
+  { field: "smsrecieved", headerName: "SMS Recieved", width: 120 },
+  { field: "published", headerName: "Published", width: 120 },
+  { field: "operatordiff", headerName: "Operator Difference", width: 120 },
+  { field: "publisherdiff", headerName: "Publisher Difference", width: 120 },
+  { field: "totaldiff", headerName: "Total Difference", width: 120 },
+];
+
+export default function TheTable() {
   return (
-    <Box>
-      <Grid container sx={{ p: 3 }}>
-        <Grid item md={2}></Grid>
-        <Grid item md={9}>
-          <Box sx={{ p: 3 }}>
-            <Grid container columnSpacing={2}>
-              <Grid item md={3}>
-                <FreeSolo />
-              </Grid>
-              <Grid item md={3}>
-                <FreeSolo />
-              </Grid>
-              <Grid item md={3}>
-                <FreeSolo />
-              </Grid>
-              <Grid item md={3}>
-                <Button autoFocus color="success" variant="contained">
-                  Download Data
-                </Button>
-              </Grid>
+    <Grid container sx={{ p: { md: 10, xs: 3 } }}>
+      <Grid item md={2}></Grid>
+      <Grid item md={9} xs={12} sx={{ mt: { xs: 4, md: 0 } }}>
+        <Box sx={{ pb: 4 }}>
+          <Grid container columnSpacing={4} rowSpacing={4} sx={{ py: 5 }}>
+            <Grid item md={3} xs={6}>
+              <FreeSolo />
             </Grid>
-          </Box>
-          <TableContainer sx={{ p: 3 }}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Test ID</TableCell>
-                  <TableCell>Sent Time</TableCell>
-                  <TableCell>SMS Sent</TableCell>
-                  <TableCell>SMS Recieved</TableCell>
-                  <TableCell>Published</TableCell>
-                  <TableCell>Operator Difference</TableCell>
-                  <TableCell>Publisher Difference</TableCell>
-                  <TableCell>Total Difference</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow
-                    key={row.testID}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {row.testID}
-                    </TableCell>
-                    <TableCell>{row.senttime}</TableCell>
-                    <TableCell>{row.smssent}</TableCell>
-                    <TableCell>{row.smsrecieved} </TableCell>
-                    <TableCell>{row.published} </TableCell>
-                    <TableCell>{row.operatordiff} </TableCell>
-                    <TableCell>{row.pubdiff} </TableCell>
-                    <TableCell>{row.total} </TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Grid>
+            <Grid item md={3} xs={6}>
+              <FreeSolo />
+            </Grid>
+            <Grid item md={3} xs={6}>
+              <FreeSolo />
+            </Grid>
+            <Grid item md={3} xs={6}>
+              <Button
+                sx={{ p: 1 }}
+                autoFocus
+                color="success"
+                variant="contained"
+              >
+                Download Data
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
+        <Box sx={{ width: "100%" }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            pageSize={5}
+            pagination
+            pageSizeOptions={[5, 10, 25]}
+          />
+        </Box>
       </Grid>
-    </Box>
+    </Grid>
   );
 }
