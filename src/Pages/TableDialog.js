@@ -2,6 +2,8 @@ import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Grid } from "@mui/material";
 import FreeSolo from "../Components/SearchInput";
+import { FaChevronLeft } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 
 function createData(
   id,
@@ -215,6 +217,9 @@ export default function TheTable() {
     <Grid container sx={{ p: { md: 10, xs: 3 } }}>
       <Grid item md={2}></Grid>
       <Grid item md={9} xs={12} sx={{ mt: { xs: 4, md: 0 } }}>
+        <Link to="/" style={{color: "white"}}>
+          <FaChevronLeft /> Back
+        </Link>
         <Box sx={{ pb: 4 }}>
           <Grid container columnSpacing={4} rowSpacing={4} sx={{ py: 5 }}>
             <Grid item md={3} xs={6}>
