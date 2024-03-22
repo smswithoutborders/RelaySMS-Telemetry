@@ -1,8 +1,7 @@
 @font-face {
   font-family: 'Suravaram';
-  src: url('/public/Suravaram/Suravaram-Regular.ttf') format('tff'), /* adjust path and file format */
-       url('/public/Suravaram/Suravaram-Regular.ttf') format('ttf'); /* adjust path and file format */
-  /* Add additional src lines for other file formats if available */
+  src: url('/public/Suravaram/Suravaram-Regular.ttf') format('tff'), 
+       url('/public/Suravaram/Suravaram-Regular.ttf') format('ttf'); 
 }
 
 
@@ -16,11 +15,4 @@
   font-family: 'Suravaram', sans-serif !important;
 }
 
-/* body {
-  background-image: linear-gradient(to left, #170624 0%, #170624 0%, #1E0041 21%, #3B009F 52%, #170624 78%, #170624 100%);
-}
 
-
-.cards {
-  background-image: linear-gradient( 109.6deg,  #100A36 11.2%, #250766 91.1% );
-} */
