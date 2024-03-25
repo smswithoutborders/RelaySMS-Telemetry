@@ -11,41 +11,41 @@ import DialogTable from "./Pages/TableDialog";
 import Footer from "./Components/Footer";
 
 const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
+	palette: {
+		mode: "dark",
+	},
 });
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  }, []);
+	useEffect(() => {
+		setTimeout(() => {
+			setIsLoading(false);
+		}, 3000);
+	}, []);
 
-  return (
-    <>
-      {isLoading ? (
-        <Loader />
-      ) : (
-        <ThemeProvider theme={darkTheme}>
-          <CssBaseline />
-          <Router>
-            <ResponsiveDrawer />
-            <Routes>
-              {" "}
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/charts" element={<Chart />} />
-              <Route path="/data" element={<DialogTable />} />
-            </Routes>
-            <Footer />
-          </Router>
-        </ThemeProvider>
-      )}
-    </>
-  );
+	return (
+		<>
+			{isLoading ? (
+				<Loader />
+			) : (
+				<ThemeProvider theme={darkTheme}>
+					<CssBaseline />
+					<Router>
+						<ResponsiveDrawer />
+						<Routes>
+							{" "}
+							<Route path="/" element={<Dashboard />} />
+							<Route path="/charts" element={<Chart />} />
+							<Route path="/data" element={<DialogTable />} />
+						</Routes>
+						<Footer />
+					</Router>
+				</ThemeProvider>
+			)}
+		</>
+	);
 }
 
 export default App;
