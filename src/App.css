@@ -1,18 +1,16 @@
 @font-face {
-  font-family: 'Suravaram';
-  src: url('/public/Suravaram/Suravaram-Regular.ttf') format('tff'), 
-       url('/public/Suravaram/Suravaram-Regular.ttf') format('ttf'); 
+  font-family: "Suravaram";
+  src:
+    url("/public/Suravaram/Suravaram-Regular.ttf") format("tff"),
+    url("/public/Suravaram/Suravaram-Regular.ttf") format("ttf");
 }
-
 
 .card {
   background-image: url(/public/3d.jpg);
-    background-size: cover;
-    background-repeat: no-repeat; 
-  }
-
-* {
-  font-family: 'Suravaram', sans-serif !important;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
-
+* {
+  font-family: "Suravaram", sans-serif !important;
+}
