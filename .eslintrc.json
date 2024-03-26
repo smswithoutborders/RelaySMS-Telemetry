@@ -23,6 +23,7 @@
 	},
 	"plugins": ["react"],
 	"rules": {
+		"react/prop-types": "off",
 		"json/*": ["error", "allowComments"],
 		"indent": ["error", "tab"],
 		"linebreak-style": ["error", "unix"],

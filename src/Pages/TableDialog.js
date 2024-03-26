@@ -66,8 +66,8 @@ export default function TheTable() {
 	return (
 		<Grid container sx={{ p: { md: 10, xs: 3 } }}>
 			<Grid item md={2}></Grid>
-			<Grid item md={9} xs={12} sx={{ mt: { xs: 4, md: 0 } }}>
-				<Link to="/" style={{ color: "white" }}>
+			<Grid item md={9} xs={12} sx={{ mt: { xs: 6, md: 0 } }}>
+				<Link to="/">
 					<FaChevronLeft /> Back
 				</Link>
 				<Box sx={{ pb: 4 }}>

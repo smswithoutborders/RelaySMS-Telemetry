@@ -5,12 +5,15 @@
 		url("/public/Suravaram/Suravaram-Regular.ttf") format("ttf");
 }
 
-.card {
-	background-image: url(/public/3d.jpg);
-	background-size: cover;
-	background-repeat: no-repeat;
-}
-
 * {
 	font-family: "Suravaram", sans-serif !important;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+a:hover {
+	color: #439aec;
 }

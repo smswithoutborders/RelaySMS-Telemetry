@@ -9,15 +9,11 @@ import Chart from "./Pages/Charts";
 import Loader from "./Components/Loader";
 import DialogTable from "./Pages/TableDialog";
 import Footer from "./Components/Footer";
-
-const darkTheme = createTheme({
-	palette: {
-		mode: "dark"
-	}
-});
+import Toggle from "./Components/ThemeToggle";
 
 function App() {
 	const [isLoading, setIsLoading] = useState(true);
+	const [darkMode, setDarkMode] = useState(true);
 
 	useEffect(() => {
 		setTimeout(() => {
@@ -25,16 +21,28 @@ function App() {
 		}, 3000);
 	}, []);
 
+	const toggleDarkMode = () => {
+		setDarkMode((prevMode) => !prevMode);
+	};
+
+	const theme = createTheme({
+		palette: {
+			mode: darkMode ? "dark" : "light"
+		}
+	});
+
 	return (
 		<>
 			{isLoading ? (
 				<Loader />
 			) : (
-				<ThemeProvider theme={darkTheme}>
+				<ThemeProvider theme={theme}>
 					<CssBaseline />
 					<Router>
-						<ResponsiveDrawer />
+						<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+						<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Routes>
+							{" "}
 							<Route path="/" element={<Dashboard />} />
 							<Route path="/charts" element={<Chart />} />
 							<Route path="/data" element={<DialogTable />} />
