@@ -1,6 +1,6 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Import BrowserRouter and Routes
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Dashboard from "./Pages/Dashboard";
@@ -12,8 +12,8 @@ import Footer from "./Components/Footer";
 
 const darkTheme = createTheme({
 	palette: {
-		mode: "dark",
-	},
+		mode: "dark"
+	}
 });
 
 function App() {
@@ -35,7 +35,6 @@ function App() {
 					<Router>
 						<ResponsiveDrawer />
 						<Routes>
-							{" "}
 							<Route path="/" element={<Dashboard />} />
 							<Route path="/charts" element={<Chart />} />
 							<Route path="/data" element={<DialogTable />} />

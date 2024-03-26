@@ -11,9 +11,7 @@ export default function Footer() {
 				<Grid item md={9}>
 					<Divider sx={{ width: "100%" }} />
 					<Box display="flex" justifyContent="space-between" sx={{ p: 3 }}>
-						<Typography variant="body2">
-              © {new Date().getFullYear()} SMSWithoutBorders
-						</Typography>
+						<Typography variant="body2">© {new Date().getFullYear()} SMSWithoutBorders</Typography>
 						<Box justifyContent="end">
 							<FaGithub size="20px" style={{ margin: 2 }} />{" "}
 							<FaFacebook size="20px" style={{ margin: 2 }} />{" "}

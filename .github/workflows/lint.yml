@@ -1,4 +1,4 @@
-name: Code Quality Checks
+name: Code Quality and Formatting Check
 
 on:
   push:
@@ -11,8 +11,8 @@ on:
       - staging
 
 jobs:
-  run-linters:
-    name: Run linters
+  check-code-quality:
+    name: Check Code Quality
     runs-on: ubuntu-latest
 
     steps:
@@ -22,13 +22,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18      
+          node-version: 18
 
       - name: Install Node.js dependencies
         run: yarn install
 
-      - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          eslint: true
-          prettier: true
+      - name: Run ESLint
+        run: yarn eslint .
+
+      - name: Run Prettier
+        run: yarn prettier --check .
