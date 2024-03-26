@@ -12,50 +12,47 @@ import Footer from "./Components/Footer";
 import Toggle from "./Components/ThemeToggle";
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+	const [isLoading, setIsLoading] = useState(true);
+	const [darkMode, setDarkMode] = useState(true);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  }, []);
+	useEffect(() => {
+		setTimeout(() => {
+			setIsLoading(false);
+		}, 3000);
+	}, []);
 
-  const toggleDarkMode = () => {
-    setDarkMode((prevMode) => !prevMode);
-  };
+	const toggleDarkMode = () => {
+		setDarkMode((prevMode) => !prevMode);
+	};
 
-  const theme = createTheme({
-    palette: {
-      mode: darkMode ? "dark" : "light",
-    },
-  });
+	const theme = createTheme({
+		palette: {
+			mode: darkMode ? "dark" : "light"
+		}
+	});
 
-  return (
-    <>
-      {isLoading ? (
-        <Loader />
-      ) : (
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Router>
-            <ResponsiveDrawer
-              darkMode={darkMode}
-              toggleDarkMode={toggleDarkMode}
-            />
-            <Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-            <Routes>
-              {" "}
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/charts" element={<Chart />} />
-              <Route path="/data" element={<DialogTable />} />
-            </Routes>
-            <Footer />
-          </Router>
-        </ThemeProvider>
-      )}
-    </>
-  );
+	return (
+		<>
+			{isLoading ? (
+				<Loader />
+			) : (
+				<ThemeProvider theme={theme}>
+					<CssBaseline />
+					<Router>
+						<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+						<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+						<Routes>
+							{" "}
+							<Route path="/" element={<Dashboard />} />
+							<Route path="/charts" element={<Chart />} />
+							<Route path="/data" element={<DialogTable />} />
+						</Routes>
+						<Footer />
+					</Router>
+				</ThemeProvider>
+			)}
+		</>
+	);
 }
 
 export default App;
