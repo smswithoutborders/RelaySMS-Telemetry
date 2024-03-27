@@ -1,9 +1,7 @@
-// OperatorSearch.js
 import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
-//import { fetchData } from "../Utils/FetchData";
 
 export default function OperatorSearch({ selectedCountry, onSelectOperator, rows }) {
 	const [operators, setOperators] = useState([]);

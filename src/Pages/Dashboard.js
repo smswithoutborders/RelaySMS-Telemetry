@@ -4,7 +4,6 @@ import TheTable from "../Components/Table";
 import FreeSolo from "../Components/CountrySearch";
 import { FaDownload } from "react-icons/fa6";
 import CountrySearch from "../Components/CountrySearch";
-// import { countryCodes } from "../Components/Table";
 import OperatorSearch from "../Components/OperatorSearch";
 import DateSearch from "../Components/DateSearch";
 import { fetchData } from "../Utils/FetchData";
@@ -16,13 +15,13 @@ export default function Dashboard() {
 	const [filteredRows, setFilteredRows] = useState([]);
 	const [selectedCountry, setSelectedCountry] = useState(null);
 	const [selectedOperator, setSelectedOperator] = useState(null);
-	const [selectedDate, setSelectedDate] = useState(null); // State for selected date
+	const [selectedDate, setSelectedDate] = useState(null);
 
 	useEffect(() => {
 		fetchData(apiUrl)
 			.then((data) => {
 				setRows(data);
-				setFilteredRows(data); // Initially, set filteredRows to all rows
+				setFilteredRows(data);
 			})
 			.catch((error) => {
 				console.error("Error fetching data:", error);
@@ -31,14 +30,14 @@ export default function Dashboard() {
 
 	useEffect(() => {
 		if (!selectedCountry || !rows) {
-			setFilteredRows(rows); // If no country is selected or rows are not loaded, show all rows
+			setFilteredRows(rows);
 			return;
 		}
 		const filteredData = rows.filter(
 			(row) =>
 				row.country === selectedCountry &&
 				(!selectedOperator || row.operator === selectedOperator) &&
-				(!selectedDate || row.date === selectedDate) // Filter by selected date
+				(!selectedDate || row.date === selectedDate)
 		);
 		setFilteredRows(filteredData);
 	}, [selectedCountry, selectedOperator, selectedDate, rows]);
@@ -111,9 +110,6 @@ export default function Dashboard() {
 									/>
 								)}
 							</Grid>
-							{/* <Grid item md={3}>
-								<OperatorSearch />
-							</Grid> */}
 							<Grid item md={3}>
 								<DateSearch onSelectDate={handleSelectDate} />
 							</Grid>

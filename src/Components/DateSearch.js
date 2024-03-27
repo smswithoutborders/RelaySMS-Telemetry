@@ -1,4 +1,3 @@
-// DateSearch.js
 import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
@@ -13,7 +12,6 @@ export default function DateSearch({ onSelectDate }) {
 	useEffect(() => {
 		fetchData(apiUrl)
 			.then((data) => {
-				// Extract unique dates from the data
 				const uniqueDates = Array.from(new Set(data.map((item) => item.date)));
 				setDates(uniqueDates);
 			})
