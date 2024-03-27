@@ -1,10 +1,60 @@
 import { Box, Button, Card, Grid, Typography } from "@mui/material";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TheTable from "../Components/Table";
-import FreeSolo from "../Components/SearchInput";
+import FreeSolo from "../Components/CountrySearch";
 import { FaDownload } from "react-icons/fa6";
+import CountrySearch from "../Components/CountrySearch";
+// import { countryCodes } from "../Components/Table";
+import OperatorSearch from "../Components/OperatorSearch";
+import DateSearch from "../Components/DateSearch";
+import { fetchData } from "../Utils/FetchData";
+
+const apiUrl = "https://6603f6ac2393662c31d04103.mockapi.io/gatewayclients/api/gateways";
 
 export default function Dashboard() {
+	const [rows, setRows] = useState([]);
+	const [filteredRows, setFilteredRows] = useState([]);
+	const [selectedCountry, setSelectedCountry] = useState(null);
+	const [selectedOperator, setSelectedOperator] = useState(null);
+	const [selectedDate, setSelectedDate] = useState(null); // State for selected date
+
+	useEffect(() => {
+		fetchData(apiUrl)
+			.then((data) => {
+				setRows(data);
+				setFilteredRows(data); // Initially, set filteredRows to all rows
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+	}, []);
+
+	useEffect(() => {
+		if (!selectedCountry || !rows) {
+			setFilteredRows(rows); // If no country is selected or rows are not loaded, show all rows
+			return;
+		}
+		const filteredData = rows.filter(
+			(row) =>
+				row.country === selectedCountry &&
+				(!selectedOperator || row.operator === selectedOperator) &&
+				(!selectedDate || row.date === selectedDate) // Filter by selected date
+		);
+		setFilteredRows(filteredData);
+	}, [selectedCountry, selectedOperator, selectedDate, rows]);
+
+	const handleSelectCountry = (selectedCountry) => {
+		setSelectedCountry(selectedCountry);
+	};
+
+	const handleSelectOperator = (selectedOperator) => {
+		setSelectedOperator(selectedOperator);
+	};
+
+	const handleSelectDate = (selectedDate) => {
+		setSelectedDate(selectedDate);
+	};
+
 	return (
 		<Box
 			className="bg"
@@ -52,13 +102,20 @@ export default function Dashboard() {
 					<Box sx={{ pb: 4 }}>
 						<Grid container columnSpacing={4} sx={{ py: 5 }}>
 							<Grid item md={3}>
-								<FreeSolo />
+								<CountrySearch onSelectCountry={handleSelectCountry} />
+								{selectedCountry && (
+									<OperatorSearch
+										selectedCountry={selectedCountry}
+										onSelectOperator={handleSelectOperator}
+										rows={rows}
+									/>
+								)}
 							</Grid>
+							{/* <Grid item md={3}>
+								<OperatorSearch />
+							</Grid> */}
 							<Grid item md={3}>
-								<FreeSolo />
-							</Grid>
-							<Grid item md={3}>
-								<FreeSolo />
+								<DateSearch onSelectDate={handleSelectDate} />
 							</Grid>
 							<Grid item md={3}>
 								<Button sx={{ p: 1 }} autoFocus color="success" variant="contained">
@@ -72,7 +129,12 @@ export default function Dashboard() {
 					<Box className="cards">
 						<Grid container>
 							<Grid item md={12}>
-								<TheTable />
+								<TheTable
+									rows={filteredRows}
+									selectedCountry={selectedCountry}
+									selectedOperator={selectedOperator}
+									selectedDate={selectedDate}
+								/>
 							</Grid>
 						</Grid>
 					</Box>

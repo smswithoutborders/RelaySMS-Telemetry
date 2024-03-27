@@ -1,7 +1,7 @@
 import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Grid } from "@mui/material";
-import FreeSolo from "../Components/SearchInput";
+import FreeSolo from "../Components/CountrySearch";
 import { FaChevronLeft } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 

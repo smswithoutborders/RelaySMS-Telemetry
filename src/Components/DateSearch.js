@@ -1,0 +1,50 @@
+// DateSearch.js
+import React, { useState, useEffect } from "react";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
+import Autocomplete from "@mui/material/Autocomplete";
+import { fetchData } from "../Utils/FetchData";
+
+const apiUrl = "https://6603f6ac2393662c31d04103.mockapi.io/gatewayclients/api/gateways";
+
+export default function DateSearch({ onSelectDate }) {
+	const [dates, setDates] = useState([]);
+
+	useEffect(() => {
+		fetchData(apiUrl)
+			.then((data) => {
+				// Extract unique dates from the data
+				const uniqueDates = Array.from(new Set(data.map((item) => item.date)));
+				setDates(uniqueDates);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+	}, []);
+
+	const handleSelectDate = (selectedDate) => {
+		onSelectDate(selectedDate);
+	};
+
+	return (
+		<Stack spacing={2} sx={{ width: "100%" }}>
+			<Autocomplete
+				id="date-search"
+				size="small"
+				options={dates}
+				onChange={(event, value) => handleSelectDate(value)}
+				renderInput={(params) => (
+					<TextField
+						{...params}
+						label="Filter by Date"
+						variant="standard"
+						InputProps={{
+							...params.InputProps,
+							type: "search"
+						}}
+					/>
+				)}
+			/>
+		</Stack>
+	);
+}
