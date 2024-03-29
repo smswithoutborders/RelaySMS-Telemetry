@@ -9,6 +9,6 @@ export async function fetchData(apiUrl) {
 		return data;
 	} catch (error) {
 		console.error("Error fetching data:", error);
-		return []; // Return an empty array or handle the error accordingly
+		return [];
 	}
 }

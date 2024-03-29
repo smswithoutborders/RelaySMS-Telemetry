@@ -16,16 +16,20 @@ export default function Dashboard() {
 	const [selectedCountry, setSelectedCountry] = useState(null);
 	const [selectedOperator, setSelectedOperator] = useState(null);
 	const [selectedDate, setSelectedDate] = useState(null);
+	const [totalEntries, setTotalEntries] = useState(0);
 
 	useEffect(() => {
-		fetchData(apiUrl)
-			.then((data) => {
-				setRows(data);
-				setFilteredRows(data);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
+		if (rows.length < 1) {
+			fetchData(apiUrl)
+				.then((data) => {
+					setRows(data);
+					setFilteredRows(data);
+					setTotalEntries(data.length);
+				})
+				.catch((error) => {
+					console.error("Error fetching data:", error);
+				});
+		}
 	}, []);
 
 	useEffect(() => {
@@ -54,6 +58,24 @@ export default function Dashboard() {
 		setSelectedDate(selectedDate);
 	};
 
+	const handleDownload = () => {
+		const headers = Object.keys(filteredRows[0]);
+
+		const csvContent =
+			"data:text/csv;charset=utf-8," +
+			[headers.join(",")]
+				.concat(filteredRows.map((row) => headers.map((header) => row[header]).join(",")))
+				.join("\n");
+
+		const encodedUri = encodeURI(csvContent);
+		const link = document.createElement("a");
+		link.setAttribute("href", encodedUri);
+		link.setAttribute("download", "reliablity_test.csv");
+
+		document.body.appendChild(link);
+		link.click();
+	};
+
 	return (
 		<Box
 			className="bg"
@@ -79,20 +101,10 @@ export default function Dashboard() {
 						<Grid item md={3}>
 							<Card className="cards" sx={{ p: 3 }}>
 								<Typography variant="h6" sx={{ fontWeight: 500, pb: 4 }}>
-									Total Tests
+									Total Gateway Clients
 								</Typography>
 								<Typography variant="h4" sx={{ fontWeight: 700 }}>
-									95
-								</Typography>
-							</Card>
-						</Grid>
-						<Grid item md={3}>
-							<Card className="cards" sx={{ p: 3 }}>
-								<Typography variant="h6" sx={{ fontWeight: 500, pb: 4 }}>
-									Resiliance Score
-								</Typography>
-								<Typography variant="h4" sx={{ fontWeight: 700 }}>
-									80%
+									{totalEntries}
 								</Typography>
 							</Card>
 						</Grid>
@@ -114,7 +126,13 @@ export default function Dashboard() {
 								<DateSearch onSelectDate={handleSelectDate} />
 							</Grid>
 							<Grid item md={3}>
-								<Button sx={{ p: 1 }} autoFocus color="success" variant="contained">
+								<Button
+									onClick={handleDownload}
+									sx={{ p: 1 }}
+									autoFocus
+									color="success"
+									variant="contained"
+								>
 									Download Data{" "}
 									<FaDownload size="18px" style={{ marginLeft: 7, marginBottom: 4 }} />
 								</Button>

@@ -4,8 +4,15 @@ import { IconButton } from "@mui/material";
 import { Link } from "react-router-dom";
 import ReactCountryFlag from "react-country-flag";
 import { FaChevronDown } from "react-icons/fa6";
+import Loader from "./Loader";
 
-export default function TheTable({ rows = [], selectedCountry, selectedOperator, selectedDate }) {
+export default function TheTable({
+	rows = [],
+	selectedCountry,
+	selectedOperator,
+	selectedDate,
+	isLoading
+}) {
 	const columns = [
 		{ field: "msisdn", headerName: "MSISDN", width: 230 },
 		{
@@ -26,8 +33,13 @@ export default function TheTable({ rows = [], selectedCountry, selectedOperator,
 			field: "action",
 			headerName: "",
 			width: 100,
-			renderCell: () => (
-				<Link to="/data">
+			renderCell: (params) => (
+				<Link
+					to={{
+						pathname: "/data"
+					}}
+					state={{ test_data: params.row.testdata }}
+				>
 					<IconButton>
 						<FaChevronDown />
 					</IconButton>
@@ -35,6 +47,22 @@ export default function TheTable({ rows = [], selectedCountry, selectedOperator,
 			)
 		}
 	];
+
+	if (isLoading) {
+		return (
+			<div
+				style={{
+					height: 400,
+					width: "100%",
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center"
+				}}
+			>
+				<Loader />
+			</div>
+		);
+	}
 
 	const filteredRows = rows.filter(
 		(row) =>

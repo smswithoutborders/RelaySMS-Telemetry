@@ -5,20 +5,29 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Dashboard from "./Pages/Dashboard";
 import ResponsiveDrawer from "./Components/Nav";
-import Chart from "./Pages/Charts";
 import Loader from "./Components/Loader";
-import DialogTable from "./Pages/TableDialog";
 import Footer from "./Components/Footer";
 import Toggle from "./Components/ThemeToggle";
+import { fetchData } from "./Utils/FetchData";
+import Help from "./Pages/Help";
+import Contact from "./Pages/Contact";
+import Data from "./Pages/TableDialog";
 
 function App() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [darkMode, setDarkMode] = useState(true);
+	const [filteredRows, setFilteredRows] = useState([]);
 
 	useEffect(() => {
-		setTimeout(() => {
-			setIsLoading(false);
-		}, 3000);
+		fetchData("https://6603f6ac2393662c31d04103.mockapi.io/gatewayclients/api/gateways")
+			.then((data) => {
+				setFilteredRows(data);
+				setIsLoading(false);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+				setIsLoading(false);
+			});
 	}, []);
 
 	const toggleDarkMode = () => {
@@ -43,9 +52,10 @@ function App() {
 						<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Routes>
 							{" "}
-							<Route path="/" element={<Dashboard />} />
-							<Route path="/charts" element={<Chart />} />
-							<Route path="/data" element={<DialogTable />} />
+							<Route path="/" element={<Dashboard filteredRows={filteredRows} />} />
+							<Route path="/help" element={<Help />} />
+							<Route path="/contact" element={<Contact />} />
+							<Route path="/data" element={<Data />} />
 						</Routes>
 						<Footer />
 					</Router>

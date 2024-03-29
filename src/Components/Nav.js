@@ -9,7 +9,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
-import { FaChartSimple, FaHouse } from "react-icons/fa6";
+import { FaChartSimple, FaHeadphones, FaHouse } from "react-icons/fa6";
 import { AppBar, Button, IconButton, Divider, Paper, Toolbar } from "@mui/material";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "@mui/icons-material";
@@ -45,11 +45,19 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton component="a" to="/charts">
+					<ListItemButton component="a" to="/help">
 						<ListItemIcon>
 							<FaChartSimple />
 						</ListItemIcon>
-						<ListItemText> Charts </ListItemText>
+						<ListItemText> Help </ListItemText>
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton component="a" to="/contact">
+						<ListItemIcon>
+							<FaHeadphones />
+						</ListItemIcon>
+						<ListItemText> Contact </ListItemText>
 					</ListItemButton>
 				</ListItem>
 			</List>
