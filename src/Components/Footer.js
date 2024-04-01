@@ -4,11 +4,11 @@ import { FaFacebook, FaGithub, FaXTwitter } from "react-icons/fa6";
 
 export default function Footer() {
 	return (
-		<Box component="footer" sx={{ position: "relative", bottom: 0 }}>
-			<Grid container sx={{ p: 2 }}>
+		<Box component="footer" sx={{ bgcolor: "dark" }}>
+			<Grid container sx={{ p: 2, position: "sticky", bottom: 0 }}>
 				<Grid item md={2}></Grid>
 
-				<Grid item md={9}>
+				<Grid item md={9} sm={12} xs={12}>
 					<Divider sx={{ width: "100%" }} />
 					<Box display="flex" justifyContent="space-between" sx={{ p: 3 }}>
 						<Typography variant="body2">© {new Date().getFullYear()} SMSWithoutBorders</Typography>

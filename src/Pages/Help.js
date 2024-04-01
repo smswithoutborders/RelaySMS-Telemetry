@@ -4,7 +4,7 @@ import { ChevronRight } from "@mui/icons-material";
 
 export default function Help() {
 	return (
-		<Grid container sx={{ px: { md: 10, xs: 2 }, py: { md: 10, xs: 8 } }}>
+		<Grid container sx={{ px: { md: 10, xs: 2 }, py: { md: 10, xs: 10 } }}>
 			<Grid item md={2}></Grid>
 			<Grid item md={10}>
 				<Typography variant="h4" sx={{ fontWeight: 600 }}>

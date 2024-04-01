@@ -15,7 +15,9 @@ import Data from "./Pages/TableDialog";
 
 function App() {
 	const [isLoading, setIsLoading] = useState(true);
-	const [darkMode, setDarkMode] = useState(true);
+	const [darkMode, setDarkMode] = useState(
+		localStorage.getItem("darkMode") === "true" ? true : false
+	);
 	const [filteredRows, setFilteredRows] = useState([]);
 
 	useEffect(() => {
@@ -31,14 +33,37 @@ function App() {
 	}, []);
 
 	const toggleDarkMode = () => {
-		setDarkMode((prevMode) => !prevMode);
+		const newMode = !darkMode;
+		setDarkMode(newMode);
+		localStorage.setItem("darkMode", newMode);
 	};
 
-	const theme = createTheme({
-		palette: {
-			mode: darkMode ? "dark" : "light"
+	const customPalette = {
+		light: {
+			palette: {
+				mode: "light",
+				background: {
+					paper: "#F0F6F6"
+				},
+				text: {
+					primary: "#2b2929"
+				}
+			}
+		},
+		dark: {
+			palette: {
+				mode: "dark",
+				background: {
+					paper: "#061826"
+				},
+				text: {
+					primary: "#F6F4F3"
+				}
+			}
 		}
-	});
+	};
+
+	const theme = createTheme(darkMode ? customPalette.dark : customPalette.light);
 
 	return (
 		<>
@@ -51,7 +76,6 @@ function App() {
 						<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Routes>
-							{" "}
 							<Route path="/" element={<Dashboard filteredRows={filteredRows} />} />
 							<Route path="/help" element={<Help />} />
 							<Route path="/contact" element={<Contact />} />

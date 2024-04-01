@@ -111,8 +111,11 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 						<Link to="/">
 							<Typography sx={{ borderRadius: "50px", m: 1 }}>Dashboard</Typography>
 						</Link>
-						<Link to="/charts">
-							<Typography sx={{ borderRadius: "50px", m: 1 }}>Charts</Typography>
+						<Link to="/help">
+							<Typography sx={{ borderRadius: "50px", m: 1 }}>Help</Typography>
+						</Link>
+						<Link to="/contact">
+							<Typography sx={{ borderRadius: "50px", m: 1 }}>Contact</Typography>
 						</Link>
 					</Box>
 					<Box>
