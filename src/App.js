@@ -41,24 +41,12 @@ function App() {
 	const customPalette = {
 		light: {
 			palette: {
-				mode: "light",
-				background: {
-					paper: "#F0F6F6"
-				},
-				text: {
-					primary: "#2b2929"
-				}
+				mode: "light"
 			}
 		},
 		dark: {
 			palette: {
-				mode: "dark",
-				background: {
-					paper: "#061826"
-				},
-				text: {
-					primary: "#F6F4F3"
-				}
+				mode: "dark"
 			}
 		}
 	};

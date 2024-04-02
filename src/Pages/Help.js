@@ -8,7 +8,7 @@ export default function Help() {
 			<Grid item md={2}></Grid>
 			<Grid item md={10}>
 				<Typography variant="h4" sx={{ fontWeight: 600 }}>
-					Relay open dashboard for gateway clients reliability
+					SMSWithoutBorders open dashboard for gateway clients reliability
 				</Typography>
 
 				<Box sx={{ py: 5 }}>
@@ -16,7 +16,7 @@ export default function Help() {
 						Welcome to our comprehensive dashboard displaying verified(reliable) gateway clients
 						across various locations. With this intuitive tool, you gain access to a curated list of
 						reliable gateway clients within your proximity. Utilize this dashboard to efficiently
-						route your messages to RelaySMS supported online platforms.
+						route your messages to SMSWithoutBorders supported online platforms.
 					</Typography>
 
 					<Box sx={{ display: "flex", color: "#98B6F3" }}>

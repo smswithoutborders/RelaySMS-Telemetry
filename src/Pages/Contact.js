@@ -5,8 +5,8 @@ import {
 	FaGithub,
 	FaGitlab,
 	FaGooglePlay,
+	FaLinkedin,
 	FaRegEnvelope,
-	FaSnapchat,
 	FaTiktok,
 	FaXTwitter
 } from "react-icons/fa6";
@@ -31,7 +31,7 @@ export default function Contact() {
 						<FaFacebook /> - @smswithoutborders_swob
 					</Box>
 					<Box sx={{ py: 2 }}>
-						<FaSnapchat /> - @smswithoutborders
+						<FaLinkedin /> - @smswithoutborders
 					</Box>
 					<Box sx={{ py: 2 }}>
 						<FaTiktok /> - @smswithoutborders

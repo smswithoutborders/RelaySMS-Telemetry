@@ -23,15 +23,15 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 		<Box
 			sx={{
 				bgcolor: "transparent",
-				display: "flex",
+				display: { md: "flex", xs: "none", sm: "none" },
 				flexDirection: "column",
 				height: "100%"
 			}}
 		>
 			<Box display="flex" sx={{ p: 3 }}>
 				<Box component="img" src="/logo.png" sx={{ width: "35px" }} />
-				<Typography variant="body1" sx={{ px: 1, pt: 1, fontWeight: 600 }}>
-					RelaySMS
+				<Typography variant="body2" sx={{ px: 1, pt: 1, fontWeight: 600 }}>
+					SMSWithoutBorders
 				</Typography>
 			</Box>
 			<Divider />
@@ -71,7 +71,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 				}}
 			>
 				<Paper elevation={3} sx={{ p: 2 }}>
-					<Typography sx={{ py: 2 }}>Check out RelaySMS blog posts</Typography>
+					<Typography sx={{ py: 2 }}>Check out SMSWithoutBorders blog posts</Typography>
 					<Button variant="contained" sx={{ borderRadius: "50px", textTransform: "none" }}>
 						Read more <ChevronRight />
 					</Button>
