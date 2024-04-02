@@ -1,7 +1,7 @@
 import { Box, Button, Card, Grid, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import TheTable from "../Components/Table";
-import { FaDownload } from "react-icons/fa6";
+import { FaDownload, FaRotate } from "react-icons/fa6";
 import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
 import DateSearch from "../Components/DateSearch";
@@ -75,6 +75,18 @@ export default function Dashboard() {
 		link.click();
 	};
 
+	const handleRefreshData = () => {
+		fetchData(apiUrl)
+			.then((data) => {
+				setRows(data);
+				setFilteredRows(data);
+				setTotalEntries(data.length);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+			});
+	};
+
 	return (
 		<Box
 			className="bg"
@@ -124,6 +136,23 @@ export default function Dashboard() {
 								</Typography>
 								<Typography variant="h4" sx={{ fontWeight: 700 }}>
 									{totalEntries}
+								</Typography>
+							</Card>
+						</Grid>
+						<Grid item md={2} xs={6}>
+							<Card className="cards" sx={{ p: 3 }}>
+								<Typography
+									variant="h6"
+									sx={{
+										fontWeight: 500,
+										pb: { md: 4, xs: 5, sm: 4 },
+										fontSize: { md: 15, sm: 15, xs: 12 }
+									}}
+								>
+									Refresh Data
+								</Typography>
+								<Typography variant="h4" sx={{ fontWeight: 700 }}>
+									<FaRotate onClick={handleRefreshData} style={{ cursor: "pointer" }} />
 								</Typography>
 							</Card>
 						</Grid>
