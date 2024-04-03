@@ -6,7 +6,7 @@ import OperatorSearch from "../Components/OperatorSearch";
 import DateSearch from "../Components/DateSearch";
 import { fetchData } from "../Utils/FetchData";
 
-const apiUrl = "https://6603f6ac2393662c31d04103.mockapi.io/gatewayclients/api/gateways";
+const apiUrl = process.env.REACT_APP_API_URL;
 
 export default function Dashboard() {
 	const [rows, setRows] = useState([]);

@@ -21,7 +21,7 @@ function App() {
 	const [filteredRows, setFilteredRows] = useState([]);
 
 	useEffect(() => {
-		fetchData("https://6603f6ac2393662c31d04103.mockapi.io/gatewayclients/api/gateways")
+		fetchData(process.env.REACT_APP_API_URL)
 			.then((data) => {
 				setFilteredRows(data);
 				setIsLoading(false);

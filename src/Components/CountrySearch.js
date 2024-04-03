@@ -4,7 +4,7 @@ import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import { fetchData } from "../Utils/FetchData";
 
-const apiUrl = "https://6603f6ac2393662c31d04103.mockapi.io/gatewayclients/api/gateways";
+const apiUrl = process.env.REACT_APP_API_URL;
 
 export default function CountrySearch({ onSelectCountry }) {
 	const [countries, setCountries] = useState([]);

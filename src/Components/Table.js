@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Box, IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { FaChevronDown } from "react-icons/fa6";
 import Loader from "./Loader";
@@ -72,24 +72,22 @@ export default function TheTable({
 	);
 
 	return (
-		<Box component="paper">
-			<DataGrid
-				rows={filteredRows}
-				columns={columns}
-				initialState={{
-					pagination: {
-						paginationModel: {
-							pageSize: 7
-						}
+		<DataGrid
+			rows={filteredRows}
+			columns={columns}
+			initialState={{
+				pagination: {
+					paginationModel: {
+						pageSize: 7
 					}
-				}}
-				pageSizeOptions={[7]}
-				slots={{
-					toolbar: GridToolbar
-				}}
-				sx={{ height: 500, width: "100%", color: "paper" }}
-				onRowClick={handleRowClick}
-			/>
-		</Box>
+				}
+			}}
+			pageSizeOptions={[7]}
+			slots={{
+				toolbar: GridToolbar
+			}}
+			sx={{ height: 500, width: "100%", color: "paper" }}
+			onRowClick={handleRowClick}
+		/>
 	);
 }
