@@ -1,20 +1,15 @@
 import * as React from "react";
-import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 
 export default function Loader() {
 	return (
 		<Box
+			display="flex"
 			my="auto"
-			align="center"
-			sx={{
-				display: "flex",
-				justifyContent: "center",
-				alignItems: "center",
-				height: "fit-content"
-			}}
+			alignItems="center"
+			sx={{ my: "auto", height: "100vh", justifyContent: "center" }}
 		>
-			<CircularProgress />
+			<Box className="loader"></Box>
 		</Box>
 	);
 }

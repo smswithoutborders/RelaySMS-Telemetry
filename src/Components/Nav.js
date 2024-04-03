@@ -9,7 +9,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
-import { FaChartSimple, FaHouse } from "react-icons/fa6";
+import { FaChartSimple, FaHeadphones, FaHouse } from "react-icons/fa6";
 import { AppBar, Button, IconButton, Divider, Paper, Toolbar } from "@mui/material";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "@mui/icons-material";
@@ -23,15 +23,15 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 		<Box
 			sx={{
 				bgcolor: "transparent",
-				display: "flex",
+				display: { md: "flex", xs: "none", sm: "none" },
 				flexDirection: "column",
 				height: "100%"
 			}}
 		>
 			<Box display="flex" sx={{ p: 3 }}>
 				<Box component="img" src="/logo.png" sx={{ width: "35px" }} />
-				<Typography variant="body1" sx={{ px: 1, pt: 1, fontWeight: 600 }}>
-					RelaySMS
+				<Typography variant="body2" sx={{ px: 1, pt: 1, fontWeight: 600 }}>
+					SMSWithoutBorders
 				</Typography>
 			</Box>
 			<Divider />
@@ -45,11 +45,19 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton component="a" to="/charts">
+					<ListItemButton component="a" to="/help">
 						<ListItemIcon>
 							<FaChartSimple />
 						</ListItemIcon>
-						<ListItemText> Charts </ListItemText>
+						<ListItemText> Help </ListItemText>
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton component="a" to="/contact">
+						<ListItemIcon>
+							<FaHeadphones />
+						</ListItemIcon>
+						<ListItemText> Contact </ListItemText>
 					</ListItemButton>
 				</ListItem>
 			</List>
@@ -63,7 +71,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 				}}
 			>
 				<Paper elevation={3} sx={{ p: 2 }}>
-					<Typography sx={{ py: 2 }}>Check out RelaySMS blog posts</Typography>
+					<Typography sx={{ py: 2 }}>Check out SMSWithoutBorders blog posts</Typography>
 					<Button variant="contained" sx={{ borderRadius: "50px", textTransform: "none" }}>
 						Read more <ChevronRight />
 					</Button>
@@ -103,8 +111,11 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 						<Link to="/">
 							<Typography sx={{ borderRadius: "50px", m: 1 }}>Dashboard</Typography>
 						</Link>
-						<Link to="/charts">
-							<Typography sx={{ borderRadius: "50px", m: 1 }}>Charts</Typography>
+						<Link to="/help">
+							<Typography sx={{ borderRadius: "50px", m: 1 }}>Help</Typography>
+						</Link>
+						<Link to="/contact">
+							<Typography sx={{ borderRadius: "50px", m: 1 }}>Contact</Typography>
 						</Link>
 					</Box>
 					<Box>

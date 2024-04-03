@@ -5,31 +5,53 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Dashboard from "./Pages/Dashboard";
 import ResponsiveDrawer from "./Components/Nav";
-import Chart from "./Pages/Charts";
 import Loader from "./Components/Loader";
-import DialogTable from "./Pages/TableDialog";
 import Footer from "./Components/Footer";
 import Toggle from "./Components/ThemeToggle";
+import { fetchData } from "./Utils/FetchData";
+import Help from "./Pages/Help";
+import Contact from "./Pages/Contact";
+import Data from "./Pages/TableDialog";
 
 function App() {
 	const [isLoading, setIsLoading] = useState(true);
-	const [darkMode, setDarkMode] = useState(true);
+	const [darkMode, setDarkMode] = useState(
+		localStorage.getItem("darkMode") === "true" ? true : false
+	);
+	const [filteredRows, setFilteredRows] = useState([]);
 
 	useEffect(() => {
-		setTimeout(() => {
-			setIsLoading(false);
-		}, 3000);
+		fetchData(process.env.REACT_APP_API_URL)
+			.then((data) => {
+				setFilteredRows(data);
+				setIsLoading(false);
+			})
+			.catch((error) => {
+				console.error("Error fetching data:", error);
+				setIsLoading(false);
+			});
 	}, []);
 
 	const toggleDarkMode = () => {
-		setDarkMode((prevMode) => !prevMode);
+		const newMode = !darkMode;
+		setDarkMode(newMode);
+		localStorage.setItem("darkMode", newMode);
 	};
 
-	const theme = createTheme({
-		palette: {
-			mode: darkMode ? "dark" : "light"
+	const customPalette = {
+		light: {
+			palette: {
+				mode: "light"
+			}
+		},
+		dark: {
+			palette: {
+				mode: "dark"
+			}
 		}
-	});
+	};
+
+	const theme = createTheme(darkMode ? customPalette.dark : customPalette.light);
 
 	return (
 		<>
@@ -42,10 +64,10 @@ function App() {
 						<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Routes>
-							{" "}
-							<Route path="/" element={<Dashboard />} />
-							<Route path="/charts" element={<Chart />} />
-							<Route path="/data" element={<DialogTable />} />
+							<Route path="/" element={<Dashboard filteredRows={filteredRows} />} />
+							<Route path="/help" element={<Help />} />
+							<Route path="/contact" element={<Contact />} />
+							<Route path="/data" element={<Data />} />
 						</Routes>
 						<Footer />
 					</Router>

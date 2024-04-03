@@ -1,115 +1,93 @@
-import * as React from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import React, { useCallback } from "react";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { IconButton } from "@mui/material";
-import { Link } from "react-router-dom";
-import ReactCountryFlag from "react-country-flag";
+import { useNavigate } from "react-router-dom";
 import { FaChevronDown } from "react-icons/fa6";
+import Loader from "./Loader";
 
-const countryCodes = {
-	Cameroon: "CM",
-	Ghana: "GH",
-	Argentina: "AR",
-	Brazil: "BR",
-	France: "FR",
-	Germany: "DE",
-	India: "IN",
-	Italy: "IT",
-	Japan: "JP",
-	Mexico: "MX",
-	Nigeria: "NG",
-	Peru: "PE",
-	Russia: "RU",
-	Spain: "ES",
-	Turkey: "TR",
-	Ukraine: "UA",
-	"United Kingdom": "GB",
-	"United States": "US",
-	Vietnam: "VN",
-	Zambia: "ZM",
-	Zimbabwe: "ZW",
-	Australia: "AU"
-};
+export default function TheTable({
+	rows = [],
+	selectedCountry,
+	selectedOperator,
+	selectedDate,
+	isLoading
+}) {
+	const navigate = useNavigate();
 
-function getCountryCode(countryName) {
-	return countryCodes[countryName];
-}
+	const handleRowClick = useCallback(
+		(params) => {
+			const data = params.row.testdata;
+			navigate("/data", { state: { test_data: data } });
+		},
+		[navigate]
+	);
 
-function createData(id, msisdn, country, operator, resiliance) {
-	return { id, msisdn, country, operator, resiliance };
-}
-
-function generateRandomPhoneNumber() {
-	const countryCode = "+237";
-	const randomNumber = Math.floor(Math.random() * 1000000000)
-		.toString()
-		.padStart(9, "0");
-	return countryCode + randomNumber;
-}
-
-const rows = [
-	createData(1, generateRandomPhoneNumber(), "Cameroon", "Orange", "90%"),
-	createData(2, generateRandomPhoneNumber(), "Ghana", "Camtel", "60%"),
-	createData(3, generateRandomPhoneNumber(), "Argentina", "Camtel", "80%"),
-	createData(4, generateRandomPhoneNumber(), "Brazil", "T-Mobile", "95%"),
-	createData(5, generateRandomPhoneNumber(), "France", "Airtel", "68%"),
-	createData(6, generateRandomPhoneNumber(), "Germany", "MTN", "96%"),
-	createData(7, generateRandomPhoneNumber(), "India", "MTN", "57%"),
-	createData(8, generateRandomPhoneNumber(), "Italy", "MTN", "50%"),
-	createData(9, generateRandomPhoneNumber(), "Japan", "Etisalat", "50%"),
-	createData(10, generateRandomPhoneNumber(), "Mexico", "Orange", "90%"),
-	createData(11, generateRandomPhoneNumber(), "Nigeria", "MTN", "49%"),
-	createData(12, generateRandomPhoneNumber(), "Peru", "Camtel", "10%"),
-	createData(13, generateRandomPhoneNumber(), "Russia", "Airtel", "90%"),
-	createData(14, generateRandomPhoneNumber(), "Spain", "Airtel", "80%"),
-	createData(15, generateRandomPhoneNumber(), "Turkey", "MTN", "60%"),
-	createData(16, generateRandomPhoneNumber(), "Ukraine", "MTN", "99%"),
-	createData(17, generateRandomPhoneNumber(), "United Kingdom", "Orange", "90%"),
-	createData(18, generateRandomPhoneNumber(), "United States", "Orange", "90%"),
-	createData(19, generateRandomPhoneNumber(), "Vietnam", "MTN", "90%"),
-	createData(20, generateRandomPhoneNumber(), "Zambia", "MTN", "90%"),
-	createData(21, generateRandomPhoneNumber(), "Zimbabwe", "Glo", "90%"),
-	createData(22, generateRandomPhoneNumber(), "Australia", "MTN", "90%")
-];
-
-const columns = [
-	{ field: "msisdn", headerName: "MSISDN", width: 200 },
-	{
-		field: "country",
-		headerName: "Country",
-		width: 200,
-		renderCell: (params) => (
-			<React.Fragment>
-				{params.value && <ReactCountryFlag countryCode={getCountryCode(params.value)} svg />}
-				{params.value}
-			</React.Fragment>
-		)
-	},
-	{ field: "operator", headerName: "Operator", width: 200 },
-	{ field: "resiliance", headerName: "Resiliance%", width: 200 },
-	{
-		field: "action",
-		headerName: "",
-		width: 100,
-		renderCell: () => (
-			<Link to="/data">
-				<IconButton>
+	const columns = [
+		{
+			field: "msisdn",
+			headerName: "MSISDN",
+			width: 230
+		},
+		{
+			field: "country",
+			headerName: "Country",
+			width: 230
+		},
+		{ field: "operator", headerName: "Operator", width: 200 },
+		{ field: "resiliance", headerName: "Resiliance%", width: 150 },
+		{ field: "date", headerName: "Date/Time", width: 200 },
+		{
+			field: "action",
+			headerName: "",
+			width: 100,
+			renderCell: () => (
+				<IconButton onRowClick={handleRowClick}>
 					<FaChevronDown />
 				</IconButton>
-			</Link>
-		)
-	}
-];
+			)
+		}
+	];
 
-export default function TheTable() {
+	if (isLoading) {
+		return (
+			<div
+				style={{
+					height: 400,
+					width: "100%",
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center"
+				}}
+			>
+				<Loader />
+			</div>
+		);
+	}
+
+	const filteredRows = rows.filter(
+		(row) =>
+			(!selectedCountry || row.country === selectedCountry) &&
+			(!selectedOperator || row.operator === selectedOperator) &&
+			(!selectedDate || row.date === selectedDate)
+	);
+
 	return (
-		<div style={{ height: 400, width: "100%" }}>
-			<DataGrid
-				rows={rows}
-				columns={columns}
-				pageSize={5}
-				pagination
-				pageSizeOptions={[5, 10, 25]}
-			/>
-		</div>
+		<DataGrid
+			rows={filteredRows}
+			columns={columns}
+			initialState={{
+				pagination: {
+					paginationModel: {
+						pageSize: 7
+					}
+				}
+			}}
+			pageSizeOptions={[7]}
+			slots={{
+				toolbar: GridToolbar
+			}}
+			sx={{ height: 500, width: "100%", color: "paper" }}
+			onRowClick={handleRowClick}
+		/>
 	);
 }
