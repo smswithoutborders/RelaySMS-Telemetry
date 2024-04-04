@@ -86,7 +86,11 @@ export default function Reliability({
 			slots={{
 				toolbar: GridToolbar
 			}}
-			sx={{ height: 500, width: "100%", color: "paper" }}
+			sx={{
+				height: 500,
+				width: "100%",
+				color: "paper"
+			}}
 			onRowClick={handleRowClick}
 		/>
 	);

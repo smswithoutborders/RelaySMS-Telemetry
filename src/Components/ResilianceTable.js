@@ -1,19 +1,67 @@
 import React, { useState, useEffect } from "react";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid"; // Import DataGrid from MUI X Data Grid
-// import { Grid } from "@mui/material";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import "../index.css"; // Import external CSS file
 
 const apiUrl = process.env.REACT_APP_RESILIANCE_URL;
 
 const columns = [
-	{ field: "id", headerName: "ID", width: 90 },
-	{ field: "msisdn", headerName: "MSISDN", width: 150 },
-	{ field: "country", headerName: "Country", width: 130 },
-	{ field: "operator", headerName: "Operator", width: 130 },
-	{ field: "regdate", headerName: "Reg Date", width: 130 },
-	{ field: "routed", headerName: "Routed", width: 130 },
-	{ field: "success", headerName: "Success", width: 130 },
-	{ field: "failure", headerName: "Failure", width: 130 },
-	{ field: "error", headerName: "Error", width: 130 }
+	{ field: "id", headerName: "ID", width: 90, headerClassName: "gray", cellClassName: "column" },
+	{
+		field: "msisdn",
+		headerName: "MSISDN",
+		width: 150,
+		headerClassName: "gray",
+		cellClassName: "column"
+	},
+	{
+		field: "country",
+		headerName: "Country",
+		width: 130,
+		headerClassName: "gray",
+		cellClassName: "column"
+	},
+	{
+		field: "operator",
+		headerName: "Operator",
+		width: 130,
+		headerClassName: "gray",
+		cellClassName: "column"
+	},
+	{
+		field: "regdate",
+		headerName: "Reg Date",
+		width: 130,
+		headerClassName: "gray",
+		cellClassName: "column"
+	},
+	{
+		field: "routed",
+		headerName: "Routed",
+		width: 130,
+		headerClassName: "gray",
+		cellClassName: "column"
+	},
+	{
+		field: "success",
+		headerName: "Success",
+		width: 130,
+		headerClassName: "gray",
+		cellClassName: "column"
+	},
+	{
+		field: "failure",
+		headerName: "Failure",
+		width: 130,
+		headerClassName: "gray",
+		cellClassName: "column"
+	},
+	{
+		field: "error",
+		headerName: "Error",
+		width: 130,
+		headerClassName: "gray",
+		cellClassName: "column"
+	}
 ];
 
 function Resiliance() {
@@ -60,8 +108,21 @@ function Resiliance() {
 						}
 					}}
 					pageSizeOptions={[7]}
+					sx={{
+						height: 500,
+						width: "100%"
+					}}
 					slots={{
 						toolbar: GridToolbar
+					}}
+					getRowClassName={(params) => {
+						return params.row.success
+							? "success"
+							: params.row.failure
+								? "failure"
+								: params.row.error
+									? "error"
+									: "";
 					}}
 				/>
 			</div>
