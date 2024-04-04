@@ -1,14 +1,15 @@
 import { Box, Card, Grid, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import TheTable from "../Components/Table";
+import Reliability from "../Components/ReliabilityTable";
 import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
 import DateSearch from "../Components/DateSearch";
 import { fetchData } from "../Utils/FetchData";
+import Resiliance from "../Components/ResilianceTable";
 
-const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = process.env.REACT_APP_RELIABILITY_URL;
 
-export default function Dashboard() {
+export default function Dashboard({ selectedTable }) {
 	const [rows, setRows] = useState([]);
 	const [filteredRows, setFilteredRows] = useState([]);
 	const [selectedCountry, setSelectedCountry] = useState(null);
@@ -111,12 +112,22 @@ export default function Dashboard() {
 					<Box sx={{ py: 4 }}>
 						<Grid container>
 							<Grid item md={12} xs={12}>
-								<TheTable
-									rows={filteredRows}
-									selectedCountry={selectedCountry}
-									selectedOperator={selectedOperator}
-									selectedDate={selectedDate}
-								/>
+								{selectedTable === "reliability" && (
+									<Reliability
+										rows={filteredRows}
+										selectedCountry={selectedCountry}
+										selectedOperator={selectedOperator}
+										selectedDate={selectedDate}
+									/>
+								)}
+								{selectedTable === "resilience" && (
+									<Resiliance
+										rows={filteredRows}
+										selectedCountry={selectedCountry}
+										selectedOperator={selectedOperator}
+										selectedDate={selectedDate}
+									/>
+								)}
 							</Grid>
 						</Grid>
 					</Box>

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { FaChevronDown } from "react-icons/fa6";
 import Loader from "./Loader";
 
-export default function TheTable({
+export default function Reliability({
 	rows = [],
 	selectedCountry,
 	selectedOperator,

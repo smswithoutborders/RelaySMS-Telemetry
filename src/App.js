@@ -15,13 +15,14 @@ import Data from "./Pages/TableDialog";
 
 function App() {
 	const [isLoading, setIsLoading] = useState(true);
+	const [selectedTable, setSelectedTable] = useState("reliability");
 	const [darkMode, setDarkMode] = useState(
 		localStorage.getItem("darkMode") === "true" ? true : false
 	);
 	const [filteredRows, setFilteredRows] = useState([]);
 
 	useEffect(() => {
-		fetchData(process.env.REACT_APP_API_URL)
+		fetchData(process.env.REACT_APP_RELIABILITY_URL)
 			.then((data) => {
 				setFilteredRows(data);
 				setIsLoading(false);
@@ -61,10 +62,17 @@ function App() {
 				<ThemeProvider theme={theme}>
 					<CssBaseline />
 					<Router>
-						<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+						<ResponsiveDrawer
+							darkMode={darkMode}
+							toggleDarkMode={toggleDarkMode}
+							setSelectedTable={setSelectedTable}
+						/>
 						<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Routes>
-							<Route path="/" element={<Dashboard filteredRows={filteredRows} />} />
+							<Route
+								path="/"
+								element={<Dashboard selectedTable={selectedTable} filteredRows={filteredRows} />}
+							/>
 							<Route path="/help" element={<Help />} />
 							<Route path="/contact" element={<Contact />} />
 							<Route path="/data" element={<Data />} />

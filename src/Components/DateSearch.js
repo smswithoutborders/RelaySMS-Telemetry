@@ -4,7 +4,7 @@ import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import { fetchData } from "../Utils/FetchData";
 
-const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = process.env.REACT_APP_RELIABILITY_URL;
 
 export default function DateSearch({ onSelectDate }) {
 	const [dates, setDates] = useState([]);

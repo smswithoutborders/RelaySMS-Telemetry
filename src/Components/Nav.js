@@ -18,7 +18,7 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 const drawerWidth = 240;
 
-function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
+function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 	const drawer = (
 		<Box
 			sx={{
@@ -37,11 +37,19 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 			<Divider />
 			<List sx={{ flexGrow: 1 }}>
 				<ListItem>
-					<ListItemButton component="a" to="/">
+					<ListItemButton component="a" to="/" onClick={() => setSelectedTable("reliability")}>
 						<ListItemIcon>
 							<FaHouse />
 						</ListItemIcon>
-						<ListItemText> Dashboard </ListItemText>
+						<ListItemText>Reliability</ListItemText>
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton onClick={() => setSelectedTable("resilience")}>
+						<ListItemIcon>
+							<FaHouse />
+						</ListItemIcon>
+						<ListItemText>Resiliance</ListItemText>
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
