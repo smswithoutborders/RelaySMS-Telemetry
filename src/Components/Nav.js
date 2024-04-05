@@ -37,7 +37,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 			<Divider />
 			<List sx={{ flexGrow: 1 }}>
 				<ListItem>
-					<ListItemButton component="a" to="/" onClick={() => setSelectedTable("reliability")}>
+					<ListItemButton component={Link} to="/" onClick={() => setSelectedTable("reliability")}>
 						<ListItemIcon>
 							<FaHouse />
 						</ListItemIcon>
@@ -45,7 +45,11 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton onClick={() => setSelectedTable("resilience")}>
+					<ListItemButton
+						component={Link}
+						to="/resilience"
+						onClick={() => setSelectedTable("resilience")}
+					>
 						<ListItemIcon>
 							<FaHouse />
 						</ListItemIcon>
@@ -53,7 +57,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton component="a" to="/help">
+					<ListItemButton component={Link} to="/help">
 						<ListItemIcon>
 							<FaChartSimple />
 						</ListItemIcon>
@@ -61,7 +65,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton component="a" to="/contact">
+					<ListItemButton component={Link} to="/contact">
 						<ListItemIcon>
 							<FaHeadphones />
 						</ListItemIcon>

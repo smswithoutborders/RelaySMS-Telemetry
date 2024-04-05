@@ -7,6 +7,7 @@ import { Link, useLocation } from "react-router-dom";
 export default function Data() {
 	const { state } = useLocation();
 	const testData = state?.test_data || [];
+	console.log("testData:", testData);
 
 	const columns = [
 		{ field: "test_id", headerName: "Test ID", width: 120 },

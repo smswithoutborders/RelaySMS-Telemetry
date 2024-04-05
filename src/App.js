@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import Dashboard from "./Pages/Dashboard";
 import ResponsiveDrawer from "./Components/Nav";
 import Loader from "./Components/Loader";
 import Footer from "./Components/Footer";
@@ -12,17 +11,52 @@ import { fetchData } from "./Utils/FetchData";
 import Help from "./Pages/Help";
 import Contact from "./Pages/Contact";
 import Data from "./Pages/TableDialog";
+import PageNotFound from "./Pages/404";
+import Reliability from "./Pages/Reliability";
+import Resilience from "./Pages/Resilience";
 
-function App() {
+const reliabilityApiUrl = process.env.REACT_APP_RELIABILITY_URL;
+const resilienceApiUrl = process.env.REACT_APP_RESILIENCE_URL;
+
+function App(selectedCountry, selectedDate, selectedOperator) {
 	const [isLoading, setIsLoading] = useState(true);
+	const [rows, setRows] = useState([]);
+	const [filteredRows, setFilteredRows] = useState([]);
+
 	const [selectedTable, setSelectedTable] = useState("reliability");
 	const [darkMode, setDarkMode] = useState(
 		localStorage.getItem("darkMode") === "true" ? true : false
 	);
-	const [filteredRows, setFilteredRows] = useState([]);
 
 	useEffect(() => {
-		fetchData(process.env.REACT_APP_RELIABILITY_URL)
+		if (rows.length < 1) {
+			fetchData(resilienceApiUrl)
+				.then((data) => {
+					setRows(data);
+					setFilteredRows(data);
+				})
+				.catch((error) => {
+					console.error("Error fetching data:", error);
+				});
+		}
+	}, [rows, resilienceApiUrl]);
+
+	useEffect(() => {
+		if (!selectedCountry || !rows) {
+			setFilteredRows(rows);
+			return;
+		}
+		const filteredData = rows.filter(
+			(row) =>
+				row.country === selectedCountry &&
+				(!selectedOperator || row.operator === selectedOperator) &&
+				(!selectedDate || row.date === selectedDate)
+		);
+		setFilteredRows(filteredData);
+	}, [selectedCountry, selectedOperator, selectedDate, rows]);
+
+	useEffect(() => {
+		fetchData(reliabilityApiUrl)
 			.then((data) => {
 				setFilteredRows(data);
 				setIsLoading(false);
@@ -71,11 +105,34 @@ function App() {
 						<Routes>
 							<Route
 								path="/"
-								element={<Dashboard selectedTable={selectedTable} filteredRows={filteredRows} />}
+								element={
+									<Reliability
+										rows={filteredRows}
+										selectedCountry={selectedCountry}
+										selectedOperator={selectedOperator}
+										selectedDate={selectedDate}
+										selectedTable={selectedTable}
+										filteredRows={filteredRows}
+									/>
+								}
+							/>
+							<Route
+								path="/resilience"
+								element={
+									<Resilience
+										rows={filteredRows}
+										selectedCountry={selectedCountry}
+										selectedOperator={selectedOperator}
+										selectedDate={selectedDate}
+										selectedTable={selectedTable}
+										filteredRows={filteredRows}
+									/>
+								}
 							/>
 							<Route path="/help" element={<Help />} />
 							<Route path="/contact" element={<Contact />} />
 							<Route path="/data" element={<Data />} />
+							<Route path="*" element={<PageNotFound />} />
 						</Routes>
 						<Footer />
 					</Router>

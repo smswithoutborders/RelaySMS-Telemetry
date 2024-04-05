@@ -2,19 +2,36 @@ import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
+// import { fetchData } from "../Utils/FetchData";
 
-export default function OperatorSearch({ selectedCountry, onSelectOperator, rows }) {
+export default function OperatorSearch({ selectedCountry, onSelectOperator, apiUrl }) {
 	const [operators, setOperators] = useState([]);
 
 	useEffect(() => {
-		if (!selectedCountry || !rows) {
-			return;
+		const fetchOperators = async () => {
+			try {
+				const response = await fetch(apiUrl);
+				const data = await response.json();
+				const filteredOperators = data
+					.filter((item) => item.country === selectedCountry)
+					.map((item) => item.operator);
+				setOperators(filteredOperators);
+				console.log("Filtered operators:", filteredOperators);
+			} catch (error) {
+				console.error("Error fetching operators:", error);
+			}
+		};
+
+		if (selectedCountry) {
+			fetchOperators();
+		} else {
+			// Reset operators if no country is selected
+			setOperators([]);
 		}
-		const filteredOperators = rows
-			.filter((row) => row.country === selectedCountry)
-			.map((row) => row.operator);
-		setOperators(filteredOperators);
-	}, [selectedCountry, rows]);
+	}, [selectedCountry, apiUrl]);
+
+	console.log("selectedCountry:", selectedCountry);
+	console.log("apiUrl:", apiUrl);
 
 	const handleSelectOperator = (selectedOperator) => {
 		onSelectOperator(selectedOperator);

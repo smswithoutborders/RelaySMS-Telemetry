@@ -1,17 +1,16 @@
+// CountrySearch.js
 import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import { fetchData } from "../Utils/FetchData";
 
-const apiUrl = process.env.REACT_APP_RELIABILITY_URL;
-
-export default function CountrySearch({ onSelectCountry }) {
+export default function CountrySearch({ onSelectCountry, apiUrl }) {
 	const [countries, setCountries] = useState([]);
 
 	useEffect(() => {
 		fetchData(apiUrl).then((data) => setCountries(data));
-	}, []);
+	}, [apiUrl]);
 
 	const handleSelectCountry = (selectedCountry) => {
 		onSelectCountry(selectedCountry);
