@@ -12,14 +12,6 @@ const apiUrl = process.env.REACT_APP_RELIABILITY_URL;
 export default function Reliability() {
 	const navigate = useNavigate();
 
-	const handleRowClick = useCallback(
-		(params) => {
-			const data = params.row.testdata;
-			navigate("/data", { state: { test_data: data } });
-		},
-		[navigate]
-	);
-
 	const [data, setData] = useState([]);
 	const [selectedCountry, setSelectedCountry] = useState(null);
 	const [selectedOperator, setSelectedOperator] = useState(null);
@@ -48,7 +40,8 @@ export default function Reliability() {
 					country: item.country,
 					operator: item.operator,
 					resiliance: item.resiliance,
-					date: item.date
+					date: item.date,
+					testdata: item.testdata
 				}));
 
 				setData(mappedData);
@@ -59,6 +52,14 @@ export default function Reliability() {
 
 		fetchData();
 	}, [apiUrl]);
+
+	const handleRowClick = useCallback(
+		(params) => {
+			const data = params.row.testdata;
+			navigate("/data", { state: { test_data: data } });
+		},
+		[navigate]
+	);
 
 	const filteredRows = data.filter(
 		(row) =>
@@ -72,7 +73,7 @@ export default function Reliability() {
 		{ field: "country", headerName: "Country", width: 200 },
 		{ field: "operator", headerName: "Operator", width: 200 },
 		{ field: "resiliance", headerName: "Reliability", width: 150 },
-		{ field: "date", headerName: "Date/Time", width: 150 },
+		{ field: "date", headerName: "Date/Time", width: 200 },
 		{
 			field: "action",
 			headerName: "",

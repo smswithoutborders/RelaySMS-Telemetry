@@ -1,19 +1,33 @@
-# gateway-client-reliability-dashboard
+# SMSWithoutBorders Dashboard
 
-A tool for measuring gateway clients reliablity.
+Welcome to SMSWithoutBorders Dashboard, a powerful tool designed to measure the reliability of gateway clients ans available gateway servers.
 
-## Installation
+## Getting Started
 
-`yarn install`
+To get started with the SMSWithoutBorders Dashboard, follow these simple steps:
 
-`yarn start`
+1. **Create .env File**: Create a `.env` file in the root directory of the project. This file will contain environment variables necessary for the application to function correctly.
 
-## Tools
+2. **Install Dependencies**: Run the following command to install dependencies:
 
-[React](https://reactjs.org/)
+   ```
+   yarn install
+   ```
 
-[Mui](https://mui.com/material-ui/)
+3. **Start the Application**: Once the dependencies are installed, start the application by running:
 
-[React Country Flag](https://www.npmjs.com/package/react-country-flag)
+   ```
+   yarn start
+   ```
 
-[React Icons](https://react-icons.github.io/react-icons/)
+## Tools Used
+
+The SMSWithoutBorders Dashboard utilizes the following tools and libraries:
+
+- **[React](https://reactjs.org/)**: A JavaScript library for building user interfaces.
+
+- **[Material-UI (Mui)](https://mui.com/material-ui/)**: A popular React UI framework that implements Google's Material Design.
+
+- **[Material-UI Data Grid](https://mui.com/components/data-grid/)**: An extension of Material-UI providing a powerful data grid component for React applications.
+
+- **[React Icons](https://react-icons.github.io/react-icons/)**: A collection of popular icons for React projects.
