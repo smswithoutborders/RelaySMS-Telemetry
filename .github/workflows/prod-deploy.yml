@@ -28,11 +28,12 @@ jobs:
             ls -l build
 
       - name: Securely Copy Artifacts to Server
-        uses: appleboy/scp-action@v0.1.3
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.PRIVKEY }}
+          tar_tmp_path: /tmp
           source: "build/*"
           target: ${{ secrets.BUILD_PATH }}
           strip_components: 1
@@ -43,7 +44,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.PRIVKEY }}
           script: |
             set -e
 
