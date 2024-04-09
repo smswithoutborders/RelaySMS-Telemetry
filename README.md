@@ -6,7 +6,12 @@ Welcome to the SMSWithoutBorders Dashboard, a powerful tool designed to measure 
 
 To get started with the SMSWithoutBorders Dashboard, follow these simple steps:
 
-1. **Create .env File**: Create a `.env` file in the root directory of the project. This file will contain environment variables necessary for the application to function correctly.
+1. **Create .env File**: Create a `.env` file in the root directory of the project. Add variables:
+
+```json
+REACT_APP_RELIABILITY_URL=https://REACT_APP_RELIABILITY_URL
+REACT_APP_RESILIENCE_URL=https://REACT_APP_RESILIENCE_URL
+```
 
 2. **Install Dependencies**: Run the following command to install dependencies:
 
