@@ -2,23 +2,25 @@ import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
-import { fetchData } from "../Utils/FetchData";
 
-const apiUrl = process.env.REACT_APP_API_URL;
-
-export default function DateSearch({ onSelectDate }) {
+export default function DateSearch({ onSelectDate, apiUrl }) {
 	const [dates, setDates] = useState([]);
 
 	useEffect(() => {
-		fetchData(apiUrl)
-			.then((data) => {
-				const uniqueDates = Array.from(new Set(data.map((item) => item.date)));
+		const fetchDates = async () => {
+			try {
+				const response = await fetch(apiUrl);
+				const data = await response.json();
+				const dateKey = Object.prototype.hasOwnProperty.call(data[0], "date") ? "date" : "regdate";
+				const uniqueDates = Array.from(new Set(data.map((item) => item[dateKey])));
 				setDates(uniqueDates);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-	}, []);
+			} catch (error) {
+				console.error("Error fetching dates:", error);
+			}
+		};
+
+		fetchDates();
+	}, [apiUrl]);
 
 	const handleSelectDate = (selectedDate) => {
 		onSelectDate(selectedDate);

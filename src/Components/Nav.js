@@ -18,7 +18,7 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 const drawerWidth = 240;
 
-function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
+function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 	const drawer = (
 		<Box
 			sx={{
@@ -37,15 +37,27 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 			<Divider />
 			<List sx={{ flexGrow: 1 }}>
 				<ListItem>
-					<ListItemButton component="a" to="/">
+					<ListItemButton component={Link} to="/" onClick={() => setSelectedTable("reliability")}>
 						<ListItemIcon>
 							<FaHouse />
 						</ListItemIcon>
-						<ListItemText> Dashboard </ListItemText>
+						<ListItemText>Reliability</ListItemText>
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton component="a" to="/help">
+					<ListItemButton
+						component={Link}
+						to="/resilience"
+						onClick={() => setSelectedTable("resilience")}
+					>
+						<ListItemIcon>
+							<FaHouse />
+						</ListItemIcon>
+						<ListItemText>Resiliance</ListItemText>
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton component={Link} to="/help">
 						<ListItemIcon>
 							<FaChartSimple />
 						</ListItemIcon>
@@ -53,7 +65,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton component="a" to="/contact">
+					<ListItemButton component={Link} to="/contact">
 						<ListItemIcon>
 							<FaHeadphones />
 						</ListItemIcon>
@@ -72,7 +84,14 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 			>
 				<Paper elevation={3} sx={{ p: 2 }}>
 					<Typography sx={{ py: 2 }}>Check out SMSWithoutBorders blog posts</Typography>
-					<Button variant="contained" sx={{ borderRadius: "50px", textTransform: "none" }}>
+					<Button
+						component="a"
+						href="https://blog.smswithoutborders.com/"
+						rel="noreferrer"
+						target="_blank"
+						variant="contained"
+						sx={{ borderRadius: "50px", textTransform: "none" }}
+					>
 						Read more <ChevronRight />
 					</Button>
 				</Paper>

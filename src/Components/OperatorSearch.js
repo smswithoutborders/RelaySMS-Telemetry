@@ -3,18 +3,29 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 
-export default function OperatorSearch({ selectedCountry, onSelectOperator, rows }) {
+export default function OperatorSearch({ selectedCountry, onSelectOperator, apiUrl }) {
 	const [operators, setOperators] = useState([]);
 
 	useEffect(() => {
-		if (!selectedCountry || !rows) {
-			return;
+		const fetchOperators = async () => {
+			try {
+				const response = await fetch(apiUrl);
+				const data = await response.json();
+				const filteredOperators = data
+					.filter((item) => item.country === selectedCountry)
+					.map((item) => item.operator);
+				setOperators(filteredOperators);
+			} catch (error) {
+				console.error("Error fetching operators:", error);
+			}
+		};
+
+		if (selectedCountry) {
+			fetchOperators();
+		} else {
+			setOperators([]);
 		}
-		const filteredOperators = rows
-			.filter((row) => row.country === selectedCountry)
-			.map((row) => row.operator);
-		setOperators(filteredOperators);
-	}, [selectedCountry, rows]);
+	}, [selectedCountry, apiUrl]);
 
 	const handleSelectOperator = (selectedOperator) => {
 		onSelectOperator(selectedOperator);
