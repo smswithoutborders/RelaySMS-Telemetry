@@ -33,7 +33,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           source: "build/*"
-          target: ${{ secrets.BUILD_PATH }}
+          target: "${{ secrets.BUILD_PATH }}"
           strip_components: 1
           rm: true
 
