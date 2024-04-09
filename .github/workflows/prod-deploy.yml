@@ -31,12 +31,12 @@ jobs:
         run: yarn build
 
       - name: Securely Copy Artifacts to Server
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "build/*"
+          source: "./build/*"
           target: ${{ secrets.BUILD_PATH }}
           strip_components: 1
           rm: true
@@ -60,3 +60,4 @@ jobs:
             echo "==============================="
             echo "✅ Deployment complete"
             echo "==============================="
+            
