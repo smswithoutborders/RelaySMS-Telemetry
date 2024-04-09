@@ -19,24 +19,21 @@ jobs:
         with: 
           node-version: 18
       
-      - name: Create .env.local file
+      - name: Create .env.local file, install and build
         run: |
             echo "RELIABILITY_URL=${{ vars.RELIABILITY_URL }}" > .env.local
             echo "RESILIENCE_URL=${{ vars.RESILIENCE_URL }}" >> .env.local
-
-      - name: Install Dependencies
-        run: yarn install
-
-      - name: Build Application
-        run: yarn build
+            yarn install
+            yarn build
+            ls -l build
 
       - name: Securely Copy Artifacts to Server
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "./build/*"
+          source: "build/*"
           target: ${{ secrets.BUILD_PATH }}
           strip_components: 1
           rm: true
@@ -60,4 +57,3 @@ jobs:
             echo "==============================="
             echo "✅ Deployment complete"
             echo "==============================="
-            
