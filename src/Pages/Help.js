@@ -19,7 +19,11 @@ export default function Help() {
 					</Typography>
 
 					<Box sx={{ display: "flex", color: "#98B6F3" }}>
-						<a href="">
+						<a
+							href="https://blog.smswithoutborders.com/posts/reliability-of-gateway-clients-in-smswithoutborders"
+							target="_blank"
+							rel="noreferrer"
+						>
 							<Typography sx={{ pt: 3 }}>
 								Check out this comprehensive blog post on gateway clients{" "}
 							</Typography>
@@ -37,14 +41,14 @@ export default function Help() {
 						<br />
 						<li>Operator - Local network providers </li> <br />
 						<li>
-							Gateway clients - I do not know{" "}
+							Gateway clients - key in routing messages from SMS to online platforms{" "}
 							<a href="" style={{ color: "#98B6F3" }}>
 								{" "}
 								learn more{" "}
 							</a>
 						</li>{" "}
 						<br />
-						<li>Routed- Lorem ipsum dolor sit amet. </li>
+						<li>Routed- Sent messages </li>
 					</ul>
 				</Box>
 

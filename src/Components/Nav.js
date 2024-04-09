@@ -84,7 +84,14 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 			>
 				<Paper elevation={3} sx={{ p: 2 }}>
 					<Typography sx={{ py: 2 }}>Check out SMSWithoutBorders blog posts</Typography>
-					<Button variant="contained" sx={{ borderRadius: "50px", textTransform: "none" }}>
+					<Button
+						component="a"
+						href="https://blog.smswithoutborders.com/"
+						rel="noreferrer"
+						target="_blank"
+						variant="contained"
+						sx={{ borderRadius: "50px", textTransform: "none" }}
+					>
 						Read more <ChevronRight />
 					</Button>
 				</Paper>
