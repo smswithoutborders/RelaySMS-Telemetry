@@ -25,14 +25,13 @@ jobs:
             echo "RESILIENCE_URL=${{ vars.RESILIENCE_URL }}" >> .env.local
             yarn install
             yarn build
-            ls -l build
 
       - name: Securely Copy Artifacts to Server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVKEY }}
+          password: ${{ secrets.PASSWORD }}
           tar_tmp_path: /tmp
           source: "build/*"
           target: ${{ secrets.BUILD_PATH }}
@@ -40,11 +39,11 @@ jobs:
           rm: true
 
       - name: 🚀 Execute Remote SSH Commands
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVKEY }}
+          password: ${{ secrets.PASSWORD }}
           script: |
             set -e
 
