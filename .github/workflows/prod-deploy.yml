@@ -27,12 +27,12 @@ jobs:
             yarn build
 
       - name: Securely Copy Artifacts to Server
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "./build/*"
+          source: "build/*"
           target: ${{ secrets.BUILD_PATH }}
           strip_components: 1
           rm: true
