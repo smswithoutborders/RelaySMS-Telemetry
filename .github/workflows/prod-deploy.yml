@@ -36,7 +36,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "./build/*"
+          source: "build/*"
           target: ${{ secrets.BUILD_PATH }}
           strip_components: 1
           rm: true
