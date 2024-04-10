@@ -3,11 +3,13 @@ on:
   push:
     branches:
       - main
-
 jobs:
-  build:
-    name: 🛠️ Build
+  deploy:
+    name: Execute Deployment Script on Server
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://telemetry.smswithoutborders.com
     steps:
       - name: Checkout Git Repository
         uses: actions/checkout@v4
@@ -15,7 +17,7 @@ jobs:
       - name: Setup NodeJs
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Create .env.local file
         run: |
@@ -28,39 +30,16 @@ jobs:
       - name: Build Application
         run: yarn build
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifact
-          overwrite: true
-          path: ./build
-          if-no-files-found: error
-          retention-days: 1
-
-  deploy:
-    name: 🚀 Deploy
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: production
-      url: https://telemetry.smswithoutborders.com
-    steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifact
-          path: ./build
-
       - name: Securely Copy Artifacts to Server
-        uses: garygrossgarten/github-action-scp@release
+        uses: appleboy/scp-action@master
         with:
-          local: build
-          remote: ${{ secrets.BUILD_PATH }}
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          rmRemote: true
-          dotfiles: true
+          source: "./build/*"
+          target: ${{ secrets.BUILD_PATH }}
+          strip_components: 1
+          rm: true
 
       - name: Execute Remote SSH Commands
         uses: appleboy/ssh-action@master
@@ -71,14 +50,13 @@ jobs:
           script: |
             set -e
 
-            whoami
-            ls -al
-
-            echo "============================================"
-            echo "🚀 Deploying new build to the production server..."
-            echo "============================================"
+            echo "============================"
+            echo "🚀 Deploy Project ..."
+            echo "============================"
             if ! ${{secrets.BUILD_CMD}}; then
-              echo "❌ Error deploying project! Deployment failed."
+              echo "❌ Error deploying project!"
               exit 1
             fi
-            echo "✅ Deployment complete."
+            echo "==============================="
+            echo "✅ Deployment complete"
+            echo "==============================="
