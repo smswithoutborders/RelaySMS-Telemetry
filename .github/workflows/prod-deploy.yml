@@ -54,8 +54,8 @@ jobs:
       - name: Securely Copy Artifacts to Server
         uses: garygrossgarten/github-action-scp@release
         with:
-          local: build
-          remote: ${{ secrets.BUILD_PATH }}
+          local: build/*
+          remote: build
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
