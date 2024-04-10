@@ -19,16 +19,19 @@ jobs:
         with: 
           node-version: 18
       
-      - name: Create .env.local file, install and build
+      - name: Create .env.local file
         run: |
             echo "RELIABILITY_URL=${{ vars.RELIABILITY_URL }}" > .env.local
             echo "RESILIENCE_URL=${{ vars.RESILIENCE_URL }}" >> .env.local
-            yarn install
-            yarn build
-            ls -l build
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Build Application
+        run: yarn build
 
       - name: Securely Copy Artifacts to Server
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -39,7 +42,7 @@ jobs:
           rm: true
 
       - name: 🚀 Execute Remote SSH Commands
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
