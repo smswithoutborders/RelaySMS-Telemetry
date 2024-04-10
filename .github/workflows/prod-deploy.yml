@@ -3,32 +3,53 @@ on:
   push:
     branches:
       - main
+
 jobs:
-  deploy:
-    name: 🚀 Execute Deployment Script on Server
+  build:
+    name: 🛠️ Build
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://telemetry.smswithoutborders.com
     steps:
       - name: Checkout Git Repository
         uses: actions/checkout@v4
 
       - name: Setup NodeJs
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: 18
-      
+
       - name: Create .env.local file
         run: |
-            echo "RELIABILITY_URL=${{ vars.RELIABILITY_URL }}" > .env.local
-            echo "RESILIENCE_URL=${{ vars.RESILIENCE_URL }}" >> .env.local
+          echo "RELIABILITY_URL=${{ vars.RELIABILITY_URL }}" > .env.local
+          echo "RESILIENCE_URL=${{ vars.RESILIENCE_URL }}" >> .env.local
 
       - name: Install Dependencies
         run: yarn install
 
       - name: Build Application
         run: yarn build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          overwrite: true
+          path: ./build
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+      url: https://telemetry.smswithoutborders.com
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+          path: ./build
 
       - name: Securely Copy Artifacts to Server
         uses: appleboy/scp-action@master
