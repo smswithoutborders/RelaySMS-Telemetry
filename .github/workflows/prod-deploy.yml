@@ -51,25 +51,16 @@ jobs:
           name: build-artifact
           path: ./build
 
-      - name: Remove Old Files from Target Directory
-        uses: appleboy/ssh-action@master
+      - name: Securely Copy Artifacts to Server
+        uses: garygrossgarten/github-action-scp@release
         with:
+          local: build
+          remote: ${{ secrets.BUILD_PATH }}
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          script: |
-            set -e
-
-            echo "======================================"
-            echo "🧹 Removing old files from the server..."
-            echo "======================================"
-            rm -rf ${{ secrets.BUILD_PATH }}*
-            echo "✅ Old files removed successfully."
-
-      - name: Securely Copy Artifacts to Server
-        run: scp -r ./build/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.BUILD_PATH }}
-        env:
-          PASSWORD: ${{ secrets.PASSWORD }}
+          rmRemote: true
+          dotfiles: true
 
       - name: Execute Remote SSH Commands
         uses: appleboy/ssh-action@master
