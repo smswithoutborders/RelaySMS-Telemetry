@@ -21,8 +21,8 @@ jobs:
 
       - name: Create .env.local file
         run: |
-          echo "RELIABILITY_URL=${{ vars.RELIABILITY_URL }}" > .env.local
-          echo "RESILIENCE_URL=${{ vars.RESILIENCE_URL }}" >> .env.local
+          echo "REACT_APP_RELIABILITY_URL=${{ vars.RELIABILITY_URL }}" > .env.local
+          echo "REACT_APP_RESILIENCE_URL=${{ vars.RESILIENCE_URL }}" >> .env.local
 
       - name: Install Dependencies
         run: yarn install
