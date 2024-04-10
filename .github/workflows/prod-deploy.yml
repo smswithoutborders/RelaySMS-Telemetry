@@ -55,7 +55,7 @@ jobs:
         uses: garygrossgarten/github-action-scp@release
         with:
           local: build
-          remote: "${{ secrets.BUILD_PATH }}"
+          remote: ${{ secrets.BUILD_PATH }}
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
@@ -70,6 +70,9 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             set -e
+
+            whoami
+            ls -al
 
             echo "============================================"
             echo "🚀 Deploying new build to the production server..."
