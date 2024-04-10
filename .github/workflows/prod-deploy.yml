@@ -62,11 +62,7 @@ jobs:
           rmRemote: true
           dotfiles: true
 
-      - uses: GuillaumeFalourd/wait-sleep-action@v1
-        with:
-          time: "15"
-
-      - name: 🚀 Execute Remote SSH Commands
+      - name: Execute Remote SSH Commands
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
