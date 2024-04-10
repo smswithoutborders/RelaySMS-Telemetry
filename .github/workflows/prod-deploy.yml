@@ -1,4 +1,4 @@
-name: 🚀 Deploy SMSWithoutBorders Visibility Dashboard on Server (production)
+name: Deploy SMSWithoutBorders Visibility Dashboard on Server (production)
 on:
   push:
     branches:
@@ -51,18 +51,7 @@ jobs:
           name: build-artifact
           path: ./build
 
-      - name: Securely Copy Artifacts to Server
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          source: "./build/*"
-          target: ${{ secrets.BUILD_PATH }}
-          strip_components: 1
-          rm: true
-
-      - name: 🚀 Execute Remote SSH Commands
+      - name: Remove Old Files from Target Directory
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -71,13 +60,31 @@ jobs:
           script: |
             set -e
 
-            echo "============================"
-            echo "🚀 Deploy Project ..."
-            echo "============================"
+            echo "======================================"
+            echo "🧹 Removing old files from the server..."
+            echo "======================================"
+            rm -rf ${{ secrets.BUILD_PATH }}*
+            echo "✅ Old files removed successfully."
+
+      - name: Securely Copy Artifacts to Server
+        run: scp -r ./build/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ secrets.BUILD_PATH }}
+        env:
+          PASSWORD: ${{ secrets.PASSWORD }}
+
+      - name: Execute Remote SSH Commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            set -e
+
+            echo "============================================"
+            echo "🚀 Deploying new build to the production server..."
+            echo "============================================"
             if ! ${{secrets.BUILD_CMD}}; then
-              echo "❌ Error deploying project!"
+              echo "❌ Error deploying project! Deployment failed."
               exit 1
             fi
-            echo "==============================="
-            echo "✅ Deployment complete"
-            echo "==============================="
+            echo "✅ Deployment complete."

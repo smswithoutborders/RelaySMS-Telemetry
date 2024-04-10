@@ -3,7 +3,6 @@ name: Code Quality and Formatting Check
 on:
   push:
     branches:
-      - main
       - staging
   pull_request:
     branches:
