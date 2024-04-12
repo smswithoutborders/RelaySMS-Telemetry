@@ -30,8 +30,9 @@ export default function Resilience() {
 			try {
 				const response = await fetch(apiUrl);
 				const jsonData = await response.json();
+
 				const mappedData = jsonData.map((item) => ({
-					id: item.id,
+					id: item.id || null,
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
@@ -41,15 +42,15 @@ export default function Resilience() {
 					failure: item.failure,
 					error: item.error
 				}));
-
-				setData(mappedData);
+				const filteredData = mappedData.filter((row) => row.id !== null);
+				setData(filteredData);
 			} catch (error) {
 				console.error("Error fetching data:", error);
 			}
 		};
 
 		fetchData();
-	}, [apiUrl]);
+	}, []);
 
 	const filteredRows = data.filter(
 		(row) =>
@@ -120,7 +121,12 @@ export default function Resilience() {
 						pageSize={5}
 						initialState={{ pagination: { paginationModel: { pageSize: 7 } } }}
 						pageSizeOptions={[7]}
-						slots={{ toolbar: GridToolbar }}
+						slots={{
+							toolbar: GridToolbar,
+							noRowsOverlay: () => (
+								<div style={{ textAlign: "center", padding: "20px" }}>No rows found</div>
+							)
+						}}
 						sx={{ height: 500, width: "100%", color: "paper", py: 4 }}
 					/>
 				</Grid>
