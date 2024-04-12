@@ -37,9 +37,8 @@ export default function Resilience() {
 					country: item.country,
 					operator: item.operator,
 					regdate: new Date(item.regdate).toLocaleDateString(),
-					routed: item.routed,
-					success: item.success,
-					failure: item.failure,
+					protocols: item.protocols,
+					status: item.status,
 					error: item.error
 				}));
 				const filteredData = mappedData.filter((row) => row.id !== null);
@@ -65,9 +64,8 @@ export default function Resilience() {
 		{ field: "country", headerName: "Country", width: 130 },
 		{ field: "operator", headerName: "Operator", width: 130 },
 		{ field: "regdate", headerName: "Reg Date", width: 130 },
-		{ field: "routed", headerName: "Routed", width: 130 },
-		{ field: "success", headerName: "Success", width: 130 },
-		{ field: "failure", headerName: "Failure", width: 130 },
+		{ field: "protocols", headerName: "Protocols", width: 130 },
+		{ field: "status", headerName: "Status", width: 130 },
 		{ field: "error", headerName: "Error", width: 130 }
 	];
 
