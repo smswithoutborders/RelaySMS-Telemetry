@@ -28,32 +28,28 @@ export default function Reliability() {
 		setSelectedDate(selectedDate);
 	};
 
-	const fetchData = async () => {
-		try {
-			const response = await fetch(apiUrl);
-			if (!response.ok) {
-				throw new Error("Network response was not ok");
-			}
-			const jsonData = await response.json();
-
-			const mappedData = jsonData.map((item) => ({
-				id: item.id || null,
-				msisdn: item.msisdn,
-				country: item.country,
-				operator: item.operator,
-				resiliance: item.resiliance,
-				date: item.date,
-				testdata: item.testdata
-			}));
-			const filteredData = mappedData.filter((row) => row.id !== null);
-			setData(filteredData);
-		} catch (error) {
-			console.error("Error fetching data:", error);
-			setData([]);
-		}
-	};
-
 	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await fetch(apiUrl);
+				const jsonData = await response.json();
+
+				const mappedData = jsonData.map((item) => ({
+					id: item.id || null,
+					msisdn: item.msisdn,
+					country: item.country,
+					operator: item.operator,
+					resiliance: item.resiliance,
+					date: item.date,
+					testdata: item.testdata
+				}));
+				const filteredData = mappedData.filter((row) => row.id !== null);
+				setData(filteredData);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
+		};
+
 		fetchData();
 	}, []);
 
