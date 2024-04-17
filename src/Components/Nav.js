@@ -53,7 +53,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 						<ListItemIcon>
 							<FaHouse />
 						</ListItemIcon>
-						<ListItemText>Resiliance</ListItemText>
+						<ListItemText>Resilience</ListItemText>
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
