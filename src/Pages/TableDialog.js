@@ -7,7 +7,6 @@ import { Link, useLocation } from "react-router-dom";
 export default function Data() {
 	const { state } = useLocation();
 	const testData = state?.test_data || [];
-	console.log("testData:", testData);
 
 	const columns = [
 		{ field: "test_id", headerName: "Test ID", width: 120 },
@@ -22,8 +21,8 @@ export default function Data() {
 
 	return (
 		<Grid container sx={{ p: { md: 10, xs: 3 } }}>
-			<Grid item md={2}></Grid>
-			<Grid item md={9} xs={12} sx={{ mt: { xs: 6, md: 0 } }}>
+			<Grid item md={2} xs={12}></Grid>
+			<Grid item md={9} xs={12} sx={{ mt: { xs: 6, md: 0 }, height: "65vh" }}>
 				<Box sx={{ pb: 10 }}>
 					<Link to="/">
 						<FaChevronLeft /> Back

@@ -76,8 +76,8 @@ export default function Resilience() {
 			sx={{ px: { md: 3, sm: 3, xs: 2 }, pb: { md: 3, sm: 3, xs: 14 } }}
 		>
 			<Grid container sx={{ p: 2 }}>
-				<Grid item md={2}></Grid>
-				<Grid item md={10}>
+				<Grid item md={2} xs={12} sm={12}></Grid>
+				<Grid item md={10} xs={12} sm={12}>
 					<Grid
 						container
 						columnSpacing={4}
@@ -95,7 +95,7 @@ export default function Resilience() {
 									variant="body1"
 									sx={{ fontWeight: 500, p: 1, fontSize: { md: 14, sm: 14, xs: 12 } }}
 								>
-									Total Gateway Servers
+									Total Gateway Clients
 								</Typography>
 							</Card>
 						</Grid>

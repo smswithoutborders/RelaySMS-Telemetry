@@ -4,9 +4,13 @@ import { FaFacebook, FaGithub, FaGooglePlay, FaRegEnvelope, FaXTwitter } from "r
 
 export default function Contact() {
 	return (
-		<Grid container justifyContent="center" sx={{ px: { md: 10, xs: 2 }, py: { md: 15, xs: 10 } }}>
-			<Grid item md={2}></Grid>
-			<Grid item md={10}>
+		<Grid
+			container
+			justifyContent="center"
+			sx={{ px: { md: 10, xs: 2, sm: 4 }, py: { md: 15, xs: 10, sm: 10 } }}
+		>
+			<Grid item md={2} xs={12} sm={12}></Grid>
+			<Grid item md={10} xs={12} sm={12}>
 				<Typography variant="h4" sx={{ fontWeight: 600, pb: 8 }}>
 					Get connected
 				</Typography>

@@ -39,7 +39,7 @@ export default function Reliability() {
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
-					resiliance: item.resiliance,
+					resilience: item.resiliance,
 					date: item.date,
 					testdata: item.testdata
 				}));
@@ -83,8 +83,8 @@ export default function Reliability() {
 			sx={{ px: { md: 3, sm: 3, xs: 2 }, pb: { md: 3, sm: 3, xs: 14 } }}
 		>
 			<Grid container sx={{ p: 2 }}>
-				<Grid item md={2}></Grid>
-				<Grid item md={10}>
+				<Grid item md={2} xs={12} sm={12}></Grid>
+				<Grid item md={10} xs={12} sm={12}>
 					<Grid
 						container
 						columnSpacing={4}

@@ -16,44 +16,13 @@ import Reliability from "./Pages/Reliability";
 import Resilience from "./Pages/Resilience";
 
 const reliabilityApiUrl = process.env.REACT_APP_RELIABILITY_URL;
-const resilienceApiUrl = process.env.REACT_APP_RESILIENCE_URL;
 
 function App(selectedCountry, selectedDate, selectedOperator) {
 	const [isLoading, setIsLoading] = useState(true);
-	const [rows, setRows] = useState([]);
 	const [filteredRows, setFilteredRows] = useState([]);
-
-	const [selectedTable, setSelectedTable] = useState("reliability");
 	const [darkMode, setDarkMode] = useState(
 		localStorage.getItem("darkMode") === "true" ? true : false
 	);
-
-	useEffect(() => {
-		if (rows.length < 1) {
-			fetchData(resilienceApiUrl)
-				.then((data) => {
-					setRows(data);
-					setFilteredRows(data);
-				})
-				.catch((error) => {
-					console.error("Error fetching data:", error);
-				});
-		}
-	}, [rows, resilienceApiUrl]);
-
-	useEffect(() => {
-		if (!selectedCountry || !rows) {
-			setFilteredRows(rows);
-			return;
-		}
-		const filteredData = rows.filter(
-			(row) =>
-				row.country === selectedCountry &&
-				(!selectedOperator || row.operator === selectedOperator) &&
-				(!selectedDate || row.date === selectedDate)
-		);
-		setFilteredRows(filteredData);
-	}, [selectedCountry, selectedOperator, selectedDate, rows]);
 
 	useEffect(() => {
 		fetchData(reliabilityApiUrl)
@@ -117,11 +86,7 @@ function App(selectedCountry, selectedDate, selectedOperator) {
 				<ThemeProvider theme={theme}>
 					<CssBaseline />
 					<Router>
-						<ResponsiveDrawer
-							darkMode={darkMode}
-							toggleDarkMode={toggleDarkMode}
-							setSelectedTable={setSelectedTable}
-						/>
+						<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 						<Routes>
 							<Route
@@ -132,7 +97,6 @@ function App(selectedCountry, selectedDate, selectedOperator) {
 										selectedCountry={selectedCountry}
 										selectedOperator={selectedOperator}
 										selectedDate={selectedDate}
-										selectedTable={selectedTable}
 										filteredRows={filteredRows}
 									/>
 								}
@@ -145,7 +109,6 @@ function App(selectedCountry, selectedDate, selectedOperator) {
 										selectedCountry={selectedCountry}
 										selectedOperator={selectedOperator}
 										selectedDate={selectedDate}
-										selectedTable={selectedTable}
 										filteredRows={filteredRows}
 									/>
 								}
