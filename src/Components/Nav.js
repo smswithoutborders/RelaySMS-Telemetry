@@ -18,7 +18,7 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 const drawerWidth = 240;
 
-function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
+function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 	const drawer = (
 		<Box
 			sx={{
@@ -37,7 +37,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 			<Divider />
 			<List sx={{ flexGrow: 1 }}>
 				<ListItem>
-					<ListItemButton component={Link} to="/" onClick={() => setSelectedTable("reliability")}>
+					<ListItemButton component={Link} to="/">
 						<ListItemIcon>
 							<FaHouse />
 						</ListItemIcon>
@@ -45,15 +45,11 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton
-						component={Link}
-						to="/resilience"
-						onClick={() => setSelectedTable("resilience")}
-					>
+					<ListItemButton component={Link} to="/resilience">
 						<ListItemIcon>
 							<FaHouse />
 						</ListItemIcon>
-						<ListItemText>Resiliance</ListItemText>
+						<ListItemText>Resilience</ListItemText>
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
@@ -127,15 +123,19 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode, setSelectedTable }) {
 			>
 				<Toolbar sx={{ justifyContent: "space-between" }}>
 					<Box display="flex">
-						<Link to="/">
-							<Typography sx={{ borderRadius: "50px", m: 1 }}>Dashboard</Typography>
-						</Link>
-						<Link to="/help">
-							<Typography sx={{ borderRadius: "50px", m: 1 }}>Help</Typography>
-						</Link>
-						<Link to="/contact">
-							<Typography sx={{ borderRadius: "50px", m: 1 }}>Contact</Typography>
-						</Link>
+						<Typography component={Link} to="/" sx={{ borderRadius: "50px", m: 1 }}>
+							Reliability
+						</Typography>
+						<Typography component={Link} to="/resilience" sx={{ borderRadius: "50px", m: 1 }}>
+							Resilience
+						</Typography>
+						<Typography component={Link} to="/help" sx={{ borderRadius: "50px", m: 1 }}>
+							Help
+						</Typography>
+
+						<Typography component={Link} to="/contact" sx={{ borderRadius: "50px", m: 1 }}>
+							Contact
+						</Typography>
 					</Box>
 					<Box>
 						<IconButton

@@ -30,26 +30,26 @@ export default function Resilience() {
 			try {
 				const response = await fetch(apiUrl);
 				const jsonData = await response.json();
+
 				const mappedData = jsonData.map((item) => ({
-					id: item.id,
+					id: item.id || null,
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
 					regdate: new Date(item.regdate).toLocaleDateString(),
-					routed: item.routed,
-					success: item.success,
-					failure: item.failure,
+					protocols: item.protocols,
+					status: item.status,
 					error: item.error
 				}));
-
-				setData(mappedData);
+				const filteredData = mappedData.filter((row) => row.id !== null);
+				setData(filteredData);
 			} catch (error) {
 				console.error("Error fetching data:", error);
 			}
 		};
 
 		fetchData();
-	}, [apiUrl]);
+	}, []);
 
 	const filteredRows = data.filter(
 		(row) =>
@@ -64,9 +64,8 @@ export default function Resilience() {
 		{ field: "country", headerName: "Country", width: 130 },
 		{ field: "operator", headerName: "Operator", width: 130 },
 		{ field: "regdate", headerName: "Reg Date", width: 130 },
-		{ field: "routed", headerName: "Routed", width: 130 },
-		{ field: "success", headerName: "Success", width: 130 },
-		{ field: "failure", headerName: "Failure", width: 130 },
+		{ field: "protocols", headerName: "Protocols", width: 130 },
+		{ field: "status", headerName: "Status", width: 130 },
 		{ field: "error", headerName: "Error", width: 130 }
 	];
 
@@ -77,8 +76,8 @@ export default function Resilience() {
 			sx={{ px: { md: 3, sm: 3, xs: 2 }, pb: { md: 3, sm: 3, xs: 14 } }}
 		>
 			<Grid container sx={{ p: 2 }}>
-				<Grid item md={2}></Grid>
-				<Grid item md={10}>
+				<Grid item md={2} xs={12} sm={12}></Grid>
+				<Grid item md={10} xs={12} sm={12}>
 					<Grid
 						container
 						columnSpacing={4}
@@ -96,7 +95,7 @@ export default function Resilience() {
 									variant="body1"
 									sx={{ fontWeight: 500, p: 1, fontSize: { md: 14, sm: 14, xs: 12 } }}
 								>
-									Total Gateway Servers
+									Total Gateway Clients
 								</Typography>
 							</Card>
 						</Grid>
@@ -120,7 +119,12 @@ export default function Resilience() {
 						pageSize={5}
 						initialState={{ pagination: { paginationModel: { pageSize: 7 } } }}
 						pageSizeOptions={[7]}
-						slots={{ toolbar: GridToolbar }}
+						slots={{
+							toolbar: GridToolbar,
+							noRowsOverlay: () => (
+								<div style={{ textAlign: "center", padding: "20px" }}>No rows found</div>
+							)
+						}}
 						sx={{ height: 500, width: "100%", color: "paper", py: 4 }}
 					/>
 				</Grid>

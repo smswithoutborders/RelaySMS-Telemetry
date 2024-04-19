@@ -6,8 +6,8 @@ export default function Footer() {
 	return (
 		<Box component="footer" sx={{ position: "relative", bottom: 0 }}>
 			<Grid container sx={{ p: 2 }}>
-				<Grid item md={2}></Grid>
-				<Grid item md={9}>
+				<Grid item md={2} xs={12} sm={12}></Grid>
+				<Grid item md={9} xs={12} sm={12}>
 					<Divider sx={{ width: "100%" }} />
 					<Box display="flex" justifyContent="space-between" sx={{ p: 2 }}>
 						<Typography variant="body2">© {new Date().getFullYear()} SMSWithoutBorders</Typography>
