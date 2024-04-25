@@ -4,6 +4,7 @@ import { Grid, Box, Card, Typography } from "@mui/material";
 import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
 import DateSearch from "../Components/DateSearch";
+import { fetchData } from "../Utils/FetchData";
 
 const apiUrl = process.env.REACT_APP_RESILIENCE_URL;
 
@@ -26,29 +27,21 @@ export default function Resilience() {
 	};
 
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await fetch(apiUrl);
-				const jsonData = await response.json();
-
-				const mappedData = jsonData.map((item) => ({
-					id: item.id || null,
+		fetchData(apiUrl)
+			.then((data) => {
+				const mappedData = data.map((item) => ({
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
-					regdate: new Date(item.regdate).toLocaleDateString(),
 					protocols: item.protocols,
-					status: item.status,
-					error: item.error
+					date: item.last_published_date
 				}));
-				const filteredData = mappedData.filter((row) => row.id !== null);
+				const filteredData = mappedData.filter((row) => row.msisdn !== null);
 				setData(filteredData);
-			} catch (error) {
+			})
+			.catch((error) => {
 				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchData();
+			});
 	}, []);
 
 	const filteredRows = data.filter(
@@ -59,14 +52,11 @@ export default function Resilience() {
 	);
 
 	const columns = [
-		{ field: "id", headerName: "ID", width: 90 },
 		{ field: "msisdn", headerName: "MSISDN", width: 150 },
 		{ field: "country", headerName: "Country", width: 130 },
 		{ field: "operator", headerName: "Operator", width: 130 },
-		{ field: "regdate", headerName: "Reg Date", width: 130 },
-		{ field: "protocols", headerName: "Protocols", width: 130 },
-		{ field: "status", headerName: "Status", width: 130 },
-		{ field: "error", headerName: "Error", width: 130 }
+		{ field: "date", headerName: "Date", width: 130 },
+		{ field: "protocols", headerName: "Protocols", width: 130 }
 	];
 
 	return (
@@ -114,6 +104,7 @@ export default function Resilience() {
 						</Grid>
 					</Grid>
 					<DataGrid
+						getRowId={(row) => row.msisdn}
 						rows={filteredRows}
 						columns={columns}
 						pageSize={5}

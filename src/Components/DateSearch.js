@@ -2,27 +2,23 @@ import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
+import { fetchData } from "../Utils/FetchData";
 
 export default function DateSearch({ onSelectDate, apiUrl }) {
 	const [dates, setDates] = useState([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const fetchDates = async () => {
-			try {
-				const response = await fetch(apiUrl);
-				const data = await response.json();
-				const dateKey = Object.prototype.hasOwnProperty.call(data[0], "date") ? "date" : "regdate";
-				const uniqueDates = Array.from(new Set(data.map((item) => item[dateKey])));
+		fetchData(apiUrl)
+			.then((data) => {
+				const uniqueDates = Array.from(new Set(data.map((item) => item?.last_published_date)));
 				setDates(uniqueDates);
 				setLoading(false);
-			} catch (error) {
-				console.error("Error fetching dates:", error);
+			})
+			.catch((error) => {
+				console.error("Error fetching countries:", error);
 				setLoading(false);
-			}
-		};
-
-		fetchDates();
+			});
 	}, []);
 
 	const handleSelectDate = (selectedDate) => {
@@ -33,7 +29,7 @@ export default function DateSearch({ onSelectDate, apiUrl }) {
 		<Stack spacing={2} sx={{ width: "100%" }}>
 			{loading ? (
 				<TextField label="Loading..." variant="standard" disabled fullWidth />
-			) : dates.length > 1 ? (
+			) : dates.length > 0 ? (
 				<Autocomplete
 					id="date-search"
 					size="small"

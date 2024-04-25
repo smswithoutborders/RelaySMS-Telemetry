@@ -9,11 +9,10 @@ export default function Data() {
 	const testData = state?.test_data || [];
 
 	const columns = [
-		{ field: "test_id", headerName: "Test ID", width: 120 },
-		{ field: "sent_time", headerName: "Sent Time", width: 120 },
-		{ field: "sms_sent", headerName: "SMS Sent", width: 120 },
-		{ field: "sms_received", headerName: "SMS Received", width: 120 },
-		{ field: "published", headerName: "Published", width: 120 },
+		{ field: "start_time", headerName: "Start Time", width: 120 },
+		{ field: "sms_sent_time", headerName: "SMS Sent Time", width: 120 },
+		{ field: "sms_received_time", headerName: "SMS Received Time", width: 120 },
+		{ field: "sms_routed_time", headerName: "Routed Time", width: 120 },
 		{ field: "operator_difference", headerName: "Operator Difference", width: 120 },
 		{ field: "publisher_difference", headerName: "Publisher Difference", width: 120 },
 		{ field: "total_difference", headerName: "Total Difference", width: 120 }
@@ -30,7 +29,6 @@ export default function Data() {
 				</Box>
 				<Box sx={{ width: "100%" }}>
 					<DataGrid
-						getRowId={(row) => row.test_id}
 						rows={testData}
 						columns={columns}
 						pageSize={5}
