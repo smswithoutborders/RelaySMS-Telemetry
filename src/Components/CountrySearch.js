@@ -28,7 +28,7 @@ export default function CountrySearch({ onSelectCountry, apiUrl }) {
 		<Stack spacing={2} sx={{ width: "100%" }}>
 			{loading ? (
 				<TextField label="Loading..." variant="standard" disabled fullWidth />
-			) : countries.length > 1 ? (
+			) : countries.length > 0 ? (
 				<Autocomplete
 					id="country-search"
 					size="small"
