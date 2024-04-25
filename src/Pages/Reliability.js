@@ -5,6 +5,7 @@ import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
 import DateSearch from "../Components/DateSearch";
 import { useNavigate } from "react-router-dom";
+import { fetchData } from "../Utils/FetchData";
 
 const apiUrl = process.env.REACT_APP_RELIABILITY_URL;
 
@@ -29,28 +30,22 @@ export default function Reliability() {
 	};
 
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await fetch(apiUrl);
-				const jsonData = await response.json();
-
-				const mappedData = jsonData.map((item) => ({
-					id: item.id || null,
+		fetchData(apiUrl)
+			.then((data) => {
+				const mappedData = data.map((item) => ({
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
 					resilience: item.resiliance,
-					date: item.date,
-					testdata: item.testdata
+					date: item.last_published_date,
+					testdata: item.test_data
 				}));
-				const filteredData = mappedData.filter((row) => row.id !== null);
+				const filteredData = mappedData.filter((row) => row.msisdn !== null);
 				setData(filteredData);
-			} catch (error) {
+			})
+			.catch((error) => {
 				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchData();
+			});
 	}, []);
 
 	const handleRowClick = useCallback(
@@ -121,6 +116,7 @@ export default function Reliability() {
 						</Grid>
 					</Grid>
 					<DataGrid
+						getRowId={(row) => row.msisdn}
 						onRowClick={handleRowClick}
 						rows={filteredRows}
 						columns={columns}
