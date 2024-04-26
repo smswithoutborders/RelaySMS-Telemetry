@@ -13,6 +13,7 @@ export default function Data() {
 		{ field: "sms_sent_time", headerName: "SMS Sent Time", width: 120 },
 		{ field: "sms_received_time", headerName: "SMS Received Time", width: 120 },
 		{ field: "sms_routed_time", headerName: "Routed Time", width: 120 },
+		{ field: "status", headerName: "Status", width: 120 },
 		{ field: "operator_difference", headerName: "Operator Difference", width: 120 },
 		{ field: "publisher_difference", headerName: "Publisher Difference", width: 120 },
 		{ field: "total_difference", headerName: "Total Difference", width: 120 }
