@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - staging
-  pull_request:
-    branches:
-      - main
-      - staging
-
 jobs:
   check-code-quality:
     name: Check Code Quality
