@@ -12,6 +12,7 @@ import Data from "./Pages/TableDialog";
 import PageNotFound from "./Pages/404";
 import Reliability from "./Pages/Reliability";
 import Resilience from "./Pages/Resilience";
+import MobileNav from "./Components/MobileNav";
 
 function App() {
 	const [darkMode, setDarkMode] = useState(
@@ -64,6 +65,7 @@ function App() {
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
 			<Router>
+				<MobileNav darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Routes>
