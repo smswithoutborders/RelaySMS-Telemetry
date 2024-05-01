@@ -9,16 +9,14 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
-import { FaChartSimple, FaHeadphones, FaHouse } from "react-icons/fa6";
-import { AppBar, Button, IconButton, Divider, Paper, Toolbar } from "@mui/material";
+import { FaCircleQuestion, FaHeadphones, FaTable, FaTableCells } from "react-icons/fa6";
+import { Button, Divider, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "@mui/icons-material";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 const drawerWidth = 240;
 
-function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
+function ResponsiveDrawer() {
 	const drawer = (
 		<Box
 			sx={{
@@ -39,7 +37,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 				<ListItem>
 					<ListItemButton component={Link} to="/">
 						<ListItemIcon>
-							<FaHouse />
+							<FaTableCells />
 						</ListItemIcon>
 						<ListItemText>Reliability</ListItemText>
 					</ListItemButton>
@@ -47,7 +45,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 				<ListItem>
 					<ListItemButton component={Link} to="/resilience">
 						<ListItemIcon>
-							<FaHouse />
+							<FaTable />
 						</ListItemIcon>
 						<ListItemText>Resilience</ListItemText>
 					</ListItemButton>
@@ -55,7 +53,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 				<ListItem>
 					<ListItemButton component={Link} to="/help">
 						<ListItemIcon>
-							<FaChartSimple />
+							<FaCircleQuestion />
 						</ListItemIcon>
 						<ListItemText> Help </ListItemText>
 					</ListItemButton>
@@ -104,11 +102,7 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 						variant="permanent"
 						sx={{
 							display: { xs: "none", sm: "none", md: "block" },
-							"& .MuiDrawer-paper": {
-								boxSizing: "border-box",
-								width: drawerWidth,
-								bgcolor: "transparent"
-							}
+							"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
 						}}
 						open
 					>
@@ -116,40 +110,6 @@ function ResponsiveDrawer({ darkMode, toggleDarkMode }) {
 					</Drawer>
 				</Box>
 			</Box>
-			<AppBar
-				sx={{
-					display: { md: "none", sx: "flex", sm: "flex" }
-				}}
-			>
-				<Toolbar sx={{ justifyContent: "space-between" }}>
-					<Box display="flex">
-						<Typography component={Link} to="/" sx={{ borderRadius: "50px", m: 1 }}>
-							Reliability
-						</Typography>
-						<Typography component={Link} to="/resilience" sx={{ borderRadius: "50px", m: 1 }}>
-							Resilience
-						</Typography>
-						<Typography component={Link} to="/help" sx={{ borderRadius: "50px", m: 1 }}>
-							Help
-						</Typography>
-
-						<Typography component={Link} to="/contact" sx={{ borderRadius: "50px", m: 1 }}>
-							Contact
-						</Typography>
-					</Box>
-					<Box>
-						<IconButton
-							className="cards"
-							onClick={toggleDarkMode}
-							sx={{ ml: 2 }}
-							aria-label={darkMode ? "Light Mode" : "Dark Mode"}
-							color="inherit"
-						>
-							{darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-						</IconButton>
-					</Box>
-				</Toolbar>
-			</AppBar>
 		</>
 	);
 }
