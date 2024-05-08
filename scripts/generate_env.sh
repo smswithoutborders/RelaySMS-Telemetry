@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Generate the .env.local file
+cat <<EOF > .env.local
+REACT_APP_RELIABILITY_URL=$REACT_APP_RELIABILITY_URL
+REACT_APP_RESILIENCE_URL=$REACT_APP_RESILIENCE_URL
+EOF

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchData } from "../Utils/FetchData";
 
 const apiUrl = process.env.REACT_APP_RELIABILITY_URL;
-
+const drawerWidth = 240;
 export default function Reliability() {
 	const navigate = useNavigate();
 
@@ -67,7 +67,7 @@ export default function Reliability() {
 		{ field: "msisdn", headerName: "MSISDN", width: 200 },
 		{ field: "country", headerName: "Country", width: 200 },
 		{ field: "operator", headerName: "Operator", width: 200 },
-		{ field: "resiliance", headerName: "Reliability", width: 150 },
+		{ field: "resiliance", headerName: "Reliability", width: 200 },
 		{ field: "date", headerName: "Date/Time", width: 200 }
 	];
 
@@ -75,19 +75,44 @@ export default function Reliability() {
 		<Box
 			className="bg"
 			component="main"
-			sx={{ px: { md: 3, sm: 3, xs: 2 }, pb: { md: 3, sm: 3, xs: 14 } }}
+			sx={{
+				px: { md: 3, sm: 3, xs: 2 },
+				pb: { md: 3, sm: 3, xs: 14 },
+				flexGrow: 1
+			}}
 		>
-			<Grid container sx={{ p: 2 }}>
-				<Grid item md={2} xs={12} sm={12}></Grid>
-				<Grid item md={10} xs={12} sm={12}>
+			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
+				<Grid
+					item
+					lg={2}
+					md={3}
+					xs={0}
+					sm={3}
+					sx={{
+						display: { xs: "none", sm: "none", md: "block" },
+						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
+					}}
+				></Grid>
+				<Grid
+					mx="auto"
+					item
+					lg={10}
+					md={9}
+					xs={12}
+					sm={12}
+					sx={{
+						p: { md: 3, sm: 2, xs: 0 },
+						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
+					}}
+				>
 					<Grid
 						container
 						columnSpacing={4}
 						rowSpacing={4}
 						alignItems="flex-end"
-						sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 10, sm: 10 } }}
+						sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 2, sm: 2 } }}
 					>
-						<Grid item md={2.5} xs={6}>
+						<Grid item md={3} xs={6}>
 							<Card sx={{ p: 2 }}>
 								<Typography textAlign="center" variant="h3" sx={{ fontWeight: 600 }}>
 									{filteredRows.length}
