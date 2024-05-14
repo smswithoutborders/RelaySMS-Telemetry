@@ -13,9 +13,8 @@ RUN yarn install --frozen-lockfile
 COPY . .
 
 # Build the application
-ARG RELIABILITY_URL
-ARG RESILIENCE_URL
-RUN export REACT_APP_RELIABILITY_URL=${RELIABILITY_URL} REACT_APP_RESILIENCE_URL=${RESILIENCE_URL} && \
+ARG GATEWAY_SERVER_URL
+RUN export REACT_APP_GATEWAY_SERVER_URL=${GATEWAY_SERVER_URL} && \
     ./scripts/generate_env.sh && \
     yarn build
 

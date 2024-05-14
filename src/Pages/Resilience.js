@@ -6,7 +6,8 @@ import OperatorSearch from "../Components/OperatorSearch";
 import DateSearch from "../Components/DateSearch";
 import { fetchData } from "../Utils/FetchData";
 
-const apiUrl = process.env.REACT_APP_RESILIENCE_URL;
+const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
+const apiUrl = `${gs_url}/v3/clients`;
 const drawerWidth = 240;
 export default function Resilience() {
 	const [data, setData] = useState([]);
