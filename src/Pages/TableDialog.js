@@ -34,7 +34,7 @@ export default function Data() {
 						columns={columns}
 						pageSize={5}
 						pagination
-						pageSizeOptions={[5, 10, 25]}
+						pageSizeOptions={[25, 50, 100]}
 						slots={{
 							toolbar: GridToolbar
 						}}
