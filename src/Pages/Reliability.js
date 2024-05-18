@@ -38,7 +38,7 @@ export default function Reliability() {
 					country: item.country,
 					operator: item.operator,
 					resilience: item.resiliance,
-					date: new Date(item.last_published_date * 1000).toLocaleString(),
+					date: item.last_published_date,
 					testdata: item.test_data
 				}));
 				const filteredData = mappedData.filter((row) => row.msisdn !== null);
