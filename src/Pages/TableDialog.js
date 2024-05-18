@@ -1,12 +1,28 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Box, Grid } from "@mui/material";
 import { FaChevronLeft } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
+import { fetchTestData } from "../Utils/FetchTestData";
 
 export default function Data() {
 	const { state } = useLocation();
-	const testData = state?.test_data || [];
+	const [testData, setTestData] = useState([]);
+
+	// Fetch test data when the component mounts or when the state changes
+	useEffect(() => {
+		if (state?.test_data) {
+			setTestData(state.test_data);
+		} else {
+			fetchTestData()
+				.then((data) => {
+					setTestData(data);
+				})
+				.catch((error) => {
+					console.error("Error fetching test data:", error);
+				});
+		}
+	}, [state]);
 
 	const columns = [
 		{ field: "start_time", headerName: "Start Time", width: 120 },
