@@ -35,7 +35,7 @@ export default function Resilience() {
 					country: item.country,
 					operator: item.operator,
 					protocols: item.protocols,
-					date: item.last_published_date
+					date: new Date(item.last_published_date * 1000).toLocaleString()
 				}));
 				const filteredData = mappedData.filter((row) => row.msisdn !== null);
 				setData(filteredData);

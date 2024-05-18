@@ -37,7 +37,7 @@ export default function Reliability() {
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
-					resilience: item.resiliance,
+					reliability: item.reliability,
 					date: new Date(item.last_published_date * 1000).toLocaleString(),
 					testdata: item.test_data
 				}));
@@ -68,7 +68,7 @@ export default function Reliability() {
 		{ field: "msisdn", headerName: "MSISDN", width: 200 },
 		{ field: "country", headerName: "Country", width: 200 },
 		{ field: "operator", headerName: "Operator", width: 200 },
-		{ field: "resiliance", headerName: "Reliability", width: 200 },
+		{ field: "reliability", headerName: "Reliability", width: 200 },
 		{ field: "date", headerName: "Date/Time", width: 200 }
 	];
 
