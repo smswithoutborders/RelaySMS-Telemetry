@@ -37,7 +37,7 @@ export default function Reliability() {
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
-					resilience: item.resiliance,
+					reliability: item.reliability,
 					date: item.last_published_date,
 					testdata: item.test_data
 				}));
