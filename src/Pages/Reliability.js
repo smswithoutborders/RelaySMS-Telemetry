@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Grid, Box, Card, Typography, Button } from "@mui/material";
+import { Grid, Box, Card, Typography } from "@mui/material";
 import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
 import DateSearch from "../Components/DateSearch";
@@ -9,54 +9,35 @@ import { fetchData } from "../Utils/FetchData";
 
 const apiUrl = process.env.REACT_APP_RELIABILITY_URL;
 const drawerWidth = 240;
-
 export default function Reliability() {
 	const navigate = useNavigate();
 
-	// State to manage data, filters, and loading status
 	const [data, setData] = useState([]);
 	const [selectedCountry, setSelectedCountry] = useState(null);
 	const [selectedOperator, setSelectedOperator] = useState(null);
 	const [selectedDate, setSelectedDate] = useState(null);
-	const [loading, setLoading] = useState(false);
 
-	// Handlers for updating filter states
-	const handleSelectCountry = (country) => {
-		setSelectedCountry(country);
+	const handleSelectCountry = (selectedCountry) => {
+		setSelectedCountry(selectedCountry);
 	};
 
-	const handleSelectOperator = (operator) => {
-		setSelectedOperator(operator);
+	const handleSelectOperator = (selectedOperator) => {
+		setSelectedOperator(selectedOperator);
 	};
 
-	const handleSelectDate = (date) => {
-		setSelectedDate(date);
+	const handleSelectDate = (selectedDate) => {
+		setSelectedDate(selectedDate);
 	};
 
-	// Function to convert Unix timestamp to human-readable format
-	const formatUnixTime = (unixTime) => {
-		const date = new Date(unixTime * 1000);
-		return date.toLocaleString();
-	};
-
-	// Function to fetch data from the API based on selected filters
-	const fetchTestData = useCallback(() => {
-		setLoading(true);
-
-		const params = new URLSearchParams();
-		if (selectedCountry) params.append("country", selectedCountry);
-		if (selectedOperator) params.append("operator", selectedOperator);
-		if (selectedDate) params.append("date", selectedDate);
-
-		fetchData(`${apiUrl}?${params.toString()}`)
+	useEffect(() => {
+		fetchData(apiUrl)
 			.then((data) => {
 				const mappedData = data.map((item) => ({
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
-					operatorCode: item.operator_code,
-					reliability: item.reliability,
-					date: formatUnixTime(item.last_published_date), //
+					resilience: item.resiliance,
+					date: item.last_published_date,
 					testdata: item.test_data
 				}));
 				const filteredData = mappedData.filter((row) => row.msisdn !== null);
@@ -64,18 +45,9 @@ export default function Reliability() {
 			})
 			.catch((error) => {
 				console.error("Error fetching data:", error);
-			})
-			.finally(() => {
-				setLoading(false);
 			});
-	}, [selectedCountry, selectedOperator, selectedDate]);
+	}, []);
 
-	// Fetch data initially and whenever filters change
-	useEffect(() => {
-		fetchTestData();
-	}, [fetchTestData]);
-
-	// Handle row click to navigate to the data page with the selected row's test data
 	const handleRowClick = useCallback(
 		(params) => {
 			const data = params.row.testdata;
@@ -84,13 +56,18 @@ export default function Reliability() {
 		[navigate]
 	);
 
-	// Define the columns for the DataGrid
+	const filteredRows = data.filter(
+		(row) =>
+			(!selectedCountry || row.country === selectedCountry) &&
+			(!selectedOperator || row.operator === selectedOperator) &&
+			(!selectedDate || row.date === selectedDate)
+	);
+
 	const columns = [
-		{ field: "msisdn", headerName: "MSISDN", width: 150 },
-		{ field: "country", headerName: "Country", width: 150 },
-		{ field: "operator", headerName: "Operator", width: 150 },
-		{ field: "operatorCode", headerName: "Operator Code", width: 150 },
-		{ field: "reliability", headerName: "Reliability", width: 150 },
+		{ field: "msisdn", headerName: "MSISDN", width: 200 },
+		{ field: "country", headerName: "Country", width: 200 },
+		{ field: "operator", headerName: "Operator", width: 200 },
+		{ field: "reliability", headerName: "Reliability", width: 200 },
 		{ field: "date", headerName: "Date/Time", width: 200 }
 	];
 
@@ -135,11 +112,10 @@ export default function Reliability() {
 						alignItems="flex-end"
 						sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 2, sm: 2 } }}
 					>
-						{/* Display the count of total gateway clients */}
 						<Grid item md={3} xs={6}>
 							<Card sx={{ p: 2 }}>
 								<Typography textAlign="center" variant="h3" sx={{ fontWeight: 600 }}>
-									{data.length}
+									{filteredRows.length}
 								</Typography>
 								<Typography
 									textAlign="center"
@@ -150,8 +126,6 @@ export default function Reliability() {
 								</Typography>
 							</Card>
 						</Grid>
-
-						{/* Country search component */}
 						<Grid item md={3} xs={6}>
 							<CountrySearch onSelectCountry={handleSelectCountry} apiUrl={apiUrl} />
 							{selectedCountry && (
@@ -162,25 +136,14 @@ export default function Reliability() {
 								/>
 							)}
 						</Grid>
-
-						{/* Date search component */}
 						<Grid item md={3} xs={6}>
 							<DateSearch onSelectDate={handleSelectDate} apiUrl={apiUrl} />
 						</Grid>
-
-						{/* Refresh button to manually fetch data */}
-						<Grid item md={3} xs={6}>
-							<Button onClick={fetchTestData} variant="contained" color="primary">
-								Refresh Data
-							</Button>
-						</Grid>
 					</Grid>
-
-					{/* DataGrid component to display the data */}
 					<DataGrid
 						getRowId={(row) => row.msisdn}
 						onRowClick={handleRowClick}
-						rows={data}
+						rows={filteredRows}
 						columns={columns}
 						pageSize={5}
 						initialState={{ pagination: { paginationModel: { pageSize: 7 } } }}
@@ -192,7 +155,6 @@ export default function Reliability() {
 							)
 						}}
 						sx={{ height: 500, width: "100%", color: "paper", py: 4 }}
-						loading={loading} // Display loading indicator while fetching data
 					/>
 				</Grid>
 			</Grid>
