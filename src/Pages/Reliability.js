@@ -7,8 +7,9 @@ import DateSearch from "../Components/DateSearch";
 import { useNavigate } from "react-router-dom";
 import { fetchData } from "../Utils/FetchData";
 
-const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
-const apiUrl = `${gs_url}/v3/clients`;
+// const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
+// const apiUrl = `${gs_url}/v3/clients`;
+const apiUrl = "https://staging.smswithoutborders.com:15000/v3/clients";
 const drawerWidth = 240;
 export default function Reliability() {
 	const navigate = useNavigate();
@@ -37,8 +38,10 @@ export default function Reliability() {
 					msisdn: item.msisdn,
 					country: item.country,
 					operator: item.operator,
+					operator_code: item.operator_code,
+					protocols: item.protocols,
 					reliability: item.reliability,
-					date: new Date(item.last_published_date).toLocaleString(),
+					last_published_date: new Date(item.last_published_date).toLocaleString(),
 					testdata: item.test_data
 				}));
 				const filteredData = mappedData.filter((row) => row.msisdn !== null);
@@ -65,12 +68,13 @@ export default function Reliability() {
 	);
 
 	const columns = [
-		{ field: "msisdn", headerName: "MSISDN", width: 200 },
-		{ field: "country", headerName: "Country", width: 200 },
-		{ field: "operator", headerName: "Operator", width: 200 },
-		{ field: "operator_code", headerName: "Operator Code", width: 200 },
-		{ field: "reliability", headerName: "Reliability", width: 200 },
-		{ field: "date", headerName: "Date/Time", width: 200 }
+		{ field: "msisdn", headerName: "MSISDN", width: 150 },
+		{ field: "country", headerName: "Country", width: 140 },
+		{ field: "operator", headerName: "Operator", width: 140 },
+		{ field: "operator_code", headerName: "Operator Code", width: 140 },
+		{ field: "reliability", headerName: "Reliability", width: 100 },
+		{ field: "protocols", headerName: "Protocols", width: 200 },
+		{ field: "last_published_date", headerName: "Date/Time", width: 200 }
 	];
 
 	return (
@@ -148,12 +152,12 @@ export default function Reliability() {
 						rows={filteredRows}
 						columns={columns}
 						pageSize={5}
-						initialState={{ pagination: { paginationModel: { pageSize: 7 } } }}
-						pageSizeOptions={[7]}
+						initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+						pageSizeOptions={[10, 25, 50]}
 						slots={{
 							toolbar: GridToolbar,
 							noRowsOverlay: () => (
-								<div style={{ textAlign: "center", padding: "20px" }}>No rows found</div>
+								<div style={{ textAlign: "center", padding: "50px" }}>No rows found</div>
 							)
 						}}
 						sx={{ height: 500, width: "100%", color: "paper", py: 4 }}
