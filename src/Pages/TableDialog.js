@@ -13,34 +13,36 @@ export default function Data() {
 		{ field: "sms_sent_time", headerName: "SMS Sent Time", width: 120 },
 		{ field: "sms_received_time", headerName: "SMS Received Time", width: 120 },
 		{ field: "sms_routed_time", headerName: "Routed Time", width: 120 },
-		{ field: "status", headerName: "Status", width: 100 },
+		{ field: "status", headerName: "Status", width: 80 },
 		{ field: "operator_difference", headerName: "Operator Difference", width: 120 },
 		{ field: "publisher_difference", headerName: "Publisher Difference", width: 120 },
 		{ field: "total_difference", headerName: "Total Difference", width: 120 }
 	];
 
 	return (
-		<Grid container sx={{ p: { md: 10, xs: 3 } }}>
-			<Grid item md={2} xs={12}></Grid>
-			<Grid item md={9} xs={12} sx={{ mt: { xs: 6, md: 0 }, height: "65vh" }}>
-				<Box sx={{ pb: 10 }}>
-					<Link to="/">
-						<FaChevronLeft /> Back
-					</Link>
-				</Box>
-				<Box sx={{ width: "100%" }}>
-					<DataGrid
-						rows={testData}
-						columns={columns}
-						pageSize={5}
-						pagination
-						pageSizeOptions={[25, 50, 100]}
-						slots={{
-							toolbar: GridToolbar
-						}}
-					/>
-				</Box>
+		<Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+			<Grid container sx={{ p: { md: 10, xs: 3 }, flex: 1 }}>
+				<Grid item md={2} xs={12}></Grid>
+				<Grid item md={9} xs={12} sx={{ mt: { xs: 6, md: 0 }, height: "65vh" }}>
+					<Box sx={{ pb: 5 }}>
+						<Link to="/">
+							<FaChevronLeft /> Back
+						</Link>
+					</Box>
+					<Box sx={{ width: "100%", height: "500px", overflow: "auto" }}>
+						<DataGrid
+							rows={testData}
+							columns={columns}
+							initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+							pageSizeOptions={[10, 25, 50]}
+							slots={{
+								toolbar: GridToolbar
+							}}
+							sx={{ width: "100%" }}
+						/>
+					</Box>
+				</Grid>
 			</Grid>
-		</Grid>
+		</Box>
 	);
 }

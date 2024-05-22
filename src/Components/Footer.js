@@ -11,9 +11,7 @@ export default function Footer() {
 			sx={{
 				px: { md: 3, sm: 3, xs: 2 },
 				pb: { md: 3, sm: 3, xs: 14 },
-				flexGrow: 1,
-				bottom: 0,
-				position: "static"
+				mt: "30px"
 			}}
 		>
 			<Grid container sx={{ p: 2 }}>
