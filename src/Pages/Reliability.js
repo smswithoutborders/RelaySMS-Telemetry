@@ -7,9 +7,8 @@ import DateSearch from "../Components/DateSearch";
 import { useNavigate } from "react-router-dom";
 import { fetchData } from "../Utils/FetchData";
 
-// const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
-// const apiUrl = `${gs_url}/v3/clients`;
-const apiUrl = "https://staging.smswithoutborders.com:15000/v3/clients";
+const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
+const apiUrl = `${gs_url}/v3/clients`;
 const drawerWidth = 240;
 export default function Reliability() {
 	const navigate = useNavigate();
