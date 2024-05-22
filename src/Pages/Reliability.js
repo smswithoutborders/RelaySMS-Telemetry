@@ -7,8 +7,9 @@ import DateSearch from "../Components/DateSearch";
 import { useNavigate } from "react-router-dom";
 import { fetchData } from "../Utils/FetchData";
 
-const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
-const apiUrl = `${gs_url}/v3/clients`;
+// const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
+// const apiUrl = `${gs_url}/v3/clients/<msisdn>/tests?per_page=20&page=2`;
+const apiUrl = "https://staging.smswithoutborders.com:15000/v3/clients";
 const drawerWidth = 240;
 export default function Reliability() {
 	const navigate = useNavigate();
@@ -38,8 +39,7 @@ export default function Reliability() {
 					country: item.country,
 					operator: item.operator,
 					operator_code: item.operator_code,
-					protocols: item.protocols,
-					reliability: item.reliability,
+					reliability: `${item.reliability}%`,
 					last_published_date: new Date(item.last_published_date).toLocaleString(),
 					testdata: item.test_data
 				}));
@@ -72,7 +72,6 @@ export default function Reliability() {
 		{ field: "operator", headerName: "Operator", width: 140 },
 		{ field: "operator_code", headerName: "Operator Code", width: 140 },
 		{ field: "reliability", headerName: "Reliability", width: 100 },
-		{ field: "protocols", headerName: "Protocols", width: 200 },
 		{ field: "last_published_date", headerName: "Date/Time", width: 200 }
 	];
 
