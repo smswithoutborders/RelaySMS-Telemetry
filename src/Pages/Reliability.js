@@ -68,6 +68,7 @@ export default function Reliability() {
 		{ field: "msisdn", headerName: "MSISDN", width: 200 },
 		{ field: "country", headerName: "Country", width: 200 },
 		{ field: "operator", headerName: "Operator", width: 200 },
+		{ field: "operator_code", headerName: "Operator Code", width: 200 },
 		{ field: "reliability", headerName: "Reliability", width: 200 },
 		{ field: "date", headerName: "Date/Time", width: 200 }
 	];
