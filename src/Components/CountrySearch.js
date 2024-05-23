@@ -9,7 +9,7 @@ export default function CountrySearch({ onSelectCountry, apiUrl }) {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		fetchData(apiUrl)
+		fetchData(`${apiUrl}?`)
 			.then((data) => {
 				setCountries(data);
 				setLoading(false);
