@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Box, Grid } from "@mui/material";
 import { FaChevronLeft } from "react-icons/fa6";
@@ -9,15 +9,40 @@ export default function Data() {
 	const testdata = state?.tests || [];
 	console.log("tests:", testdata);
 
+	const formatDate = (dateString) => {
+		if (!dateString) return "";
+		return new Date(dateString).toLocaleString();
+	};
+
 	const columns = [
-		{ field: "start_time", headerName: "Start Time", width: 120 },
-		{ field: "sms_sent_time", headerName: "SMS Sent Time", width: 120 },
-		{ field: "sms_received_time", headerName: "SMS Received Time", width: 120 },
-		{ field: "sms_routed_time", headerName: "Routed Time", width: 120 },
-		{ field: "status", headerName: "Status", width: 80 },
-		{ field: "operator_difference", headerName: "Operator Difference", width: 120 },
-		{ field: "publisher_difference", headerName: "Publisher Difference", width: 120 },
-		{ field: "total_difference", headerName: "Total Difference", width: 120 }
+		{
+			field: "start_time",
+			headerName: "Start Time",
+			width: 160,
+			valueFormatter: (params) => formatDate(params.value)
+		},
+		{
+			field: "sms_sent_time",
+			headerName: "SMS Sent Time",
+			width: 160,
+			valueFormatter: (params) => formatDate(params.value)
+		},
+		{
+			field: "sms_received_time",
+			headerName: "SMS Received Time",
+			width: 160,
+			valueFormatter: (params) => formatDate(params.value)
+		},
+		{
+			field: "sms_routed_time",
+			headerName: "Routed Time",
+			width: 160,
+			valueFormatter: (params) => formatDate(params.value)
+		},
+		{ field: "status", headerName: "Status", width: 100 },
+		{ field: "operator_difference", headerName: "Operator Difference", width: 160 },
+		{ field: "publisher_difference", headerName: "Publisher Difference", width: 160 },
+		{ field: "total_difference", headerName: "Total Difference", width: 160 }
 	];
 
 	return (
