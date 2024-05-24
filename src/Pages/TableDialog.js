@@ -6,7 +6,8 @@ import { Link, useLocation } from "react-router-dom";
 
 export default function Data() {
 	const { state } = useLocation();
-	const testData = state?.test_data || [];
+	const testdata = state?.tests || [];
+	console.log("tests:", testdata);
 
 	const columns = [
 		{ field: "start_time", headerName: "Start Time", width: 120 },
@@ -31,7 +32,7 @@ export default function Data() {
 					</Box>
 					<Box sx={{ width: "100%", height: "500px", overflow: "auto" }}>
 						<DataGrid
-							rows={testData}
+							rows={testdata}
 							columns={columns}
 							initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
 							pageSizeOptions={[10, 25, 50]}

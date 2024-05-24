@@ -56,7 +56,7 @@ export default function Reliability() {
 					protocols: item.protocols,
 					reliability: `${item.reliability}%`,
 					last_published_date: new Date(item.last_published_date).toLocaleString(),
-					testdata: item.test_data
+					tests: item.tests
 				}));
 				const filteredData = mappedData.filter((row) => row.msisdn !== null);
 				setData(filteredData);
@@ -68,8 +68,16 @@ export default function Reliability() {
 
 	const handleRowClick = useCallback(
 		(params) => {
-			const data = params.row.testdata;
-			navigate("/data", { state: { test_data: data } });
+			const msisdn = params.row.msisdn;
+			const apiUrlWithMsisdn = `${gs_url}/v3/clients/${msisdn}/tests`;
+
+			fetchData(apiUrlWithMsisdn)
+				.then((testsData) => {
+					navigate("/data", { state: { tests: testsData } });
+				})
+				.catch((error) => {
+					console.error("Error fetching tests data:", error);
+				});
 		},
 		[navigate]
 	);
@@ -80,7 +88,6 @@ export default function Reliability() {
 			(!selectedOperator || row.operator === selectedOperator) &&
 			(!selectedDate || row.date === selectedDate)
 	);
-
 	const columns = [
 		{ field: "msisdn", headerName: "MSISDN", width: 150 },
 		{ field: "country", headerName: "Country", width: 140 },
