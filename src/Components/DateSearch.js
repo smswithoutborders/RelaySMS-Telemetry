@@ -46,6 +46,7 @@ export default function DateSearch({ onSelectDate, apiUrl }) {
 							}}
 						/>
 					)}
+					getOptionLabel={(option) => new Date(option).toLocaleString()}
 				/>
 			) : (
 				<TextField label="No options" variant="standard" disabled fullWidth />

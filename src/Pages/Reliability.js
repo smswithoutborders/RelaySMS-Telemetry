@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 import { Grid, Box, Card, Typography } from "@mui/material";
 import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
@@ -8,8 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { fetchData } from "../Utils/FetchData";
 
 const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
-const apiUrl = `${gs_url}/v3/clients`;
+const apiUrl = `${gs_url}/v3/clients?`;
 const drawerWidth = 240;
+
 export default function Reliability() {
 	const navigate = useNavigate();
 
@@ -30,6 +31,20 @@ export default function Reliability() {
 		setSelectedDate(selectedDate);
 	};
 
+	//
+	const [page, setPage] = React.useState(0);
+	const [rowsPerPage, setRowsPerPage] = React.useState(1);
+
+	const handleChangePage = (event, newPage) => {
+		setPage(newPage);
+	};
+
+	const handleChangeRowsPerPage = (event) => {
+		setRowsPerPage(parseInt(event.target.value, 5));
+		setPage(0);
+	};
+	//
+
 	useEffect(() => {
 		fetchData(apiUrl)
 			.then((data) => {
@@ -39,7 +54,7 @@ export default function Reliability() {
 					operator: item.operator,
 					operator_code: item.operator_code,
 					protocols: item.protocols,
-					reliability: item.reliability,
+					reliability: `${item.reliability}%`,
 					last_published_date: new Date(item.last_published_date).toLocaleString(),
 					testdata: item.test_data
 				}));
@@ -72,7 +87,7 @@ export default function Reliability() {
 		{ field: "operator", headerName: "Operator", width: 140 },
 		{ field: "operator_code", headerName: "Operator Code", width: 140 },
 		{ field: "reliability", headerName: "Reliability", width: 100 },
-		{ field: "protocols", headerName: "Protocols", width: 200 },
+		{ field: "protocols", headerName: "Protocols", width: 150 },
 		{ field: "last_published_date", headerName: "Date/Time", width: 200 }
 	];
 
@@ -150,15 +165,10 @@ export default function Reliability() {
 						onRowClick={handleRowClick}
 						rows={filteredRows}
 						columns={columns}
-						pageSize={5}
-						initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-						pageSizeOptions={[10, 25, 50]}
-						slots={{
-							toolbar: GridToolbar,
-							noRowsOverlay: () => (
-								<div style={{ textAlign: "center", padding: "50px" }}>No rows found</div>
-							)
-						}}
+						rowsPerPage={rowsPerPage}
+						page={page}
+						onPageChange={handleChangePage}
+						onRowsPerPageChange={handleChangeRowsPerPage}
 						sx={{ height: 500, width: "100%", color: "paper", py: 4 }}
 					/>
 				</Grid>
