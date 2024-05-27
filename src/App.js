@@ -45,15 +45,21 @@ function App() {
 				styleOverrides: {
 					root: {
 						"& .MuiDataGrid-cell": {
-							backgroundColor: darkMode ? "#393939" : "#FFFFFF",
-							color: darkMode ? "#FFFFFF" : "#000000"
+							backgroundColor: darkMode ? "#1e1e1e" : "#ffffff",
+							color: darkMode ? "#ffffff" : "#000000",
+							borderBottom: `1px solid ${darkMode ? "#2c2c2c" : "#e0e0e0"}`
 						},
-						"& .MuiDataGrid-virtualScroller": {
-							backgroundColor: darkMode ? "#282727" : "#FFFFFF"
+						"& .MuiDataGrid-columnHeaders": {
+							backgroundColor: darkMode ? "#333333" : "#eeeeee",
+							color: darkMode ? "#ffffff" : "#000000",
+							borderBottom: `1px solid ${darkMode ? "#444444" : "#cccccc"}`
 						},
 						"& .MuiDataGrid-toolbarContainer": {
-							backgroundColor: darkMode ? "#333" : "#FFFFFF",
-							color: darkMode ? "#FFFFFF" : "#000000"
+							backgroundColor: darkMode ? "#444444" : "#f5f5f5",
+							color: darkMode ? "#ffffff" : "#000000"
+						},
+						"& .MuiDataGrid-row:hover": {
+							backgroundColor: darkMode ? "#333333" : "#f5f5f5"
 						}
 					}
 				}
@@ -73,7 +79,7 @@ function App() {
 					<Route path="/resilience" element={<Resilience />} />
 					<Route path="/help" element={<Help />} />
 					<Route path="/contact" element={<Contact />} />
-					<Route path="/data" element={<Data />} />
+					<Route path="/tests" element={<Data />} />
 					<Route path="*" element={<PageNotFound />} />
 				</Routes>
 				<Footer />

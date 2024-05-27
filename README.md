@@ -9,8 +9,7 @@ To get started with the SMSWithoutBorders Dashboard, follow these simple steps:
 1. **Create .env File**: Create a `.env` file in the root directory of the project. Add variables:
 
 ```
-REACT_APP_RELIABILITY_URL=# reliability data source (replace with actual URL)
-REACT_APP_RESILIENCE_URL=# resilience data source (replace with actual URL)
+REACT_APP_GATEWAY_SERVER_URL=
 ```
 
 > [!NOTE]

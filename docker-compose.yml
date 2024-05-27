@@ -5,8 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - RELIABILITY_URL=${RELIABILITY_URL}
-        - RESILIENCE_URL=${RESILIENCE_URL}
+        - GATEWAY_SERVER_URL=${GATEWAY_SERVER_URL}
     ports:
       - ${PORT:-80}:80
       - ${SSL_PORT:-443}:443

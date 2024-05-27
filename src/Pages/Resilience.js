@@ -1,62 +1,134 @@
 import React, { useState, useEffect } from "react";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Grid, Box, Card, Typography } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import {
+	Grid,
+	Box,
+	Card,
+	Typography,
+	LinearProgress,
+	CircularProgress,
+	Button
+} from "@mui/material";
 import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
+import CustomNoRowsOverlay from "../Components/CustomNoRowsOverlay";
 import DateSearch from "../Components/DateSearch";
-import { fetchData } from "../Utils/FetchData";
 
-const apiUrl = process.env.REACT_APP_RESILIENCE_URL;
+const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
+const apiUrl = `${gs_url}/v3/clients`;
 const drawerWidth = 240;
-export default function Resilience() {
+
+const formatDate = (dateString) =>
+	!dateString ? "" : new Date(dateString * 1000).toLocaleString();
+
+const useFetchData = (url) => {
 	const [data, setData] = useState([]);
-	const [selectedCountry, setSelectedCountry] = useState(null);
-	const [selectedOperator, setSelectedOperator] = useState(null);
-	const [selectedDate, setSelectedDate] = useState(null);
+	const [loading, setLoading] = useState(false);
 
-	const handleSelectCountry = (selectedCountry) => {
-		setSelectedCountry(selectedCountry);
-	};
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				const response = await fetch(url);
+				if (!response.ok) {
+					throw new Error("Network response was not ok");
+				}
+				const data = await response.json();
+				setData(data);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			} finally {
+				setLoading(false);
+			}
+		};
 
-	const handleSelectOperator = (selectedOperator) => {
-		setSelectedOperator(selectedOperator);
-	};
+		fetchData();
+	}, [url]);
 
-	const handleSelectDate = (selectedDate) => {
-		setSelectedDate(selectedDate);
+	return { data, loading };
+};
+
+const useClientData = (paginationModel, selectedCountry, selectedOperator, selectedDate) => {
+	const [data, setData] = useState([]);
+	const [totalRows, setTotalRows] = useState(0);
+	const [loading, setLoading] = useState(false);
+
+	const fetchClientData = async () => {
+		setLoading(true);
+		try {
+			const url = new URL(apiUrl);
+			const params = {
+				page: paginationModel.page + 1,
+				per_page: paginationModel.pageSize,
+				...(selectedCountry && { country: selectedCountry.toLowerCase() }),
+				...(selectedOperator && { operator: selectedOperator.toLowerCase() }),
+				...(selectedDate && { last_published_date: selectedDate })
+			};
+			url.search = new URLSearchParams(params).toString();
+
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error("Network response was not ok");
+			}
+
+			const totalCount = parseInt(response.headers.get("X-Total-Count"));
+			const data = await response.json();
+			setData(data);
+			setTotalRows(totalCount);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	useEffect(() => {
-		fetchData(apiUrl)
-			.then((data) => {
-				const mappedData = data.map((item) => ({
-					msisdn: item.msisdn,
-					country: item.country,
-					operator: item.operator,
-					protocols: item.protocols,
-					date: item.last_published_date
-				}));
-				const filteredData = mappedData.filter((row) => row.msisdn !== null);
-				setData(filteredData);
-			})
-			.catch((error) => {
-				console.error("Error fetching data:", error);
-			});
-	}, []);
+		fetchClientData();
+	}, [paginationModel, selectedCountry, selectedOperator, selectedDate]);
 
-	const filteredRows = data.filter(
-		(row) =>
-			(!selectedCountry || row.country === selectedCountry) &&
-			(!selectedOperator || row.operator === selectedOperator) &&
-			(!selectedDate || row.date === selectedDate)
+	return { data, totalRows, loading, refetch: fetchClientData };
+};
+
+const Resilience = () => {
+	const [selectedCountry, setSelectedCountry] = useState(null);
+	const [selectedOperator, setSelectedOperator] = useState(null);
+	const [selectedDate, setSelectedDate] = useState(null);
+	const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
+
+	const { data: countryData, loading: countryLoading } = useFetchData(`${apiUrl}/countries`);
+	const { data: operatorData, loading: operatorLoading } = useFetchData(
+		`${apiUrl}/${selectedCountry}/operators`
 	);
 
+	const {
+		data,
+		totalRows,
+		loading: clientDataLoading,
+		refetch
+	} = useClientData(paginationModel, selectedCountry, selectedOperator, selectedDate);
+
+	const handleRefresh = () => {
+		refetch();
+	};
+
+	const handleCountrySelect = (country) => {
+		setSelectedCountry(country);
+		setSelectedOperator(null);
+	};
+
 	const columns = [
-		{ field: "msisdn", headerName: "MSISDN", width: 200 },
-		{ field: "country", headerName: "Country", width: 200 },
-		{ field: "operator", headerName: "Operator", width: 200 },
-		{ field: "date", headerName: "Date", width: 200 },
-		{ field: "protocols", headerName: "Protocols", width: 200 }
+		{ field: "msisdn", headerName: "MSISDN", minWidth: 100, flex: 1 },
+		{ field: "country", headerName: "Country", minWidth: 100, flex: 0.7 },
+		{ field: "operator", headerName: "Operator", minWidth: 100, flex: 0.7 },
+		{ field: "operator_code", headerName: "Operator Code", minWidth: 100, flex: 0.6 },
+		{ field: "protocols", headerName: "Protocols", minWidth: 100, flex: 0.6 },
+		{
+			field: "last_published_date",
+			headerName: "Date/Time",
+			minWidth: 100,
+			flex: 1,
+			valueFormatter: (params) => formatDate(params.value)
+		}
 	];
 
 	return (
@@ -82,6 +154,7 @@ export default function Resilience() {
 					}}
 				></Grid>
 				<Grid
+					mx="auto"
 					item
 					lg={10}
 					md={9}
@@ -99,10 +172,10 @@ export default function Resilience() {
 						alignItems="flex-end"
 						sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 2, sm: 2 } }}
 					>
-						<Grid item md={2.5} xs={6}>
+						<Grid item md={3} xs={6}>
 							<Card sx={{ p: 2 }}>
 								<Typography textAlign="center" variant="h3" sx={{ fontWeight: 600 }}>
-									{filteredRows.length}
+									{totalRows}
 								</Typography>
 								<Typography
 									textAlign="center"
@@ -114,36 +187,48 @@ export default function Resilience() {
 							</Card>
 						</Grid>
 						<Grid item md={3} xs={6}>
-							<CountrySearch onSelectCountry={handleSelectCountry} apiUrl={apiUrl} />
+							<CountrySearch
+								countries={countryData}
+								onSelectCountry={handleCountrySelect}
+								loading={countryLoading}
+							/>
 							{selectedCountry && (
 								<OperatorSearch
-									selectedCountry={selectedCountry}
-									onSelectOperator={handleSelectOperator}
-									apiUrl={apiUrl}
+									operators={operatorData}
+									onSelectOperator={setSelectedOperator}
+									loading={operatorLoading}
 								/>
 							)}
 						</Grid>
 						<Grid item md={3} xs={6}>
-							<DateSearch onSelectDate={handleSelectDate} apiUrl={apiUrl} />
+							<DateSearch onSelectDate={setSelectedDate} />
+						</Grid>
+						<Grid item md={3} xs={6}>
+							<Button variant="contained" onClick={handleRefresh} disabled={clientDataLoading}>
+								Refresh {clientDataLoading && <CircularProgress size={24} />}
+							</Button>
 						</Grid>
 					</Grid>
 					<DataGrid
+						loading={clientDataLoading}
+						rows={data}
 						getRowId={(row) => row.msisdn}
-						rows={filteredRows}
+						rowCount={totalRows}
 						columns={columns}
-						pageSize={5}
-						initialState={{ pagination: { paginationModel: { pageSize: 7 } } }}
-						pageSizeOptions={[7]}
+						pageSizeOptions={[10, 25, 50, 100]}
+						paginationModel={paginationModel}
+						paginationMode="server"
+						onPaginationModelChange={setPaginationModel}
 						slots={{
-							toolbar: GridToolbar,
-							noRowsOverlay: () => (
-								<div style={{ textAlign: "center", padding: "20px" }}>No rows found</div>
-							)
+							noRowsOverlay: CustomNoRowsOverlay,
+							loadingOverlay: LinearProgress
 						}}
-						sx={{ height: 500, width: "100%", color: "paper", py: 4 }}
+						sx={{ height: 550 }}
 					/>
 				</Grid>
 			</Grid>
 		</Box>
 	);
-}
+};
+
+export default Resilience;

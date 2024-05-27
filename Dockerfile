@@ -1,40 +1,28 @@
-# Stage 1: Build environment
 FROM node:18-alpine as build
 WORKDIR /app
 
-# Copy only necessary files
-COPY package.json yarn.lock ./
+COPY package.json ./
 COPY scripts ./scripts
 
-# Install dependencies
-RUN yarn install --frozen-lockfile
+RUN yarn install --no-lockfile
 
-# Copy the rest of the application
 COPY . .
 
-# Build the application
-ARG RELIABILITY_URL
-ARG RESILIENCE_URL
-RUN export REACT_APP_RELIABILITY_URL=${RELIABILITY_URL} REACT_APP_RESILIENCE_URL=${RESILIENCE_URL} && \
+ARG GATEWAY_SERVER_URL
+RUN export REACT_APP_GATEWAY_SERVER_URL=${GATEWAY_SERVER_URL} && \
     ./scripts/generate_env.sh && \
     yarn build
 
-# Stage 2: Production environment
 FROM nginx:stable-alpine
 
-# Copy built files from the build stage to NGINX html directory
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy NGINX configuration template
 COPY nginx/nginx.conf.template /etc/nginx/conf.d/default.template
 
-# Copy entry script and make it executable
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-# Expose ports
 EXPOSE 80
 EXPOSE 443
 
-# Start NGINX using entry script
 CMD ["/docker-entrypoint.sh"]
