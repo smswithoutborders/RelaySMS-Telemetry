@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Grid, Box, Card, Typography, LinearProgress } from "@mui/material";
+import {
+	Grid,
+	Box,
+	Card,
+	Typography,
+	LinearProgress,
+	CircularProgress,
+	Button
+} from "@mui/material";
 import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
 import CustomNoRowsOverlay from "../Components/CustomNoRowsOverlay";
 import DateSearch from "../Components/DateSearch";
 import { useNavigate } from "react-router-dom";
-import { fetchData } from "../Utils/FetchData";
 
 const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
 const apiUrl = `${gs_url}/v3/clients`;
@@ -17,9 +24,11 @@ const formatDate = (dateString) =>
 
 const useFetchData = (url) => {
 	const [data, setData] = useState([]);
+	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		const fetchData = async () => {
+			setLoading(true);
 			try {
 				const response = await fetch(url);
 				if (!response.ok) {
@@ -29,50 +38,56 @@ const useFetchData = (url) => {
 				setData(data);
 			} catch (error) {
 				console.error("Error fetching data:", error);
+			} finally {
+				setLoading(false);
 			}
 		};
 
 		fetchData();
 	}, [url]);
 
-	return data;
+	return { data, loading };
 };
 
 const useClientData = (paginationModel, selectedCountry, selectedOperator, selectedDate) => {
 	const [data, setData] = useState([]);
 	const [totalRows, setTotalRows] = useState(0);
+	const [loading, setLoading] = useState(false);
+
+	const fetchClientData = async () => {
+		setLoading(true);
+		try {
+			const url = new URL(apiUrl);
+			const params = {
+				page: paginationModel.page + 1,
+				per_page: paginationModel.pageSize,
+				...(selectedCountry && { country: selectedCountry.toLowerCase() }),
+				...(selectedOperator && { operator: selectedOperator.toLowerCase() }),
+				...(selectedDate && { last_published_date: selectedDate })
+			};
+			url.search = new URLSearchParams(params).toString();
+
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error("Network response was not ok");
+			}
+
+			const totalCount = parseInt(response.headers.get("X-Total-Count"));
+			const data = await response.json();
+			setData(data);
+			setTotalRows(totalCount);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	useEffect(() => {
-		const fetchClientData = async () => {
-			try {
-				const url = new URL(apiUrl);
-				const params = {
-					page: paginationModel.page + 1,
-					per_page: paginationModel.pageSize,
-					...(selectedCountry && { country: selectedCountry.toLowerCase() }),
-					...(selectedOperator && { operator: selectedOperator.toLowerCase() }),
-					...(selectedDate && { last_published_date: selectedDate })
-				};
-				url.search = new URLSearchParams(params).toString();
-
-				const response = await fetch(url);
-				if (!response.ok) {
-					throw new Error("Network response was not ok");
-				}
-
-				const totalCount = parseInt(response.headers.get("X-Total-Count"));
-				const data = await response.json();
-				setData(data);
-				setTotalRows(totalCount);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
 		fetchClientData();
 	}, [paginationModel, selectedCountry, selectedOperator, selectedDate]);
 
-	return { data, totalRows };
+	return { data, totalRows, loading, refetch: fetchClientData };
 };
 
 const Reliability = () => {
@@ -82,15 +97,21 @@ const Reliability = () => {
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
 
-	const countryData = useFetchData(`${apiUrl}/countries`);
-	const operatorData = useFetchData(`${apiUrl}/${selectedCountry}/operators`);
-
-	const { data, totalRows } = useClientData(
-		paginationModel,
-		selectedCountry,
-		selectedOperator,
-		selectedDate
+	const { data: countryData, loading: countryLoading } = useFetchData(`${apiUrl}/countries`);
+	const { data: operatorData, loading: operatorLoading } = useFetchData(
+		`${apiUrl}/${selectedCountry}/operators`
 	);
+
+	const {
+		data,
+		totalRows,
+		loading: clientDataLoading,
+		refetch
+	} = useClientData(paginationModel, selectedCountry, selectedOperator, selectedDate);
+
+	const handleRefresh = () => {
+		refetch();
+	};
 
 	const handleCountrySelect = (country) => {
 		setSelectedCountry(country);
@@ -100,34 +121,42 @@ const Reliability = () => {
 	const handleRowClick = useCallback(
 		(params) => {
 			const msisdn = params.row.msisdn;
-			const apiUrlWithMsisdn = `${gs_url}/v3/clients/${msisdn}/tests`;
-
-			fetchData(apiUrlWithMsisdn)
-				.then((testsData) => {
-					navigate("/data", { state: { tests: testsData } });
-				})
-				.catch((error) => {
-					console.error("Error fetching tests data:", error);
-				});
+			navigate("/tests", { state: { msisdn: msisdn } });
 		},
 		[navigate]
 	);
 
+	const renderReliabilityCell = (params) => {
+		const value = parseFloat(params.value).toFixed(2);
+		return (
+			<Box alignItems="center" width="100%">
+				<LinearProgress variant="determinate" value={value} sx={{ mb: 1 }} />
+				<Typography
+					variant="body2"
+					color="textSecondary"
+					sx={{ textAlign: "center" }}
+				>{`${value}%`}</Typography>
+			</Box>
+		);
+	};
+
 	const columns = [
-		{ field: "msisdn", headerName: "MSISDN", width: 150 },
-		{ field: "country", headerName: "Country", width: 140 },
-		{ field: "operator", headerName: "Operator", width: 140 },
-		{ field: "operator_code", headerName: "Operator Code", width: 140 },
+		{ field: "msisdn", headerName: "MSISDN", minWidth: 180, flex: 1 },
+		{ field: "country", headerName: "Country", minWidth: 100, flex: 0.7 },
+		{ field: "operator", headerName: "Operator", minWidth: 100, flex: 0.7 },
+		{ field: "operator_code", headerName: "Operator Code", minWidth: 100, flex: 0.6 },
 		{
 			field: "reliability",
 			headerName: "Reliability",
-			width: 100,
-			valueFormatter: (params) => `${params.value}%`
+			minWidth: 100,
+			flex: 1,
+			renderCell: renderReliabilityCell
 		},
 		{
 			field: "last_published_date",
 			headerName: "Date/Time",
-			width: 200,
+			minWidth: 180,
+			flex: 1,
 			valueFormatter: (params) => formatDate(params.value)
 		}
 	];
@@ -188,16 +217,30 @@ const Reliability = () => {
 							</Card>
 						</Grid>
 						<Grid item md={3} xs={6}>
-							<CountrySearch countries={countryData} onSelectCountry={handleCountrySelect} />
+							<CountrySearch
+								countries={countryData}
+								onSelectCountry={handleCountrySelect}
+								loading={countryLoading}
+							/>
 							{selectedCountry && (
-								<OperatorSearch operators={operatorData} onSelectOperator={setSelectedOperator} />
+								<OperatorSearch
+									operators={operatorData}
+									onSelectOperator={setSelectedOperator}
+									loading={operatorLoading}
+								/>
 							)}
 						</Grid>
 						<Grid item md={3} xs={6}>
 							<DateSearch onSelectDate={setSelectedDate} />
 						</Grid>
+						<Grid item md={3} xs={6}>
+							<Button variant="contained" onClick={handleRefresh} disabled={clientDataLoading}>
+								Refresh {clientDataLoading && <CircularProgress size={24} />}
+							</Button>
+						</Grid>
 					</Grid>
 					<DataGrid
+						loading={clientDataLoading}
 						rows={data}
 						getRowId={(row) => row.msisdn}
 						onRowClick={handleRowClick}
@@ -211,7 +254,7 @@ const Reliability = () => {
 							noRowsOverlay: CustomNoRowsOverlay,
 							loadingOverlay: LinearProgress
 						}}
-						sx={{ height: 500, width: "100%", color: "paper", py: 4 }}
+						sx={{ height: 550 }}
 					/>
 				</Grid>
 			</Grid>

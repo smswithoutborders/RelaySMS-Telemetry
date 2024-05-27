@@ -1,7 +1,7 @@
-import React from "react";
-import { Autocomplete, TextField } from "@mui/material";
+import React, { Fragment } from "react";
+import { Autocomplete, TextField, CircularProgress } from "@mui/material";
 
-const OperatorSearch = ({ operators, onSelectOperator }) => {
+const OperatorSearch = ({ operators, onSelectOperator, loading }) => {
 	const handleOperatorChange = (event, newValue) => {
 		onSelectOperator(newValue);
 	};
@@ -10,6 +10,7 @@ const OperatorSearch = ({ operators, onSelectOperator }) => {
 		<Autocomplete
 			sx={{ mt: 3 }}
 			options={operators}
+			disabled={loading}
 			onChange={handleOperatorChange}
 			renderInput={(params) => (
 				<TextField
@@ -18,6 +19,11 @@ const OperatorSearch = ({ operators, onSelectOperator }) => {
 					variant="outlined"
 					InputProps={{
 						...params.InputProps,
+						endAdornment: (
+							<Fragment>
+								{loading ? <CircularProgress size={20} /> : params.InputProps.endAdornment}
+							</Fragment>
+						),
 						type: "search"
 					}}
 				/>
