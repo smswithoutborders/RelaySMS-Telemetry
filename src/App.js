@@ -39,26 +39,7 @@ function App() {
 	};
 
 	const theme = createTheme({
-		...customPalette[darkMode ? "dark" : "light"],
-		components: {
-			MuiDataGrid: {
-				styleOverrides: {
-					root: {
-						"& .MuiDataGrid-cell": {
-							backgroundColor: darkMode ? "#393939" : "#FFFFFF",
-							color: darkMode ? "#FFFFFF" : "#000000"
-						},
-						"& .MuiDataGrid-virtualScroller": {
-							backgroundColor: darkMode ? "#282727" : "#FFFFFF"
-						},
-						"& .MuiDataGrid-toolbarContainer": {
-							backgroundColor: darkMode ? "#333" : "#FFFFFF",
-							color: darkMode ? "#FFFFFF" : "#000000"
-						}
-					}
-				}
-			}
-		}
+		...customPalette[darkMode ? "dark" : "light"]
 	});
 
 	return (

@@ -1,56 +1,55 @@
-import React, { useState, useEffect } from "react";
-import TextField from "@mui/material/TextField";
-import Stack from "@mui/material/Stack";
-import Autocomplete from "@mui/material/Autocomplete";
-import { fetchData } from "../Utils/FetchData";
+import React, { useState } from "react";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Grid, FormHelperText } from "@mui/material";
+import dayjs from "dayjs";
 
-export default function DateSearch({ onSelectDate, apiUrl }) {
-	const [dates, setDates] = useState([]);
-	const [loading, setLoading] = useState(true);
+const DateSearch = ({ onSelectDate }) => {
+	const [error, setError] = useState("");
 
-	useEffect(() => {
-		fetchData(apiUrl)
-			.then((data) => {
-				const uniqueDates = Array.from(new Set(data.map((item) => item?.last_published_date)));
-				setDates(uniqueDates);
-				setLoading(false);
-			})
-			.catch((error) => {
-				console.error("Error fetching countries:", error);
-				setLoading(false);
-			});
-	}, []);
+	const handleDateChange = (date) => {
+		const formattedDate = dayjs(date).format("YYYY-MM-DD");
 
-	const handleSelectDate = (selectedDate) => {
-		onSelectDate(selectedDate);
+		if (formattedDate.toLowerCase() === "invalid date") {
+			onSelectDate(null);
+			setError("Invalid date format. Please enter a valid date.");
+			return;
+		}
+
+		onSelectDate(formattedDate);
+		setError("");
 	};
 
 	return (
-		<Stack spacing={2} sx={{ width: "100%" }}>
-			{loading ? (
-				<TextField label="Loading..." variant="standard" disabled fullWidth />
-			) : dates.length > 0 ? (
-				<Autocomplete
-					id="date-search"
-					size="small"
-					options={dates}
-					onChange={(event, value) => handleSelectDate(value)}
-					renderInput={(params) => (
-						<TextField
-							{...params}
-							label="Filter by Date"
-							variant="standard"
-							InputProps={{
-								...params.InputProps,
-								type: "search"
-							}}
-						/>
+		<LocalizationProvider dateAdapter={AdapterDayjs}>
+			<Grid container spacing={2}>
+				<Grid item xs={12}>
+					<DatePicker
+						label="Filter by Date"
+						format="YYYY-MM-DD"
+						onin
+						onChange={handleDateChange}
+						slotProps={{
+							textField: { variant: "outlined" },
+							field: { clearable: true },
+							toolbar: {
+								toolbarPlaceholder: "---- -- --",
+								toolbarFormat: "YYYY - MM - DD",
+								hidden: false
+							}
+						}}
+						error={error !== ""}
+					/>
+					{error !== "" && (
+						<FormHelperText sx={{ position: "absolute" }} error>
+							{error}
+						</FormHelperText>
 					)}
-					getOptionLabel={(option) => new Date(option).toLocaleString()}
-				/>
-			) : (
-				<TextField label="No options" variant="standard" disabled fullWidth />
-			)}
-		</Stack>
+				</Grid>
+			</Grid>
+		</LocalizationProvider>
 	);
-}
+};
+
+export default DateSearch;

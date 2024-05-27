@@ -10,10 +10,12 @@
 		"@mui/material": "^5.15.14",
 		"@mui/x-charts": "^6.19.5",
 		"@mui/x-data-grid": "^6.19.8",
+		"@mui/x-date-pickers": "^6.20.0",
 		"@testing-library/jest-dom": "^5.14.1",
 		"@testing-library/react": "^13.0.0",
 		"@testing-library/user-event": "^13.2.1",
 		"d3": "^7.9.0",
+		"dayjs": "^1.11.11",
 		"react": "^18.2.0",
 		"react-country-flag": "^3.1.0",
 		"react-dom": "^18.2.0",
@@ -50,6 +52,7 @@
 		]
 	},
 	"devDependencies": {
+		"@babel/plugin-proposal-private-property-in-object": "^7.0.0",
 		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-formatter-summary": "^1.1.0",
@@ -58,8 +61,7 @@
 		"eslint-plugin-react": "^7.34.1",
 		"husky": "^9.0.11",
 		"lint-staged": "^15.2.2",
-		"prettier": "^3.2.5",
-		"@babel/plugin-proposal-private-property-in-object": "^7.0.0"
+		"prettier": "^3.2.5"
 	},
 	"lint-staged": {
 		"*.{js,jsx}": "eslint --cache --fix",
