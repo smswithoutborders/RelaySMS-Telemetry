@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json ./
 COPY scripts ./scripts
 
-RUN yarn install
+RUN yarn install --no-lockfile
 
 COPY . .
 

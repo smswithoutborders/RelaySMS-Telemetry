@@ -126,16 +126,45 @@ const Reliability = () => {
 		[navigate]
 	);
 
+	const getProgressColor = (value) => {
+		return value >= 75 ? "success" : value >= 50 ? "warning" : "error";
+	};
+
 	const renderReliabilityCell = (params) => {
 		const value = parseFloat(params.value).toFixed(2);
+		const color = getProgressColor(value);
+
 		return (
-			<Box alignItems="center" width="100%">
-				<LinearProgress variant="determinate" value={value} sx={{ mb: 1 }} />
-				<Typography
-					variant="body2"
-					color="textSecondary"
-					sx={{ textAlign: "center" }}
-				>{`${value}%`}</Typography>
+			<Box sx={{ position: "relative", display: "inline-flex" }}>
+				<CircularProgress
+					variant="determinate"
+					value={100}
+					size={49}
+					thickness={1}
+					sx={{ color: "grey" }}
+				/>
+				<CircularProgress
+					variant="determinate"
+					value={value}
+					size={49}
+					thickness={1}
+					color={color}
+					sx={{ position: "absolute", left: 0 }}
+				/>
+				<Box
+					sx={{
+						top: 0,
+						left: 0,
+						bottom: 0,
+						right: 0,
+						position: "absolute",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center"
+					}}
+				>
+					<Typography fontSize={9} variant="caption">{`${value}%`}</Typography>
+				</Box>
 			</Box>
 		);
 	};
@@ -149,7 +178,7 @@ const Reliability = () => {
 			field: "reliability",
 			headerName: "Reliability",
 			minWidth: 100,
-			flex: 1,
+			flex: 0.6,
 			renderCell: renderReliabilityCell
 		},
 		{
