@@ -1,54 +1,36 @@
-import React, { useState, useEffect } from "react";
-import TextField from "@mui/material/TextField";
-import Stack from "@mui/material/Stack";
-import Autocomplete from "@mui/material/Autocomplete";
-import { fetchData } from "../Utils/FetchData";
+import React, { Fragment } from "react";
+import { Autocomplete, TextField, CircularProgress } from "@mui/material";
 
-export default function CountrySearch({ onSelectCountry, apiUrl }) {
-	const [countries, setCountries] = useState([]);
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		fetchData(`${apiUrl}?`)
-			.then((data) => {
-				setCountries(data);
-				setLoading(false);
-			})
-			.catch((error) => {
-				console.error("Error fetching countries:", error);
-				setLoading(false);
-			});
-	}, []);
-
-	const handleSelectCountry = (selectedCountry) => {
-		onSelectCountry(selectedCountry);
+const CountrySearch = ({ countries, onSelectCountry, loading }) => {
+	const handleCountryChange = (event, newValue) => {
+		onSelectCountry(newValue);
 	};
 
 	return (
-		<Stack spacing={2} sx={{ width: "100%" }}>
-			{loading ? (
-				<TextField label="Loading..." variant="standard" disabled fullWidth />
-			) : countries.length > 0 ? (
-				<Autocomplete
-					id="country-search"
-					size="small"
-					options={countries.map((country) => country.country)}
-					onChange={(event, value) => handleSelectCountry(value)}
-					renderInput={(params) => (
-						<TextField
-							{...params}
-							label="Filter by Country"
-							variant="standard"
-							InputProps={{
-								...params.InputProps,
-								type: "search"
-							}}
-						/>
-					)}
-				/>
-			) : (
-				<TextField label="No options" variant="standard" disabled fullWidth />
+		<Autocomplete
+			disabled={loading}
+			options={countries}
+			onChange={handleCountryChange}
+			renderInput={(params) => (
+				<Fragment>
+					<TextField
+						{...params}
+						label="Filter by Country"
+						variant="outlined"
+						InputProps={{
+							...params.InputProps,
+							endAdornment: (
+								<Fragment>
+									{loading ? <CircularProgress size={20} /> : params.InputProps.endAdornment}
+								</Fragment>
+							),
+							type: "search"
+						}}
+					/>
+				</Fragment>
 			)}
-		</Stack>
+		/>
 	);
-}
+};
+
+export default CountrySearch;
