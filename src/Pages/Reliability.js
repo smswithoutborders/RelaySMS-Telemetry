@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
 	Grid,
 	Box,
@@ -7,7 +7,8 @@ import {
 	Typography,
 	LinearProgress,
 	CircularProgress,
-	Button
+	Button,
+	Stack
 } from "@mui/material";
 import CountrySearch from "../Components/CountrySearch";
 import OperatorSearch from "../Components/OperatorSearch";
@@ -179,6 +180,7 @@ const Reliability = () => {
 			headerName: "Reliability",
 			minWidth: 100,
 			flex: 0.6,
+			valueFormatter: ({ value }) => `${value}%`,
 			renderCell: renderReliabilityCell
 		},
 		{
@@ -262,12 +264,19 @@ const Reliability = () => {
 						<Grid item md={3} xs={6}>
 							<DateSearch onSelectDate={setSelectedDate} />
 						</Grid>
-						<Grid item md={3} xs={6}>
-							<Button variant="contained" onClick={handleRefresh} disabled={clientDataLoading}>
-								Refresh {clientDataLoading && <CircularProgress size={24} />}
-							</Button>
-						</Grid>
 					</Grid>
+					<Stack
+						spacing={1}
+						direction="row"
+						alignItems="center"
+						sx={{ mb: 1 }}
+						useFlexGap
+						flexWrap="wrap"
+					>
+						<Button variant="outlined" onClick={handleRefresh} disabled={clientDataLoading}>
+							Refetch data {clientDataLoading && <CircularProgress size={24} sx={{ ml: 2 }} />}
+						</Button>
+					</Stack>
 					<DataGrid
 						loading={clientDataLoading}
 						rows={data}
@@ -281,7 +290,8 @@ const Reliability = () => {
 						onPaginationModelChange={setPaginationModel}
 						slots={{
 							noRowsOverlay: CustomNoRowsOverlay,
-							loadingOverlay: LinearProgress
+							loadingOverlay: LinearProgress,
+							toolbar: GridToolbar
 						}}
 						sx={{ height: 550 }}
 					/>

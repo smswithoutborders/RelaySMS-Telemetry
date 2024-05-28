@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { DataGrid } from "@mui/x-data-grid";
-import { Box, Grid, LinearProgress, Button, CircularProgress } from "@mui/material";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { Box, Grid, LinearProgress, Button, CircularProgress, Stack } from "@mui/material";
 import { FaChevronLeft } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
 import CustomNoRowsOverlay from "../Components/CustomNoRowsOverlay";
@@ -158,10 +158,19 @@ export default function Data() {
 						<Link to="/">
 							<FaChevronLeft /> Back
 						</Link>
-						<Button variant="contained" onClick={handleRefresh} disabled={testDataLoading}>
-							Refresh {testDataLoading && <CircularProgress size={24} />}
-						</Button>
 					</Grid>
+					<Stack
+						spacing={1}
+						direction="row"
+						alignItems="center"
+						sx={{ mb: 1 }}
+						useFlexGap
+						flexWrap="wrap"
+					>
+						<Button variant="outlined" onClick={handleRefresh} disabled={testDataLoading}>
+							Refetch data {testDataLoading && <CircularProgress size={24} sx={{ ml: 2 }} />}
+						</Button>
+					</Stack>
 					<DataGrid
 						loading={testDataLoading}
 						rows={data}
@@ -173,7 +182,8 @@ export default function Data() {
 						onPaginationModelChange={setPaginationModel}
 						slots={{
 							noRowsOverlay: CustomNoRowsOverlay,
-							loadingOverlay: LinearProgress
+							loadingOverlay: LinearProgress,
+							toolbar: GridToolbar
 						}}
 						sx={{ height: 550 }}
 					/>
