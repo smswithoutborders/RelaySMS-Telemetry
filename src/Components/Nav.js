@@ -9,7 +9,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
-import { FaCircleQuestion, FaHeadphones, FaTable, FaTableCells } from "react-icons/fa6";
+import { FaCircleQuestion, FaHeadphones, FaTable, FaTableCells, FaOpenid } from "react-icons/fa6";
 import { Button, Divider, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "@mui/icons-material";
@@ -29,7 +29,7 @@ function ResponsiveDrawer() {
 			<Box display="flex" sx={{ p: 3 }}>
 				<Box component="img" src="/logo.png" sx={{ width: "35px" }} />
 				<Typography variant="body2" sx={{ px: 1, pt: 1, fontWeight: 600 }}>
-					SMSWithoutBorders
+					RelaySMS
 				</Typography>
 			</Box>
 			<Divider />
@@ -51,11 +51,19 @@ function ResponsiveDrawer() {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
+					<ListItemButton component={Link} to="/openTelemetry">
+						<ListItemIcon>
+							<FaOpenid />
+						</ListItemIcon>
+						<ListItemText>Open Telemetry</ListItemText>
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
 					<ListItemButton component={Link} to="/help">
 						<ListItemIcon>
 							<FaCircleQuestion />
 						</ListItemIcon>
-						<ListItemText> Help </ListItemText>
+						<ListItemText>Help</ListItemText>
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
@@ -63,7 +71,7 @@ function ResponsiveDrawer() {
 						<ListItemIcon>
 							<FaHeadphones />
 						</ListItemIcon>
-						<ListItemText> Contact </ListItemText>
+						<ListItemText>Contact</ListItemText>
 					</ListItemButton>
 				</ListItem>
 			</List>
@@ -77,7 +85,7 @@ function ResponsiveDrawer() {
 				}}
 			>
 				<Paper elevation={3} sx={{ p: 2 }}>
-					<Typography sx={{ py: 2 }}>Check out SMSWithoutBorders blog posts</Typography>
+					<Typography sx={{ py: 2 }}>Check out RelaySMS blog posts</Typography>
 					<Button
 						component="a"
 						href="https://blog.smswithoutborders.com/"
