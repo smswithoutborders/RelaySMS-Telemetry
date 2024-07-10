@@ -51,7 +51,7 @@ function ResponsiveDrawer() {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
-					<ListItemButton component={Link} to="/openTelemetry">
+					<ListItemButton component={Link} to="/OpenTelemetry">
 						<ListItemIcon>
 							<FaOpenid />
 						</ListItemIcon>

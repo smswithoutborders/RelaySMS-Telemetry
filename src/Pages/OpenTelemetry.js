@@ -90,7 +90,7 @@ const useClientData = (paginationModel, selectedCountry, selectedOperator, selec
 	return { data, totalRows, loading, refetch: fetchClientData };
 };
 
-const Resilience = () => {
+const OpenTelemetry = () => {
 	const [selectedCountry, setSelectedCountry] = useState(null);
 	const [selectedOperator, setSelectedOperator] = useState(null);
 	const [selectedDate, setSelectedDate] = useState(null);
@@ -240,4 +240,4 @@ const Resilience = () => {
 	);
 };
 
-export default Resilience;
+export default OpenTelemetry;
