@@ -8,27 +8,6 @@ const OpenTelemetry = () => {
 			<section className="home-section">
 				<div className="home-content">
 					<i className="bx bx-menu text-light"></i>
-					<div className="main">
-						<div className="row">
-							<div className="col-md-6">
-								<h4 className="text-light">Open Telemetry</h4>
-								{/* Original content and components */}
-								<div className="row">
-									{/* Replace with original content */}
-									<div className="col-md-6">
-										{/* Original content */}
-										<p className="text-light">Original content here...</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-
-			<section className="home-section">
-				<div className="home-content">
-					<i className="bx bx-menu text-light"></i>
 					<div className="main" id="">
 						<div className="row">
 							<div className="col-md-6">
