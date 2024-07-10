@@ -1,242 +1,215 @@
-import React, { useState, useEffect } from "react";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import {
-	Grid,
-	Box,
-	Card,
-	Typography,
-	LinearProgress,
-	CircularProgress,
-	Button,
-	Stack
-} from "@mui/material";
-import CountrySearch from "../Components/CountrySearch";
-import OperatorSearch from "../Components/OperatorSearch";
-import CustomNoRowsOverlay from "../Components/CustomNoRowsOverlay";
-import DateSearch from "../Components/DateSearch";
-
-const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
-const apiUrl = `${gs_url}/v3/clients`;
-const drawerWidth = 240;
-
-const formatDate = (dateString) =>
-	!dateString ? "" : new Date(dateString * 1000).toLocaleString();
-
-const useFetchData = (url) => {
-	const [data, setData] = useState([]);
-	const [loading, setLoading] = useState(false);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			setLoading(true);
-			try {
-				const response = await fetch(url);
-				if (!response.ok) {
-					throw new Error("Network response was not ok");
-				}
-				const data = await response.json();
-				setData(data);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchData();
-	}, [url]);
-
-	return { data, loading };
-};
-
-const useClientData = (paginationModel, selectedCountry, selectedOperator, selectedDate) => {
-	const [data, setData] = useState([]);
-	const [totalRows, setTotalRows] = useState(0);
-	const [loading, setLoading] = useState(false);
-
-	const fetchClientData = async () => {
-		setLoading(true);
-		try {
-			const url = new URL(apiUrl);
-			const params = {
-				page: paginationModel.page + 1,
-				per_page: paginationModel.pageSize,
-				...(selectedCountry && { country: selectedCountry.toLowerCase() }),
-				...(selectedOperator && { operator: selectedOperator.toLowerCase() }),
-				...(selectedDate && { last_published_date: selectedDate })
-			};
-			url.search = new URLSearchParams(params).toString();
-
-			const response = await fetch(url);
-			if (!response.ok) {
-				throw new Error("Network response was not ok");
-			}
-
-			const totalCount = parseInt(response.headers.get("X-Total-Count"));
-			const data = await response.json();
-			setData(data);
-			setTotalRows(totalCount);
-		} catch (error) {
-			console.error("Error fetching data:", error);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchClientData();
-	}, [paginationModel, selectedCountry, selectedOperator, selectedDate]);
-
-	return { data, totalRows, loading, refetch: fetchClientData };
-};
+import React from "react";
+import "../index.css";
+import "../Components/OPentelematryjsfile";
 
 const OpenTelemetry = () => {
-	const [selectedCountry, setSelectedCountry] = useState(null);
-	const [selectedOperator, setSelectedOperator] = useState(null);
-	const [selectedDate, setSelectedDate] = useState(null);
-	const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-
-	const { data: countryData, loading: countryLoading } = useFetchData(`${apiUrl}/countries`);
-	const { data: operatorData, loading: operatorLoading } = useFetchData(
-		`${apiUrl}/${selectedCountry}/operators`
-	);
-
-	const {
-		data,
-		totalRows,
-		loading: clientDataLoading,
-		refetch
-	} = useClientData(paginationModel, selectedCountry, selectedOperator, selectedDate);
-
-	const handleRefresh = () => {
-		refetch();
-	};
-
-	const handleCountrySelect = (country) => {
-		setSelectedCountry(country);
-		setSelectedOperator(null);
-	};
-
-	const columns = [
-		{ field: "msisdn", headerName: "MSISDN", minWidth: 100, flex: 1 },
-		{ field: "country", headerName: "Country", minWidth: 100, flex: 0.7 },
-		{ field: "operator", headerName: "Operator", minWidth: 100, flex: 0.7 },
-		{ field: "operator_code", headerName: "Operator Code", minWidth: 100, flex: 0.6 },
-		{ field: "protocols", headerName: "Protocols", minWidth: 100, flex: 0.6 },
-		{
-			field: "last_published_date",
-			headerName: "Date/Time",
-			minWidth: 100,
-			flex: 1,
-			valueFormatter: (params) => formatDate(params.value)
-		}
-	];
-
 	return (
-		<Box
-			className="bg"
-			component="main"
-			sx={{
-				px: { md: 3, sm: 3, xs: 2 },
-				pb: { md: 3, sm: 3, xs: 14 },
-				flexGrow: 1
-			}}
-		>
-			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
-				<Grid
-					item
-					lg={2}
-					md={3}
-					xs={0}
-					sm={3}
-					sx={{
-						display: { xs: "none", sm: "none", md: "block" },
-						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
-					}}
-				></Grid>
-				<Grid
-					mx="auto"
-					item
-					lg={10}
-					md={9}
-					xs={12}
-					sm={12}
-					sx={{
-						p: { md: 3, sm: 2, xs: 0 },
-						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
-					}}
-				>
-					<Grid
-						container
-						columnSpacing={4}
-						rowSpacing={4}
-						alignItems="flex-end"
-						sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 2, sm: 2 } }}
-					>
-						<Grid item md={3} xs={6}>
-							<Card sx={{ p: 2 }}>
-								<Typography textAlign="center" variant="h3" sx={{ fontWeight: 600 }}>
-									{totalRows}
-								</Typography>
-								<Typography
-									textAlign="center"
-									variant="body1"
-									sx={{ fontWeight: 500, p: 1, fontSize: { md: 14, sm: 14, xs: 12 } }}
-								>
-									Total Gateway Clients
-								</Typography>
-							</Card>
-						</Grid>
-						<Grid item md={3} xs={6}>
-							<CountrySearch
-								countries={countryData}
-								onSelectCountry={handleCountrySelect}
-								loading={countryLoading}
-							/>
-							{selectedCountry && (
-								<OperatorSearch
-									operators={operatorData}
-									onSelectOperator={setSelectedOperator}
-									loading={operatorLoading}
-								/>
-							)}
-						</Grid>
-						<Grid item md={3} xs={6}>
-							<DateSearch onSelectDate={setSelectedDate} />
-						</Grid>
-					</Grid>
-					<Stack
-						spacing={1}
-						direction="row"
-						alignItems="center"
-						sx={{ mb: 1 }}
-						useFlexGap
-						flexWrap="wrap"
-					>
-						<Button variant="outlined" onClick={handleRefresh} disabled={clientDataLoading}>
-							Refetch data {clientDataLoading && <CircularProgress size={24} sx={{ ml: 2 }} />}
-						</Button>
-					</Stack>
-					<DataGrid
-						loading={clientDataLoading}
-						rows={data}
-						getRowId={(row) => row.msisdn}
-						rowCount={totalRows}
-						columns={columns}
-						pageSizeOptions={[10, 25, 50, 100]}
-						paginationModel={paginationModel}
-						paginationMode="server"
-						onPaginationModelChange={setPaginationModel}
-						slots={{
-							noRowsOverlay: CustomNoRowsOverlay,
-							loadingOverlay: LinearProgress,
-							toolbar: GridToolbar
-						}}
-						sx={{ height: 550 }}
-					/>
-				</Grid>
-			</Grid>
-		</Box>
+		<div>
+			<section className="home-section">
+				<div className="home-content">
+					<i className="bx bx-menu text-light"></i>
+					<div className="main">
+						<div className="row">
+							<div className="col-md-6">
+								<h4 className="text-light">Open Telemetry</h4>
+								{/* Original content and components */}
+								<div className="row">
+									{/* Replace with original content */}
+									<div className="col-md-6">
+										{/* Original content */}
+										<p className="text-light">Original content here...</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section className="home-section">
+				<div className="home-content">
+					<i className="bx bx-menu text-light"></i>
+					<div className="main" id="">
+						<div className="row">
+							<div className="col-md-6">
+								<h4 className="text-light">
+									{" "}
+									Open Telemetry{" "}
+									<i
+										className="fa-solid fa-arrows-rotate refresh"
+										onClick={() => window.location.reload()}
+									></i>
+								</h4>
+							</div>
+							<div className="col-md-6 text-end pe-5"></div>
+						</div>
+
+						<div className="row text-light">
+							<div className="col-sm-2 card1 text-center m-1">
+								<div className="row justify-content-md-center">
+									<div className="col-md-3 icondiv">
+										<div className="icon1">
+											<i className="fa-solid fa-chart-simple fa-2x"></i>
+										</div>
+									</div>
+									<div className="col-md-6">
+										<h3 className="total text-light" id="total">
+											0
+										</h3>
+										<p className="text-light textsmall" id="totalheader">
+											TOTAL
+										</p>
+									</div>
+								</div>
+							</div>
+
+							<div className="col-sm-2 card2 text-center m-1" id="card2">
+								<div className="row justify-content-md-center">
+									<div className="col-md-3">
+										<div className="icon2">
+											<i className="fa-solid fa-map-location-dot fa-2x"></i>
+										</div>
+									</div>
+									<div className="col-md-6" id="countrytotaldiv">
+										<h3 className="total text-light" id="countrytotal">
+											0
+										</h3>
+										<p className="text-light textsmall">COUNTRY TOTAL</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div className="row mt-3">
+							<div className="col-md-3 type">
+								<h6 className="text-light">Type</h6>
+								<select id="type" className="btn btn-outline-light mb-4 w-75">
+									<option value="signup">Signed-up Users</option>
+									<option value="available">Available Users</option>
+								</select>
+							</div>
+
+							<div className="col-md-2 p-3">
+								<h6 className="text-light">Format</h6>
+								<div className="row">
+									<div className="col-md-6">
+										<input
+											className="form-check-input"
+											type="radio"
+											name="format"
+											value="month"
+											id="format_month"
+										/>
+										<label className="form-check-label text-light"> Month </label>
+									</div>
+									<div className="col-md-6">
+										<input
+											className="form-check-input"
+											type="radio"
+											name="format"
+											value="day"
+											id="format_day"
+										/>
+										<label className="form-check-label text-light"> Days</label>
+									</div>
+								</div>
+							</div>
+
+							<div className="col-md-3 text-light ps-1 pe-5 pb-3">
+								<div className="row">
+									<div className="col-6">
+										<small>Start-Date</small>
+										<input
+											id="start_date"
+											type="date"
+											className="btn btn-outline-light form-control text-center"
+										/>
+									</div>
+									<div className="col-6">
+										<small>End-Date</small>
+										<input
+											id="end_date"
+											type="date"
+											className="btn btn-outline-light form-control text-center"
+										/>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div className="row" id="maprow">
+							<div className="col-md-7 bigbox2 m-1" id="bigbox2">
+								<div className="mapouter" id="mapping">
+									<div className="d-flex justify-content-center">
+										<div
+											className="spinner-border text-light"
+											style={{ marginTop: "5rem", width: "4rem", height: "4rem" }}
+											role="status"
+										>
+											<span className="visually-hidden">Loading...</span>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div className="col-md-4 smallbox2 m-1" id="smallbox2">
+								<div className="table-responsive rest" id="countrytableid">
+									<table className="table text-center">
+										<thead id="countrytable_head" className="text-light"></thead>
+										<tbody id="countrytable_data" className="text-light"></tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+
+						<div className="row">
+							<div className="col-md-7 bigbox m-1">
+								<div className="text-light mb-3" id="line_div">
+									<div className="d-flex justify-content-center">
+										<div
+											className="spinner-border text-light"
+											style={{ marginTop: "1rem", width: "4rem", height: "4rem" }}
+											role="status"
+										>
+											<span className="visually-hidden">Loading...</span>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div className="col-md-4 smallbox m-1">
+								<div className="d-flex align-items-start">
+									<div
+										className="nav flex-column nav-pills me-3"
+										id="v-pills-tab"
+										role="tablist"
+										aria-orientation="vertical"
+									></div>
+									<div className="tab-content w-100" id="v-pills-tabContent"></div>
+								</div>
+							</div>
+						</div>
+						<p className="p-3 footer" style={{ color: "rgb(126, 128, 129)" }}>
+							&copy; 2023 -{" "}
+							<a href="https://smswithoutborders.com/">
+								<span>SMSWithoutBorders</span>
+							</a>
+							.
+						</p>
+					</div>
+				</div>
+			</section>
+
+			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-base.min.js"></script>
+			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-map.min.js"></script>
+			<script src="https://cdn.anychart.com/geodata/latest/custom/world/world.js"></script>
+			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-data-adapter.min.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js"></script>
+			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-exports.min.js"></script>
+			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-ui.min.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/js/all.min.js"></script>
+			<script src="assets/js/main.js"></script>
+		</div>
 	);
 };
 
