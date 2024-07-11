@@ -9,7 +9,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
-import { FaCircleQuestion, FaHeadphones, FaTable, FaTableCells, FaOpenid } from "react-icons/fa6";
+import { FaCircleQuestion, FaHeadphones, FaTable, FaTableCells } from "react-icons/fa6";
 import { Button, Divider, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "@mui/icons-material";
@@ -53,7 +53,7 @@ function ResponsiveDrawer() {
 				<ListItem>
 					<ListItemButton component={Link} to="/OpenTelemetry">
 						<ListItemIcon>
-							<FaOpenid />
+							<FaTable />
 						</ListItemIcon>
 						<ListItemText>Open Telemetry</ListItemText>
 					</ListItemButton>

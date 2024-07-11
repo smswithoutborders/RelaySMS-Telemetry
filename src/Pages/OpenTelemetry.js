@@ -1,194 +1,269 @@
 import React from "react";
+import {
+	Box,
+	Grid,
+	IconButton,
+	Card,
+	CardContent,
+	Typography,
+	FormControl,
+	InputLabel,
+	Select,
+	MenuItem,
+	RadioGroup,
+	FormControlLabel,
+	Radio,
+	TextField
+} from "@mui/material";
+import {
+	Refresh as RefreshIcon,
+	BarChart as BarChartIcon,
+	LocationOn as LocationOnIcon
+} from "@mui/icons-material";
+import { makeStyles } from "@mui/styles";
 import "../index.css";
-import "../Components/OPentelematryjsfile";
+
+const drawerWidth = 240; // Define drawerWidth
+
+const useStyles = makeStyles((theme) => ({
+	homeSection: {
+		padding: theme.spacing(3),
+		minHeight: "100vh"
+	},
+	homeContent: {
+		color: "#fff"
+	},
+	iconButton: {
+		color: "#fff"
+	},
+	card: {
+		backgroundColor: "#3c3f41",
+		color: "#fff"
+	},
+	cardContent: {
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center"
+	},
+	formControl: {
+		minWidth: 120
+	},
+	select: {
+		color: "#fff",
+		".MuiOutlinedInput-notchedOutline": {
+			borderColor: "#fff"
+		},
+		"&:hover .MuiOutlinedInput-notchedOutline": {
+			borderColor: "#fff"
+		},
+		"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+			borderColor: "#fff"
+		}
+	},
+	textField: {
+		"& .MuiInputBase-input": {
+			color: "#fff"
+		},
+		"& .MuiInputLabel-root": {
+			color: "#fff"
+		},
+		"& .MuiOutlinedInput-root": {
+			"& fieldset": {
+				borderColor: "#fff"
+			},
+			"&:hover fieldset": {
+				borderColor: "#fff"
+			},
+			"&.Mui-focused fieldset": {
+				borderColor: "#fff"
+			}
+		}
+	},
+	radioGroup: {
+		color: "#fff"
+	},
+	radio: {
+		color: "#fff"
+	},
+	formControlLabel: {
+		color: "#fff"
+	}
+}));
 
 const OpenTelemetry = () => {
+	const classes = useStyles();
+
 	return (
-		<div>
-			<section className="home-section">
-				<div className="home-content">
-					<i className="bx bx-menu text-light"></i>
-					<div className="main" id="">
-						<div className="row">
-							<div className="col-md-6">
-								<h4 className="text-light">
-									{" "}
-									Open Telemetry{" "}
-									<i
-										className="fa-solid fa-arrows-rotate refresh"
+		<Box
+			className={classes.homeSection}
+			component="main"
+			sx={{
+				px: { md: 3, sm: 3, xs: 2 },
+				pb: { md: 3, sm: 3, xs: 14 },
+				flexGrow: 1
+			}}
+		>
+			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
+				<Grid
+					item
+					lg={2}
+					md={3}
+					xs={0}
+					sm={3}
+					sx={{
+						display: { xs: "none", sm: "none", md: "block" },
+						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
+					}}
+				></Grid>
+				<Grid
+					mx="auto"
+					item
+					lg={10}
+					md={9}
+					xs={12}
+					sm={12}
+					sx={{
+						p: { md: 3, sm: 2, xs: 0 },
+						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
+					}}
+				>
+					<Box className={classes.homeContent}>
+						<Grid container spacing={2} alignItems="center">
+							<Grid item xs={12} md={6}>
+								<Typography variant="h4" className={classes.homeContent}>
+									Open Telemetry
+									<IconButton
+										className={classes.iconButton}
 										onClick={() => window.location.reload()}
-									></i>
-								</h4>
-							</div>
-							<div className="col-md-6 text-end pe-5"></div>
-						</div>
+									>
+										<RefreshIcon />
+									</IconButton>
+								</Typography>
+							</Grid>
+							<Grid item xs={12} md={6} className="text-end pe-5">
+								{/* Additional content can go here */}
+							</Grid>
+						</Grid>
 
-						<div className="row text-light">
-							<div className="col-sm-2 card1 text-center m-1">
-								<div className="row justify-content-md-center">
-									<div className="col-md-3 icondiv">
-										<div className="icon1">
-											<i className="fa-solid fa-chart-simple fa-2x"></i>
-										</div>
-									</div>
-									<div className="col-md-6">
-										<h3 className="total text-light" id="total">
-											0
-										</h3>
-										<p className="text-light textsmall" id="totalheader">
-											TOTAL
-										</p>
-									</div>
-								</div>
-							</div>
+						<Grid container spacing={2} className={classes.homeContent} sx={{ mt: 3 }}>
+							<Grid item xs={12} sm={6} md={2}>
+								<Card className={`${classes.card} card1 text-center`}>
+									<CardContent className={classes.cardContent}>
+										<Grid container justifyContent="center" alignItems="center">
+											<Grid item xs={3} className="icondiv">
+												<BarChartIcon fontSize="large" className="icon1" />
+											</Grid>
+											<Grid item xs={6}>
+												<Typography variant="h3" className="total" id="total">
+													0
+												</Typography>
+												<Typography className="textsmall" id="totalheader">
+													TOTAL
+												</Typography>
+											</Grid>
+										</Grid>
+									</CardContent>
+								</Card>
+							</Grid>
+							<Grid item xs={12} sm={6} md={2}>
+								<Card className={`${classes.card} card2 text-center`} id="card2">
+									<CardContent className={classes.cardContent}>
+										<Grid container justifyContent="center" alignItems="center">
+											<Grid item xs={3}>
+												<LocationOnIcon fontSize="large" className="icon2" />
+											</Grid>
+											<Grid item xs={6} id="countrytotaldiv">
+												<Typography variant="h3" className="total" id="countrytotal">
+													0
+												</Typography>
+												<Typography className="textsmall">COUNTRY TOTAL</Typography>
+											</Grid>
+										</Grid>
+									</CardContent>
+								</Card>
+							</Grid>
+						</Grid>
 
-							<div className="col-sm-2 card2 text-center m-1" id="card2">
-								<div className="row justify-content-md-center">
-									<div className="col-md-3">
-										<div className="icon2">
-											<i className="fa-solid fa-map-location-dot fa-2x"></i>
-										</div>
-									</div>
-									<div className="col-md-6" id="countrytotaldiv">
-										<h3 className="total text-light" id="countrytotal">
-											0
-										</h3>
-										<p className="text-light textsmall">COUNTRY TOTAL</p>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div className="row mt-3">
-							<div className="col-md-3 type">
-								<h6 className="text-light">Type</h6>
-								<select id="type" className="btn btn-outline-light mb-4 w-75">
-									<option value="signup">Signed-up Users</option>
-									<option value="available">Available Users</option>
-								</select>
-							</div>
-
-							<div className="col-md-2 p-3">
-								<h6 className="text-light">Format</h6>
-								<div className="row">
-									<div className="col-md-6">
-										<input
-											className="form-check-input"
-											type="radio"
-											name="format"
-											value="month"
-											id="format_month"
+						<Grid container spacing={2} className={classes.homeContent} sx={{ mt: 3 }}>
+							<Grid item xs={12} sm={6} md={3}>
+								<FormControl variant="outlined" className={classes.formControl} fullWidth>
+									<InputLabel id="type-label" className={classes.formControlLabel}>
+										Type
+									</InputLabel>
+									<Select
+										labelId="type-label"
+										id="type-select"
+										value={""}
+										onChange={() => {}}
+										className={classes.select}
+									>
+										<MenuItem value="">
+											<em>None</em>
+										</MenuItem>
+										<MenuItem value={10}>Type 1</MenuItem>
+										<MenuItem value={20}>Type 2</MenuItem>
+										<MenuItem value={30}>Type 3</MenuItem>
+									</Select>
+								</FormControl>
+							</Grid>
+							<Grid item xs={12} sm={6} md={3}>
+								<FormControl component="fieldset">
+									<RadioGroup
+										row
+										aria-label="format"
+										name="format"
+										value={"json"}
+										onChange={() => {}}
+										className={classes.radioGroup}
+									>
+										<FormControlLabel
+											value="json"
+											control={<Radio className={classes.radio} />}
+											label="JSON"
+											className={classes.formControlLabel}
 										/>
-										<label className="form-check-label text-light"> Month </label>
-									</div>
-									<div className="col-md-6">
-										<input
-											className="form-check-input"
-											type="radio"
-											name="format"
-											value="day"
-											id="format_day"
+										<FormControlLabel
+											value="csv"
+											control={<Radio className={classes.radio} />}
+											label="CSV"
+											className={classes.formControlLabel}
 										/>
-										<label className="form-check-label text-light"> Days</label>
-									</div>
-								</div>
-							</div>
+									</RadioGroup>
+								</FormControl>
+							</Grid>
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									id="start-date"
+									label="Start Date"
+									type="date"
+									defaultValue="2023-01-01"
+									InputLabelProps={{
+										shrink: true
+									}}
+									fullWidth
+									className={classes.textField}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									id="end-date"
+									label="End Date"
+									type="date"
+									defaultValue="2023-12-31"
+									InputLabelProps={{
+										shrink: true
+									}}
+									fullWidth
+									className={classes.textField}
+								/>
+							</Grid>
+						</Grid>
 
-							<div className="col-md-3 text-light ps-1 pe-5 pb-3">
-								<div className="row">
-									<div className="col-6">
-										<small>Start-Date</small>
-										<input
-											id="start_date"
-											type="date"
-											className="btn btn-outline-light form-control text-center"
-										/>
-									</div>
-									<div className="col-6">
-										<small>End-Date</small>
-										<input
-											id="end_date"
-											type="date"
-											className="btn btn-outline-light form-control text-center"
-										/>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div className="row" id="maprow">
-							<div className="col-md-7 bigbox2 m-1" id="bigbox2">
-								<div className="mapouter" id="mapping">
-									<div className="d-flex justify-content-center">
-										<div
-											className="spinner-border text-light"
-											style={{ marginTop: "5rem", width: "4rem", height: "4rem" }}
-											role="status"
-										>
-											<span className="visually-hidden">Loading...</span>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div className="col-md-4 smallbox2 m-1" id="smallbox2">
-								<div className="table-responsive rest" id="countrytableid">
-									<table className="table text-center">
-										<thead id="countrytable_head" className="text-light"></thead>
-										<tbody id="countrytable_data" className="text-light"></tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-
-						<div className="row">
-							<div className="col-md-7 bigbox m-1">
-								<div className="text-light mb-3" id="line_div">
-									<div className="d-flex justify-content-center">
-										<div
-											className="spinner-border text-light"
-											style={{ marginTop: "1rem", width: "4rem", height: "4rem" }}
-											role="status"
-										>
-											<span className="visually-hidden">Loading...</span>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div className="col-md-4 smallbox m-1">
-								<div className="d-flex align-items-start">
-									<div
-										className="nav flex-column nav-pills me-3"
-										id="v-pills-tab"
-										role="tablist"
-										aria-orientation="vertical"
-									></div>
-									<div className="tab-content w-100" id="v-pills-tabContent"></div>
-								</div>
-							</div>
-						</div>
-						<p className="p-3 footer" style={{ color: "rgb(126, 128, 129)" }}>
-							&copy; 2023 -{" "}
-							<a href="https://smswithoutborders.com/">
-								<span>SMSWithoutBorders</span>
-							</a>
-							.
-						</p>
-					</div>
-				</div>
-			</section>
-
-			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-base.min.js"></script>
-			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-map.min.js"></script>
-			<script src="https://cdn.anychart.com/geodata/latest/custom/world/world.js"></script>
-			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-data-adapter.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js"></script>
-			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-exports.min.js"></script>
-			<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-ui.min.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/js/all.min.js"></script>
-			<script src="assets/js/main.js"></script>
-		</div>
+						{/* Add the map, table, chart, and other sections here */}
+					</Box>
+				</Grid>
+			</Grid>
+		</Box>
 	);
 };
 
