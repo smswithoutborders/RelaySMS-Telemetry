@@ -23,22 +23,27 @@ import {
 import { makeStyles } from "@mui/styles";
 import "../index.css";
 
-const drawerWidth = 240; // Define drawerWidth
+// Define drawer width for the sidebar
+const drawerWidth = 240;
 
+// Create styles using makeStyles
 const useStyles = makeStyles((theme) => ({
 	homeSection: {
 		padding: theme.spacing(3),
-		minHeight: "100vh"
+		minHeight: "100vh",
+		backgroundColor: theme.palette.mode === "dark" ? "#282c34" : "#f0f0f0",
+		color: theme.palette.mode === "dark" ? "#fff" : "#000"
 	},
 	homeContent: {
-		color: "#fff"
+		color: theme.palette.mode === "dark" ? "#fff" : "#000"
 	},
 	iconButton: {
-		color: "#fff"
+		color: theme.palette.mode === "dark" ? "#fff" : "#000"
 	},
 	card: {
-		backgroundColor: "#3c3f41",
-		color: "#fff"
+		backgroundColor: theme.palette.mode === "dark" ? "#3c3f41" : "#fff",
+		color: theme.palette.mode === "dark" ? "#fff" : "#000",
+		height: "100%"
 	},
 	cardContent: {
 		display: "flex",
@@ -49,44 +54,44 @@ const useStyles = makeStyles((theme) => ({
 		minWidth: 120
 	},
 	select: {
-		color: "#fff",
+		color: theme.palette.mode === "dark" ? "#fff" : "#000",
 		".MuiOutlinedInput-notchedOutline": {
-			borderColor: "#fff"
+			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
 		},
 		"&:hover .MuiOutlinedInput-notchedOutline": {
-			borderColor: "#fff"
+			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
 		},
 		"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-			borderColor: "#fff"
+			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
 		}
 	},
 	textField: {
 		"& .MuiInputBase-input": {
-			color: "#fff"
+			color: theme.palette.mode === "dark" ? "#fff" : "#000"
 		},
 		"& .MuiInputLabel-root": {
-			color: "#fff"
+			color: theme.palette.mode === "dark" ? "#fff" : "#000"
 		},
 		"& .MuiOutlinedInput-root": {
 			"& fieldset": {
-				borderColor: "#fff"
+				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
 			},
 			"&:hover fieldset": {
-				borderColor: "#fff"
+				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
 			},
 			"&.Mui-focused fieldset": {
-				borderColor: "#fff"
+				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
 			}
 		}
 	},
 	radioGroup: {
-		color: "#fff"
+		color: theme.palette.mode === "dark" ? "#fff" : "#000"
 	},
 	radio: {
-		color: "#fff"
+		color: theme.palette.mode === "dark" ? "#fff" : "#000"
 	},
 	formControlLabel: {
-		color: "#fff"
+		color: theme.palette.mode === "dark" ? "#fff" : "#000"
 	}
 }));
 
@@ -103,7 +108,9 @@ const OpenTelemetry = () => {
 				flexGrow: 1
 			}}
 		>
+			{/* Container Grid for Main Layout */}
 			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
+				{/* Sidebar Section */}
 				<Grid
 					item
 					lg={2}
@@ -115,6 +122,8 @@ const OpenTelemetry = () => {
 						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
 					}}
 				></Grid>
+
+				{/* Main Content Area */}
 				<Grid
 					mx="auto"
 					item
@@ -128,6 +137,7 @@ const OpenTelemetry = () => {
 					}}
 				>
 					<Box className={classes.homeContent}>
+						{/* Header Section */}
 						<Grid container spacing={2} alignItems="center">
 							<Grid item xs={12} md={6}>
 								<Typography variant="h4" className={classes.homeContent}>
@@ -145,7 +155,9 @@ const OpenTelemetry = () => {
 							</Grid>
 						</Grid>
 
+						{/* Total and Country Cards */}
 						<Grid container spacing={2} className={classes.homeContent} sx={{ mt: 3 }}>
+							{/* Total Card */}
 							<Grid item xs={12} sm={6} md={2}>
 								<Card className={`${classes.card} card1 text-center`}>
 									<CardContent className={classes.cardContent}>
@@ -165,6 +177,8 @@ const OpenTelemetry = () => {
 									</CardContent>
 								</Card>
 							</Grid>
+
+							{/* Country Total Card */}
 							<Grid item xs={12} sm={6} md={2}>
 								<Card className={`${classes.card} card2 text-center`} id="card2">
 									<CardContent className={classes.cardContent}>
@@ -184,7 +198,9 @@ const OpenTelemetry = () => {
 							</Grid>
 						</Grid>
 
+						{/* Form Controls for Filtering Data */}
 						<Grid container spacing={2} className={classes.homeContent} sx={{ mt: 3 }}>
+							{/* Type Select */}
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl variant="outlined" className={classes.formControl} fullWidth>
 									<InputLabel id="type-label" className={classes.formControlLabel}>
@@ -206,6 +222,8 @@ const OpenTelemetry = () => {
 									</Select>
 								</FormControl>
 							</Grid>
+
+							{/* Format Radio Buttons */}
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl component="fieldset">
 									<RadioGroup
@@ -231,6 +249,8 @@ const OpenTelemetry = () => {
 									</RadioGroup>
 								</FormControl>
 							</Grid>
+
+							{/* Start Date Picker */}
 							<Grid item xs={12} sm={6} md={3}>
 								<TextField
 									id="start-date"
@@ -244,6 +264,8 @@ const OpenTelemetry = () => {
 									className={classes.textField}
 								/>
 							</Grid>
+
+							{/* End Date Picker */}
 							<Grid item xs={12} sm={6} md={3}>
 								<TextField
 									id="end-date"
