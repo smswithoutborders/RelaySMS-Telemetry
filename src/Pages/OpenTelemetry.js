@@ -1,102 +1,67 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChartSimple, faMapLocationDot } from "@fortawesome/free-solid-svg-icons";
 import {
 	Box,
 	Grid,
-	IconButton,
-	Card,
-	CardContent,
 	Typography,
-	FormControl,
-	InputLabel,
-	Select,
-	MenuItem,
-	RadioGroup,
 	FormControlLabel,
 	Radio,
-	TextField
+	RadioGroup,
+	TextField,
+	Table,
+	TableHead,
+	TableBody,
+	TableCell,
+	TableRow,
+	Tabs,
+	Tab
 } from "@mui/material";
-import {
-	Refresh as RefreshIcon,
-	BarChart as BarChartIcon,
-	LocationOn as LocationOnIcon
-} from "@mui/icons-material";
 import { makeStyles } from "@mui/styles";
-import "../index.css";
 
-// Define drawer width for the sidebar
-const drawerWidth = 240;
-
-// Create styles using makeStyles
 const useStyles = makeStyles((theme) => ({
 	homeSection: {
 		padding: theme.spacing(3),
-		minHeight: "100vh",
-		backgroundColor: theme.palette.mode === "dark" ? "#282c34" : "#f0f0f0",
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	homeContent: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	iconButton: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
+		minHeight: "100vh"
 	},
 	card: {
-		backgroundColor: theme.palette.mode === "dark" ? "#3c3f41" : "#fff",
-		color: theme.palette.mode === "dark" ? "#fff" : "#000",
-		height: "100%"
-	},
-	cardContent: {
-		display: "flex",
-		justifyContent: "center",
-		alignItems: "center"
+		borderRadius: "8px",
+		boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)"
 	},
 	formControl: {
-		minWidth: 120
+		borderRadius: "8px",
+		boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+		padding: theme.spacing(2)
 	},
-	select: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000",
-		".MuiOutlinedInput-notchedOutline": {
-			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-		},
-		"&:hover .MuiOutlinedInput-notchedOutline": {
-			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-		},
-		"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-		}
+	filterSection: {
+		marginTop: theme.spacing(5)
 	},
-	textField: {
-		"& .MuiInputBase-input": {
-			color: theme.palette.mode === "dark" ? "#fff" : "#000"
-		},
-		"& .MuiInputLabel-root": {
-			color: theme.palette.mode === "dark" ? "#fff" : "#000"
-		},
-		"& .MuiOutlinedInput-root": {
-			"& fieldset": {
-				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-			},
-			"&:hover fieldset": {
-				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-			},
-			"&.Mui-focused fieldset": {
-				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-			}
-		}
+	bigbox: {
+		backgroundColor: "#333",
+		borderRadius: "8px",
+		padding: theme.spacing(2)
 	},
-	radioGroup: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	radio: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	formControlLabel: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
+	smallbox: {
+		backgroundColor: "#555",
+		borderRadius: "8px",
+		padding: theme.spacing(2)
 	}
 }));
 
 const OpenTelemetry = () => {
 	const classes = useStyles();
+
+	const tableData = [
+		{ id: 1, country: "Country A", value: 100 },
+		{ id: 2, country: "Country B", value: 200 },
+		{ id: 3, country: "Country C", value: 300 }
+	];
+
+	const chartData = [
+		{ month: "January", value: 500 },
+		{ month: "February", value: 600 },
+		{ month: "March", value: 700 }
+	];
 
 	return (
 		<Box
@@ -108,181 +73,183 @@ const OpenTelemetry = () => {
 				flexGrow: 1
 			}}
 		>
-			{/* Container Grid for Main Layout */}
+			{/* Main Grid Container */}
 			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
-				{/* Sidebar Section */}
-				<Grid
-					item
-					lg={2}
-					md={3}
-					xs={0}
-					sm={3}
-					sx={{
-						display: { xs: "none", sm: "none", md: "block" },
-						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
-					}}
-				></Grid>
+				<Grid item lg={2} md={3} sm={3} xs={0} />
 
-				{/* Main Content Area */}
-				<Grid
-					mx="auto"
-					item
-					lg={10}
-					md={9}
-					xs={12}
-					sm={12}
-					sx={{
-						p: { md: 3, sm: 2, xs: 0 },
-						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
-					}}
-				>
-					<Box className={classes.homeContent}>
-						{/* Header Section */}
-						<Grid container spacing={2} alignItems="center">
-							<Grid item xs={12} md={6}>
-								<Typography variant="h4" className={classes.homeContent}>
-									Open Telemetry
-									<IconButton
-										className={classes.iconButton}
-										onClick={() => window.location.reload()}
-									>
-										<RefreshIcon />
-									</IconButton>
-								</Typography>
-							</Grid>
-							<Grid item xs={12} md={6} className="text-end pe-5">
-								{/* Additional content can go here */}
+				<Grid item lg={10} md={9} sm={12} xs={12} sx={{ p: { md: 3, sm: 2, xs: 0 } }}>
+					<Grid container spacing={2} sx={{ mb: 4 }}>
+						{/* Total Box 1 */}
+						<Grid
+							item
+							xs={12}
+							sm={6}
+							md={3}
+							className={`${classes.card} card1 text-center m-1`}
+							style={{ backgroundColor: "#f0f0f0" }}
+						>
+							<Grid container alignItems="center" justifyContent="center">
+								<Grid item xs={3} md={3} className="icondiv">
+									<div className="icon1">
+										<FontAwesomeIcon icon={faChartSimple} className="fa-2x" />
+									</div>
+								</Grid>
+								<Grid item xs={9} md={9}>
+									<Typography variant="h3" className="total text-light" id="total">
+										0
+									</Typography>
+									<Typography variant="body1" className="text-light textsmall" id="totalheader">
+										TOTAL
+									</Typography>
+								</Grid>
 							</Grid>
 						</Grid>
 
-						{/* Total and Country Cards */}
-						<Grid container spacing={2} className={classes.homeContent} sx={{ mt: 3 }}>
-							{/* Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={`${classes.card} card1 text-center`}>
-									<CardContent className={classes.cardContent}>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3} className="icondiv">
-												<BarChartIcon fontSize="large" className="icon1" />
-											</Grid>
-											<Grid item xs={6}>
-												<Typography variant="h3" className="total" id="total">
-													0
-												</Typography>
-												<Typography className="textsmall" id="totalheader">
-													TOTAL
-												</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
-							</Grid>
-
-							{/* Country Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={`${classes.card} card2 text-center`} id="card2">
-									<CardContent className={classes.cardContent}>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3}>
-												<LocationOnIcon fontSize="large" className="icon2" />
-											</Grid>
-											<Grid item xs={6} id="countrytotaldiv">
-												<Typography variant="h3" className="total" id="countrytotal">
-													0
-												</Typography>
-												<Typography className="textsmall">COUNTRY TOTAL</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
+						{/* Total Box 2 */}
+						<Grid
+							item
+							xs={12}
+							sm={6}
+							md={3}
+							className={`${classes.card} card2 text-center m-1`}
+							style={{ backgroundColor: "#d0e8f2" }} // Add your desired background color here
+						>
+							<Grid container alignItems="center" justifyContent="center">
+								<Grid item xs={3} md={3}>
+									<div className="icon2">
+										<FontAwesomeIcon icon={faMapLocationDot} className="fa-2x" />
+									</div>
+								</Grid>
+								<Grid item xs={9} md={9}>
+									<Typography variant="h3" className="total text-light" id="countrytotal">
+										0
+									</Typography>
+									<Typography variant="body1" className="text-light textsmall">
+										COUNTRY TOTAL
+									</Typography>
+								</Grid>
 							</Grid>
 						</Grid>
+					</Grid>
 
-						{/* Form Controls for Filtering Data */}
-						<Grid container spacing={2} className={classes.homeContent} sx={{ mt: 3 }}>
-							{/* Type Select */}
-							<Grid item xs={12} sm={6} md={3}>
-								<FormControl variant="outlined" className={classes.formControl} fullWidth>
-									<InputLabel id="type-label" className={classes.formControlLabel}>
-										Type
-									</InputLabel>
-									<Select
-										labelId="type-label"
-										id="type-select"
-										value={""}
-										onChange={() => {}}
-										className={classes.select}
-									>
-										<MenuItem value="">
-											<em>None</em>
-										</MenuItem>
-										<MenuItem value={10}>Type 1</MenuItem>
-										<MenuItem value={20}>Type 2</MenuItem>
-										<MenuItem value={30}>Type 3</MenuItem>
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Format Radio Buttons */}
-							<Grid item xs={12} sm={6} md={3}>
-								<FormControl component="fieldset">
-									<RadioGroup
-										row
-										aria-label="format"
-										name="format"
-										value={"json"}
-										onChange={() => {}}
-										className={classes.radioGroup}
-									>
-										<FormControlLabel
-											value="json"
-											control={<Radio className={classes.radio} />}
-											label="JSON"
-											className={classes.formControlLabel}
-										/>
-										<FormControlLabel
-											value="csv"
-											control={<Radio className={classes.radio} />}
-											label="CSV"
-											className={classes.formControlLabel}
-										/>
-									</RadioGroup>
-								</FormControl>
-							</Grid>
-
-							{/* Start Date Picker */}
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									id="start-date"
-									label="Start Date"
-									type="date"
-									defaultValue="2023-01-01"
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-									className={classes.textField}
-								/>
-							</Grid>
-
-							{/* End Date Picker */}
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									id="end-date"
-									label="End Date"
-									type="date"
-									defaultValue="2023-12-31"
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-									className={classes.textField}
-								/>
-							</Grid>
+					{/* Filter Section */}
+					<Grid container spacing={5} className={classes.filterSection} sx={{ mt: 4, mb: 4 }}>
+						{/* Type Filter */}
+						<Grid item xs={12} md={3} className={`${classes.formControl} type`}>
+							<Typography variant="h6" className="text-light">
+								Type
+							</Typography>
+							<TextField
+								select
+								fullWidth
+								id="type"
+								variant="outlined"
+								className="mb-4"
+								SelectProps={{
+									native: true
+								}}
+							>
+								<option value="signup">Signed-up Users</option>
+								<option value="available">Available Users</option>
+							</TextField>
 						</Grid>
 
-						{/* Add the map, table, chart, and other sections here */}
-					</Box>
+						{/* Format Filter */}
+						<Grid item xs={12} md={2} className={`${classes.formControl} p-3`}>
+							<Typography variant="h6" className="text-light">
+								Format
+							</Typography>
+							<RadioGroup row aria-label="format" name="format" defaultValue="month">
+								<FormControlLabel value="month" control={<Radio color="primary" />} label="Month" />
+								<FormControlLabel value="day" control={<Radio color="primary" />} label="Days" />
+							</RadioGroup>
+						</Grid>
+
+						{/* Date Range Filter */}
+						<Grid
+							item
+							xs={12}
+							md={3}
+							className={`${classes.formControl} text-light ps-1 pe-5 pb-3`}
+						>
+							<Grid container spacing={2}>
+								<Grid item xs={6}>
+									<Typography variant="body2">Start Date</Typography>
+									<TextField
+										id="start_date"
+										type="date"
+										variant="outlined"
+										fullWidth
+										InputLabelProps={{
+											shrink: true
+										}}
+									/>
+								</Grid>
+								<Grid item xs={6}>
+									<Typography variant="body2">End Date</Typography>
+									<TextField
+										id="end_date"
+										type="date"
+										variant="outlined"
+										fullWidth
+										InputLabelProps={{
+											shrink: true
+										}}
+									/>
+								</Grid>
+							</Grid>
+						</Grid>
+					</Grid>
+
+					{/* Table and Chart Section */}
+					<Grid container spacing={2}>
+						{/* Table 1 */}
+						<Grid item md={7} className="bigbox m-1">
+							<div className="text-light mb-3" id="line_div">
+								<Table className="table text-center text-light">
+									<TableHead>
+										<TableRow>
+											<TableCell>Country</TableCell>
+											<TableCell>Value</TableCell>
+										</TableRow>
+									</TableHead>
+									<TableBody>
+										{tableData.map((row) => (
+											<TableRow key={row.id}>
+												<TableCell>{row.country}</TableCell>
+												<TableCell>{row.value}</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</div>
+						</Grid>
+
+						{/* Chart and Tabs */}
+						<Grid item xs={12} md={4} className="smallbox m-1">
+							<Tabs
+								orientation="vertical"
+								variant="scrollable"
+								id="v-pills-tab"
+								className="me-3"
+								aria-label="Vertical tabs example"
+							>
+								<Tab label="Chart 1" />
+								<Tab label="Chart 2" />
+								{/* Add more tabs as needed */}
+							</Tabs>
+							{/* Placeholder for chart components */}
+							{/* Render chart based on selected tab */}
+							{chartData.map((data) => (
+								<div key={data.month} hidden={true}>
+									{/* Replace with actual chart component */}
+									<Typography variant="h6" className="text-light">
+										{data.month} - {data.value}
+									</Typography>
+								</div>
+							))}
+						</Grid>
+					</Grid>
 				</Grid>
 			</Grid>
 		</Box>
