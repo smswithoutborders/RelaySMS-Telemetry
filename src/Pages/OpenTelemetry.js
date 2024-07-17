@@ -2,267 +2,190 @@ import React, { useState, useEffect } from "react";
 import {
 	Box,
 	Grid,
-	Card,
-	CardContent,
 	Typography,
 	FormControl,
 	InputLabel,
 	Select,
 	MenuItem,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableRow,
 	TextField
 } from "@mui/material";
-import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
-import "../index.css";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import {
-	Chart as ChartJS,
-	CategoryScale,
-	LinearScale,
-	PointElement,
-	LineElement,
-	Title,
+	LineChart,
+	Line,
+	XAxis,
+	YAxis,
+	CartesianGrid,
 	Tooltip,
-	Legend
-} from "chart.js";
-import { Line } from "react-chartjs-2";
+	Legend,
+	ResponsiveContainer
+} from "recharts";
+import { Container, Card as BootstrapCard } from "react-bootstrap";
 
-// Register Chart.js modules
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-// Define drawer width for the sidebar
-const drawerWidth = 240;
+const baseUrl = "https://smswithoutborders.com:11000"; // Base URL for API
 
 const OpenTelemetry = () => {
-	// Define state variables
-	const [countryTableData, setCountryTableData] = useState([]);
+	const [data, setData] = useState(null);
 	const [totalUsers, setTotalUsers] = useState(0);
-	const [displayType, setDisplayType] = useState("Total Users"); // Add displayType state
+	const [displayType, setDisplayType] = useState("Total Users");
+	const [startDate, setStartDate] = useState("");
+	const [endDate, setEndDate] = useState("");
 
-	// Dummy data for demonstration
-	useEffect(() => {
-		const dummyCountryTableData = [
-			["USA", "Washington", 100],
-			["Canada", "Ottawa", 200],
-			["Mexico", "Mexico City", 300]
-		];
-		setCountryTableData(dummyCountryTableData);
-
-		const dummyTotalUsers = 600;
-		setTotalUsers(dummyTotalUsers);
-	}, []);
-
-	const monthlyData = [
-		{ month: "January", availableUsers: 120 },
-		{ month: "February", availableUsers: 150 },
-		{ month: "March", availableUsers: 130 },
-		{ month: "April", availableUsers: 170 }
-	];
-	const lineChartData = {
-		labels: monthlyData.map((data) => data.month),
-		datasets: [
-			{
-				label: displayType === "Sign Up Users" ? "Sign Up Users" : "Available Users",
-				data:
-					displayType === "Sign Up Users"
-						? [50, 60, 45, 55]
-						: monthlyData.map((data) => data.availableUsers),
-				fill: false,
-				backgroundColor: "rgb(75, 192, 192)",
-				borderColor: "rgba(75, 192, 192, 0.2)"
+	const fetchData = async (url) => {
+		try {
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error("Network response was not ok");
 			}
-		]
+			const data = await response.json();
+			setData(data);
+			handleData(data);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
 	};
 
+	const handleData = (data) => {
+		setTotalUsers(data.total_users);
+	};
+
+	const displayLineChart = (type) => {
+		let chartData = [];
+		if (data) {
+			Object.keys(data).forEach((item) => {
+				if (item !== "countries" && item !== "total_users" && item !== "total_countries") {
+					chartData.push({ name: item, [type]: data[item] });
+				}
+			});
+		}
+
+		return (
+			<ResponsiveContainer width="100%" height={300}>
+				<LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+					<CartesianGrid strokeDasharray="3 3" />
+					<XAxis dataKey="name" />
+					<YAxis />
+					<Tooltip />
+					<Legend />
+					<Line type="monotone" dataKey={type} stroke="#8884d8" activeDot={{ r: 8 }} />
+				</LineChart>
+			</ResponsiveContainer>
+		);
+	};
+
+	const handleDisplayTypeChange = (e) => {
+		setDisplayType(e.target.value);
+		fetchData(
+			`${baseUrl}/users?start=${startDate}&end=${endDate}&type=available&format=${e.target.value.toLowerCase()}`
+		);
+	};
+
+	const handleStartDateChange = (e) => {
+		setStartDate(e.target.value);
+		checkDate();
+		fetchData(
+			`${baseUrl}/users?start=${e.target.value}&end=${endDate}&type=available&format=${displayType.toLowerCase()}`
+		);
+	};
+
+	const handleEndDateChange = (e) => {
+		setEndDate(e.target.value);
+		checkDate();
+		fetchData(
+			`${baseUrl}/users?start=${startDate}&end=${e.target.value}&type=available&format=${displayType.toLowerCase()}`
+		);
+	};
+
+	const checkDate = () => {
+		if (startDate === "") {
+			setStartDate(endDate);
+		} else if (endDate === "") {
+			setEndDate(startDate);
+		}
+	};
+
+	useEffect(() => {
+		const today = new Date().toISOString().split("T")[0];
+		setStartDate(today);
+		setEndDate(today);
+		fetchData(`${baseUrl}/users?start=${today}&end=${today}&type=available&format=month`);
+	}, []);
+
 	return (
-		<Box
-			component="main"
-			sx={{
-				px: { md: 3, sm: 3, xs: 2 },
-				pb: { md: 3, sm: 3, xs: 14 },
-				flexGrow: 1
-			}}
-		>
-			{/* Container Grid for Main Layout */}
-			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
-				{/* Sidebar Section */}
-				<Grid
-					item
-					lg={2}
-					md={3}
-					xs={0}
-					sm={3}
-					sx={{
-						display: { xs: "none", sm: "none", md: "block" },
-						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
-					}}
-				></Grid>
-
-				{/* Main Content Area */}
-				<Grid
-					mx="auto"
-					item
-					lg={10}
-					md={9}
-					xs={12}
-					sm={12}
-					sx={{
-						p: { md: 3, sm: 2, xs: 0 },
-						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
-					}}
-				>
-					<Box>
-						{/* Total and Country Cards */}
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={" card1 text-center"}>
-									<CardContent>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3} className="icondiv">
-												<BarChartIcon fontSize="large" className="icon1" />
-											</Grid>
-											<Grid item xs={6}>
-												<Typography variant="h3" className="total" id="total">
-													{totalUsers}
-												</Typography>
-												<Typography className="textsmall" id="totalheader">
-													TOTAL
-												</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
-							</Grid>
-
-							{/* Country Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={" card2 text-center"} id="card2">
-									<CardContent>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3}>
-												<LocationOnIcon fontSize="large" className="icon2" />
-											</Grid>
-											<Grid item xs={6} id="countrytotaldiv">
-												<Typography variant="h3" className="total" id="countrytotal">
-													{countryTableData.reduce((acc, row) => acc + row[2], 0)}
-												</Typography>
-												<Typography className="textsmall">COUNTRY TOTAL</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
-							</Grid>
-						</Grid>
-
-						{/* Form Controls for Filtering Data */}
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Type Select */}
-							<Grid item xs={12} sm={6} md={3}>
-								<FormControl fullWidth variant="outlined" sx={{ my: 1 }}>
-									<InputLabel id="display-type-label">Display Type</InputLabel>
-									<Select
-										labelId="display-type-label"
-										id="display-type"
-										value={displayType}
-										onChange={(e) => setDisplayType(e.target.value)}
-										label="Display Type"
-									>
-										<MenuItem value="Total Users">Total Users</MenuItem>
-										<MenuItem value="Sign Up Users">Sign Up Users</MenuItem>
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Start Date Picker */}
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									id="start-date"
-									label="Start Date"
-									type="date"
-									defaultValue="2023-01-01"
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-								/>
-							</Grid>
-
-							{/* End Date Picker */}
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									id="end-date"
-									label="End Date"
-									type="date"
-									defaultValue="2023-12-31"
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-								/>
-							</Grid>
-						</Grid>
-
-						{/* Chart and Table in Row and Column */}
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							<Grid item xs={12} md={6}>
-								<Box sx={{ height: "300px" }}>
-									<Typography variant="h6">Users Over Time</Typography>
-									<Line
-										data={lineChartData}
-										options={{
-											responsive: true,
-											maintainAspectRatio: false
-										}}
-									/>
-								</Box>
-							</Grid>
-
-							<Grid item xs={12} md={6}>
-								<Table className="table text-center text-light">
-									<TableHead>
-										<TableRow>
-											<TableCell>Country</TableCell>
-											<TableCell>Users</TableCell>
-											<TableCell>Percentage</TableCell>
-										</TableRow>
-									</TableHead>
-									<TableBody>
-										{countryTableData.map((row, index) => (
-											<TableRow key={index}>
-												<TableCell>{row[0]}</TableCell>
-												<TableCell>{row[2]}</TableCell>
-												<TableCell>{((row[2] / totalUsers) * 100).toFixed(1) + "%"}</TableCell>
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
-								<br />
-
-								<Table className="table text-center text-light">
-									<TableHead>
-										<TableRow>
-											<TableCell>Country</TableCell>
-											<TableCell>Users</TableCell>
-										</TableRow>
-									</TableHead>
-									<TableBody>
-										{countryTableData.map((row, index) => (
-											<TableRow key={index}>
-												<TableCell>{row[0]}</TableCell>
-												<TableCell>{row[2]}</TableCell>
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
-							</Grid>
-						</Grid>
-					</Box>
+		<Box sx={{ flexGrow: 1 }}>
+			<Container>
+				<Grid container spacing={3} justifyContent="center">
+					<Grid item xs={12} sm={6} md={4}>
+						<BootstrapCard className="text-center">
+							<BootstrapCard.Body>
+								<BarChartIcon fontSize="large" />
+								<Typography variant="h3">{totalUsers}</Typography>
+								<Typography className="textsmall">TOTAL</Typography>
+							</BootstrapCard.Body>
+						</BootstrapCard>
+					</Grid>
+					<Grid item xs={12} sm={6} md={4}>
+						<BootstrapCard className="text-center">
+							<BootstrapCard.Body>
+								<LocationOnIcon fontSize="large" />
+								<Typography variant="h3">{data ? data.total_countries : 0}</Typography>
+								<Typography className="textsmall">COUNTRY TOTAL</Typography>
+							</BootstrapCard.Body>
+						</BootstrapCard>
+					</Grid>
 				</Grid>
-			</Grid>
+
+				<Grid container spacing={3} sx={{ mt: 3 }}>
+					<Grid item xs={12} md={4}>
+						<FormControl fullWidth variant="outlined" sx={{ my: 1 }}>
+							<InputLabel id="display-type-label">Display Type</InputLabel>
+							<Select
+								labelId="display-type-label"
+								id="display-type"
+								value={displayType}
+								onChange={handleDisplayTypeChange}
+								label="Display Type"
+							>
+								<MenuItem value="Total Users">Total Users</MenuItem>
+								<MenuItem value="Sign Up Users">Sign Up Users</MenuItem>
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid item xs={12} md={4}>
+						<TextField
+							id="start-date"
+							label="Start Date"
+							type="date"
+							value={startDate}
+							onChange={handleStartDateChange}
+							InputLabelProps={{
+								shrink: true
+							}}
+							fullWidth
+						/>
+					</Grid>
+					<Grid item xs={12} md={4}>
+						<TextField
+							id="end-date"
+							label="End Date"
+							type="date"
+							value={endDate}
+							onChange={handleEndDateChange}
+							InputLabelProps={{
+								shrink: true
+							}}
+							fullWidth
+						/>
+					</Grid>
+				</Grid>
+
+				<Grid item xs={12} sx={{ mt: 3 }}>
+					<div className="chart-container">
+						{data && displayLineChart(displayType.toLowerCase())}
+					</div>
+				</Grid>
+			</Container>
 		</Box>
 	);
 };
