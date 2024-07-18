@@ -20,6 +20,8 @@ import {
 	TableHead,
 	TableRow,
 	Paper,
+	Stack,
+	Button,
 	FormLabel
 } from "@mui/material";
 import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
@@ -53,6 +55,17 @@ const OpenTelemetry = () => {
 		}
 	}, [data]);
 
+	useEffect(() => {
+		if (chart) {
+			try {
+				const apexChart = new ApexCharts(document.querySelector("#chart"), chart);
+				apexChart.render();
+			} catch (error) {
+				console.error("Error rendering chart:", error);
+			}
+		}
+	}, [chart]);
+
 	const fetchData = async (start, end, type, format) => {
 		try {
 			const response = await axios.get(
@@ -64,6 +77,14 @@ const OpenTelemetry = () => {
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
+		}
+	};
+
+	const handleData = (data) => {
+		if (displayType === "signup") {
+			setTotalUsers(data.total_signups || 0); // Set total signups for the "Sign Up Users" display type
+		} else {
+			setTotalUsers(data.total_users || 0); // Set total users for the "Total Users" display type
 		}
 	};
 
@@ -98,32 +119,15 @@ const OpenTelemetry = () => {
 			chart: {
 				height: 350,
 				type: "line",
-				zoom: {
-					enabled: false
-				}
+				zoom: { enabled: false }
 			},
-			series: [
-				{
-					name: displayType,
-					data: chartData
-				}
-			],
-			dataLabels: {
-				enabled: false
-			},
-			stroke: {
-				curve: "smooth"
-			},
-			xaxis: {
-				categories
-			}
+			series: [{ name: displayType, data: chartData }],
+			dataLabels: { enabled: false },
+			stroke: { curve: "smooth" },
+			xaxis: { categories }
 		};
 
 		setChart(options);
-	};
-
-	const handleData = (data) => {
-		setTotalUsers(data.total_users || 0);
 	};
 
 	const handleDisplayTypeChange = (e) => {
@@ -150,29 +154,22 @@ const OpenTelemetry = () => {
 		fetchData(startDate, newEndDate, displayType, format);
 	};
 
-	useEffect(() => {
-		if (chart) {
-			try {
-				const apexChart = new ApexCharts(document.querySelector("#chart"), chart);
-				apexChart.render();
-			} catch (error) {
-				console.error("Error rendering chart:", error);
-			}
-		}
-	}, [chart]);
+	const handleRefresh = () => {
+		fetchData(startDate, endDate, displayType, format);
+	};
 
 	return (
 		<Box
+			className="bg"
 			component="main"
 			sx={{
 				px: { md: 3, sm: 3, xs: 2 },
 				pb: { md: 3, sm: 3, xs: 14 },
+				pr: { md: 3, sm: 3, xs: 2 },
 				flexGrow: 1
 			}}
 		>
-			{/* Container Grid for Main Layout */}
 			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
-				{/* Sidebar Section */}
 				<Grid
 					item
 					lg={2}
@@ -185,7 +182,6 @@ const OpenTelemetry = () => {
 					}}
 				></Grid>
 
-				{/* Main Content Area */}
 				<Grid
 					mx="auto"
 					item
@@ -199,7 +195,6 @@ const OpenTelemetry = () => {
 					}}
 				>
 					<Box>
-						{/* Total and Country Cards */}
 						<Grid container spacing={2} sx={{ mt: 3 }}>
 							{/* Total Card */}
 							<Grid item xs={12} sm={6} md={2}>
@@ -218,27 +213,30 @@ const OpenTelemetry = () => {
 								</Card>
 							</Grid>
 
-							{/* Country Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={" card2 text-center"} id="card2">
-									<CardContent>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3}>
-												<LocationOnIcon fontSize="large" className="icon2" />
+							{/* Conditional Country Total Card */}
+							{displayType === "available" && (
+								<Grid item xs={12} sm={6} md={2}>
+									<Card className={" card2 text-center"} id="card2">
+										<CardContent>
+											<Grid container justifyContent="center" alignItems="center">
+												<Grid item xs={3}>
+													<LocationOnIcon fontSize="large" className="icon2" />
+												</Grid>
+												<Grid item xs={6} id="countrytotaldiv">
+													<Typography variant="h3">
+														{data ? data.total_countries || 0 : 0}
+													</Typography>
+													<Typography className="textsmall">COUNTRY TOTAL</Typography>
+												</Grid>
 											</Grid>
-											<Grid item xs={6} id="countrytotaldiv">
-												<Typography variant="h3">{data ? data.total_countries || 0 : 0}</Typography>
-												<Typography className="textsmall">COUNTRY TOTAL</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
-							</Grid>
+										</CardContent>
+									</Card>
+								</Grid>
+							)}
 						</Grid>
 
-						{/* Form Controls for Filtering Data */}
 						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Type Select */}
+							{/* Display Type Select */}
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl variant="outlined" fullWidth>
 									<InputLabel id="display-type-label">Display Type</InputLabel>
@@ -257,21 +255,19 @@ const OpenTelemetry = () => {
 
 							{/* Format Radio Buttons */}
 							<Grid item xs={12} sm={6} md={3}>
-								<Grid item xs={12} sm={6} md={3}>
-									<FormControl component="fieldset">
-										<FormLabel component="legend">Format</FormLabel>
-										<RadioGroup
-											row
-											aria-label="format"
-											name="format"
-											value={format}
-											onChange={handleFormatChange}
-										>
-											<FormControlLabel value="month" control={<Radio />} label="Month" />
-											<FormControlLabel value="day" control={<Radio />} label="Day" />
-										</RadioGroup>
-									</FormControl>
-								</Grid>
+								<FormControl component="fieldset">
+									<FormLabel component="legend">Format</FormLabel>
+									<RadioGroup
+										row
+										aria-label="format"
+										name="format"
+										value={format}
+										onChange={handleFormatChange}
+									>
+										<FormControlLabel value="month" control={<Radio />} label="Month" />
+										<FormControlLabel value="day" control={<Radio />} label="Day" />
+									</RadioGroup>
+								</FormControl>
 							</Grid>
 
 							{/* Start Date Picker */}
@@ -282,9 +278,7 @@ const OpenTelemetry = () => {
 									type="date"
 									value={startDate}
 									onChange={handleStartDateChange}
-									InputLabelProps={{
-										shrink: true
-									}}
+									InputLabelProps={{ shrink: true }}
 									fullWidth
 								/>
 							</Grid>
@@ -297,16 +291,23 @@ const OpenTelemetry = () => {
 									type="date"
 									value={endDate}
 									onChange={handleEndDateChange}
-									InputLabelProps={{
-										shrink: true
-									}}
+									InputLabelProps={{ shrink: true }}
 									fullWidth
 								/>
 							</Grid>
 						</Grid>
 
-						{/* Add the map, table, chart, and other sections here */}
-						<Grid item xs={12}>
+						{/* Refresh Button */}
+						<Grid item xs={12} sx={{ mt: 2 }}>
+							<Stack direction="row" spacing={2} justifyContent="center">
+								<Button variant="contained" color="primary" onClick={handleRefresh}>
+									Refresh
+								</Button>
+							</Stack>
+						</Grid>
+
+						{/* Data Table */}
+						<Grid item xs={6}>
 							<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
 								<Table sx={{ minWidth: 650 }} aria-label="country table">
 									<TableHead>
@@ -317,12 +318,12 @@ const OpenTelemetry = () => {
 										</TableRow>
 									</TableHead>
 									<TableBody>
-										{data && data.countries && data.countries.length > 0 ? (
-											data.countries.map((country, index) => (
+										{data && data[displayType] && data[displayType].length > 0 ? (
+											data[displayType].map((item, index) => (
 												<TableRow key={index}>
-													<TableCell>{country[0]}</TableCell>
-													<TableCell>{country[2]}</TableCell>
-													<TableCell>{((country[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
+													<TableCell>{item[0]}</TableCell>
+													<TableCell>{item[2]}</TableCell>
+													<TableCell>{((item[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
 												</TableRow>
 											))
 										) : (
@@ -336,9 +337,33 @@ const OpenTelemetry = () => {
 								</Table>
 							</TableContainer>
 						</Grid>
-
-						<Grid item xs={12} style={{ marginTop: "3rem" }}>
-							<Box id="chart" sx={{ marginTop: 3 }} />
+						<Grid item xs={6}>
+							<TableContainer sx={{ minWidth: 650 }} aria-label="country table">
+								<TableHead>
+									<TableRow>
+										<TableCell>COUNTRY</TableCell>
+										<TableCell>USERS</TableCell>
+										<TableCell>PERCENTAGE</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{data && data.countries && data.countries.length > 0 ? (
+										data.countries.map((country, index) => (
+											<TableRow key={index}>
+												<TableCell>{country[0]}</TableCell>
+												<TableCell>{country[2]}</TableCell>
+												<TableCell>{((country[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
+											</TableRow>
+										))
+									) : (
+										<TableRow>
+											<TableCell colSpan={3} align="center">
+												No data available
+											</TableCell>
+										</TableRow>
+									)}
+								</TableBody>
+							</TableContainer>
 						</Grid>
 					</Box>
 				</Grid>
