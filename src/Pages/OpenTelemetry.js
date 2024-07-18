@@ -307,35 +307,37 @@ const OpenTelemetry = () => {
 						</Grid>
 
 						{/* Data Table */}
-
 						<Grid item xs={6}>
-							<TableContainer sx={{ minWidth: 650 }} aria-label="country table">
-								<TableHead>
-									<TableRow>
-										<TableCell>COUNTRY</TableCell>
-										<TableCell>USERS</TableCell>
-										<TableCell>PERCENTAGE</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{data && data.countries && data.countries.length > 0 ? (
-										data.countries.map((country, index) => (
-											<TableRow key={index}>
-												<TableCell>{country[0]}</TableCell>
-												<TableCell>{country[2]}</TableCell>
-												<TableCell>{((country[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
-											</TableRow>
-										))
-									) : (
+							<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
+								<Table>
+									<TableHead>
 										<TableRow>
-											<TableCell colSpan={3} align="center">
-												No data available
-											</TableCell>
+											<TableCell>COUNTRY</TableCell>
+											<TableCell>USERS</TableCell>
+											<TableCell>PERCENTAGE</TableCell>
 										</TableRow>
-									)}
-								</TableBody>
+									</TableHead>
+									<TableBody>
+										{data && data.countries && data.countries.length > 0 ? (
+											data.countries.map((country, index) => (
+												<TableRow key={index}>
+													<TableCell>{country[0]}</TableCell>
+													<TableCell>{country[2]}</TableCell>
+													<TableCell>{((country[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
+												</TableRow>
+											))
+										) : (
+											<TableRow>
+												<TableCell colSpan={3} align="center">
+													No data available
+												</TableCell>
+											</TableRow>
+										)}
+									</TableBody>
+								</Table>
 							</TableContainer>
 						</Grid>
+						<Grid item xs={6}></Grid>
 					</Box>
 				</Grid>
 			</Grid>
