@@ -307,36 +307,7 @@ const OpenTelemetry = () => {
 						</Grid>
 
 						{/* Data Table */}
-						<Grid item xs={6}>
-							<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
-								<Table sx={{ minWidth: 650 }} aria-label="country table">
-									<TableHead>
-										<TableRow>
-											<TableCell>COUNTRY</TableCell>
-											<TableCell>USERS</TableCell>
-											<TableCell>PERCENTAGE</TableCell>
-										</TableRow>
-									</TableHead>
-									<TableBody>
-										{data && data[displayType] && data[displayType].length > 0 ? (
-											data[displayType].map((item, index) => (
-												<TableRow key={index}>
-													<TableCell>{item[0]}</TableCell>
-													<TableCell>{item[2]}</TableCell>
-													<TableCell>{((item[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
-												</TableRow>
-											))
-										) : (
-											<TableRow>
-												<TableCell colSpan={3} align="center">
-													No data available
-												</TableCell>
-											</TableRow>
-										)}
-									</TableBody>
-								</Table>
-							</TableContainer>
-						</Grid>
+
 						<Grid item xs={6}>
 							<TableContainer sx={{ minWidth: 650 }} aria-label="country table">
 								<TableHead>
