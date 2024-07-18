@@ -1,288 +1,293 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Box,
 	Grid,
-	IconButton,
 	Card,
-	CardContent,
 	Typography,
 	FormControl,
 	InputLabel,
 	Select,
 	MenuItem,
-	RadioGroup,
-	FormControlLabel,
-	Radio,
-	TextField
+	TextField,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Paper
 } from "@mui/material";
-import {
-	Refresh as RefreshIcon,
-	BarChart as BarChartIcon,
-	LocationOn as LocationOnIcon
-} from "@mui/icons-material";
-import { makeStyles } from "@mui/styles";
+import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
+import { Card as BootstrapCard } from "react-bootstrap";
+import axios from "axios";
+import ApexCharts from "apexcharts";
 import "../index.css";
 
-// Define drawer width for the sidebar
-const drawerWidth = 240;
-
-// Create styles using makeStyles
-const useStyles = makeStyles((theme) => ({
-	homeSection: {
-		padding: theme.spacing(3),
-		minHeight: "100vh",
-		backgroundColor: theme.palette.mode === "dark" ? "#282c34" : "#f0f0f0",
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	homeContent: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	iconButton: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	card: {
-		backgroundColor: theme.palette.mode === "dark" ? "#3c3f41" : "#fff",
-		color: theme.palette.mode === "dark" ? "#fff" : "#000",
-		height: "100%"
-	},
-	cardContent: {
-		display: "flex",
-		justifyContent: "center",
-		alignItems: "center"
-	},
-	formControl: {
-		minWidth: 120
-	},
-	select: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000",
-		".MuiOutlinedInput-notchedOutline": {
-			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-		},
-		"&:hover .MuiOutlinedInput-notchedOutline": {
-			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-		},
-		"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-			borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-		}
-	},
-	textField: {
-		"& .MuiInputBase-input": {
-			color: theme.palette.mode === "dark" ? "#fff" : "#000"
-		},
-		"& .MuiInputLabel-root": {
-			color: theme.palette.mode === "dark" ? "#fff" : "#000"
-		},
-		"& .MuiOutlinedInput-root": {
-			"& fieldset": {
-				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-			},
-			"&:hover fieldset": {
-				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-			},
-			"&.Mui-focused fieldset": {
-				borderColor: theme.palette.mode === "dark" ? "#fff" : "#000"
-			}
-		}
-	},
-	radioGroup: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	radio: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	},
-	formControlLabel: {
-		color: theme.palette.mode === "dark" ? "#fff" : "#000"
-	}
-}));
+const baseUrl = "https://smswithoutborders.com:11000";
 
 const OpenTelemetry = () => {
-	const classes = useStyles();
+	const [data, setData] = useState(null);
+	const [totalUsers, setTotalUsers] = useState(0);
+	const [displayType, setDisplayType] = useState("available");
+	const [format, setFormat] = useState("month");
+	const [startDate, setStartDate] = useState("");
+	const [endDate, setEndDate] = useState("");
+	const [chart, setChart] = useState(null);
+
+	useEffect(() => {
+		const today = new Date().toISOString().split("T")[0];
+		setStartDate(today);
+		setEndDate(today);
+		fetchData(today, today, displayType, format);
+	}, []);
+
+	useEffect(() => {
+		if (data) {
+			handleData(data);
+			extractChartData(data);
+		}
+	}, [data]);
+
+	const fetchData = async (start, end, type, format) => {
+		try {
+			const response = await axios.get(
+				`${baseUrl}/users?start=${start}&end=${end}&type=${type}&format=${format}`
+			);
+			if (response.status === 200) {
+				const responseData = response.data;
+				setData(responseData);
+			}
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
+	};
+
+	const extractChartData = (data) => {
+		if (!data || !data[displayType]) {
+			console.error(`Data for display type '${displayType}' is undefined.`);
+			return;
+		}
+
+		const months = [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"May",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Oct",
+			"Nov",
+			"Dec"
+		];
+		const days = Array.from({ length: 31 }, (_, i) => i + 1);
+		const categories = format === "month" ? months : days;
+
+		const chartData = categories.map((_, index) => {
+			return data[displayType][index] ? data[displayType][index][1] : 0;
+		});
+
+		const options = {
+			chart: {
+				height: 350,
+				type: "line",
+				zoom: {
+					enabled: false
+				}
+			},
+			series: [
+				{
+					name: displayType,
+					data: chartData
+				}
+			],
+			dataLabels: {
+				enabled: false
+			},
+			stroke: {
+				curve: "smooth"
+			},
+			xaxis: {
+				categories
+			}
+		};
+
+		setChart(options);
+	};
+
+	const handleData = (data) => {
+		setTotalUsers(data.total_users || 0);
+	};
+
+	const handleDisplayTypeChange = (e) => {
+		const newDisplayType = e.target.value;
+		setDisplayType(newDisplayType);
+		fetchData(startDate, endDate, newDisplayType, format);
+	};
+
+	const handleFormatChange = (e) => {
+		const newFormat = e.target.value;
+		setFormat(newFormat);
+		fetchData(startDate, endDate, displayType, newFormat);
+	};
+
+	const handleStartDateChange = (e) => {
+		const newStartDate = e.target.value;
+		setStartDate(newStartDate);
+		fetchData(newStartDate, endDate, displayType, format);
+	};
+
+	const handleEndDateChange = (e) => {
+		const newEndDate = e.target.value;
+		setEndDate(newEndDate);
+		fetchData(startDate, newEndDate, displayType, format);
+	};
+
+	useEffect(() => {
+		if (chart) {
+			try {
+				const apexChart = new ApexCharts(document.querySelector("#chart"), chart);
+				apexChart.render();
+			} catch (error) {
+				console.error("Error rendering chart:", error);
+			}
+		}
+	}, [chart]);
 
 	return (
 		<Box
-			className={classes.homeSection}
 			component="main"
 			sx={{
-				px: { md: 3, sm: 3, xs: 2 },
-				pb: { md: 3, sm: 3, xs: 14 },
-				flexGrow: 1
+				paddingX: { md: 3, sm: 3, xs: 2 },
+				paddingBottom: { md: 3, sm: 3, xs: 14 },
+				flexGrow: 1,
+				marginTop: 6
 			}}
 		>
-			{/* Container Grid for Main Layout */}
-			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
-				{/* Sidebar Section */}
-				<Grid
-					item
-					lg={2}
-					md={3}
-					xs={0}
-					sm={3}
-					sx={{
-						display: { xs: "none", sm: "none", md: "block" },
-						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
-					}}
-				></Grid>
-
-				{/* Main Content Area */}
-				<Grid
-					mx="auto"
-					item
-					lg={10}
-					md={9}
-					xs={12}
-					sm={12}
-					sx={{
-						p: { md: 3, sm: 2, xs: 0 },
-						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
-					}}
-				>
-					<Box className={classes.homeContent}>
-						{/* Header Section */}
-						<Grid container spacing={2} alignItems="center">
-							<Grid item xs={12} md={6}>
-								<Typography variant="h4" className={classes.homeContent}>
-									Open Telemetry
-									<IconButton
-										className={classes.iconButton}
-										onClick={() => window.location.reload()}
-									>
-										<RefreshIcon />
-									</IconButton>
-								</Typography>
-							</Grid>
-							<Grid item xs={12} md={6} className="text-end pe-5">
-								{/* Additional content can go here */}
-							</Grid>
+			<Grid container spacing={2} justifyContent="center">
+				<Grid item xs={12} md={8}>
+					<Grid container spacing={2}>
+						<Grid item xs={12} sm={6} md={3}>
+							<Card>
+								<BootstrapCard>
+									<BootstrapCard.Body>
+										<BarChartIcon fontSize="large" />
+										<Typography variant="h3">{totalUsers}</Typography>
+										<Typography className="textsmall">TOTAL</Typography>
+									</BootstrapCard.Body>
+								</BootstrapCard>
+							</Card>
 						</Grid>
 
-						{/* Total and Country Cards */}
-						<Grid container spacing={2} className={classes.homeContent} sx={{ mt: 3 }}>
-							{/* Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={`${classes.card} card1 text-center`}>
-									<CardContent className={classes.cardContent}>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3} className="icondiv">
-												<BarChartIcon fontSize="large" className="icon1" />
-											</Grid>
-											<Grid item xs={6}>
-												<Typography variant="h3" className="total" id="total">
-													0
-												</Typography>
-												<Typography className="textsmall" id="totalheader">
-													TOTAL
-												</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
-							</Grid>
-
-							{/* Country Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={`${classes.card} card2 text-center`} id="card2">
-									<CardContent className={classes.cardContent}>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3}>
-												<LocationOnIcon fontSize="large" className="icon2" />
-											</Grid>
-											<Grid item xs={6} id="countrytotaldiv">
-												<Typography variant="h3" className="total" id="countrytotal">
-													0
-												</Typography>
-												<Typography className="textsmall">COUNTRY TOTAL</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
-							</Grid>
+						<Grid item xs={12} sm={6} md={3}>
+							<Card>
+								<BootstrapCard>
+									<BootstrapCard.Body>
+										<LocationOnIcon fontSize="large" />
+										<Typography variant="h3">{data ? data.total_countries || 0 : 0}</Typography>
+										<Typography className="textsmall">COUNTRY TOTAL</Typography>
+									</BootstrapCard.Body>
+								</BootstrapCard>
+							</Card>
 						</Grid>
 
-						{/* Form Controls for Filtering Data */}
-						<Grid container spacing={2} className={classes.homeContent} sx={{ mt: 3 }}>
-							{/* Type Select */}
-							<Grid item xs={12} sm={6} md={3}>
-								<FormControl variant="outlined" className={classes.formControl} fullWidth>
-									<InputLabel id="type-label" className={classes.formControlLabel}>
-										Type
-									</InputLabel>
-									<Select
-										labelId="type-label"
-										id="type-select"
-										value={""}
-										onChange={() => {}}
-										className={classes.select}
-									>
-										<MenuItem value="">
-											<em>None</em>
-										</MenuItem>
-										<MenuItem value={10}>Type 1</MenuItem>
-										<MenuItem value={20}>Type 2</MenuItem>
-										<MenuItem value={30}>Type 3</MenuItem>
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Format Radio Buttons */}
-							<Grid item xs={12} sm={6} md={3}>
-								<FormControl component="fieldset">
-									<RadioGroup
-										row
-										aria-label="format"
-										name="format"
-										value={"json"}
-										onChange={() => {}}
-										className={classes.radioGroup}
-									>
-										<FormControlLabel
-											value="json"
-											control={<Radio className={classes.radio} />}
-											label="JSON"
-											className={classes.formControlLabel}
-										/>
-										<FormControlLabel
-											value="csv"
-											control={<Radio className={classes.radio} />}
-											label="CSV"
-											className={classes.formControlLabel}
-										/>
-									</RadioGroup>
-								</FormControl>
-							</Grid>
-
-							{/* Start Date Picker */}
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									id="start-date"
-									label="Start Date"
-									type="date"
-									defaultValue="2023-01-01"
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-									className={classes.textField}
-								/>
-							</Grid>
-
-							{/* End Date Picker */}
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									id="end-date"
-									label="End Date"
-									type="date"
-									defaultValue="2023-12-31"
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-									className={classes.textField}
-								/>
-							</Grid>
+						<Grid item xs={12} sm={6} md={3}>
+							<FormControl fullWidth variant="outlined">
+								<InputLabel id="display-type-label">Display Type</InputLabel>
+								<Select
+									labelId="display-type-label"
+									id="display-type"
+									value={displayType}
+									onChange={handleDisplayTypeChange}
+									label="Display Type"
+								>
+									<MenuItem value="available">Total Users</MenuItem>
+									<MenuItem value="signup">Sign Up Users</MenuItem>
+								</Select>
+							</FormControl>
 						</Grid>
 
-						{/* Add the map, table, chart, and other sections here */}
-					</Box>
+						<Grid item xs={12} sm={6} md={3}>
+							<FormControl fullWidth variant="outlined">
+								<InputLabel id="format-label">Format</InputLabel>
+								<Select
+									labelId="format-label"
+									id="format"
+									value={format}
+									onChange={handleFormatChange}
+									label="Format"
+								>
+									<MenuItem value="month">Month</MenuItem>
+									<MenuItem value="day">Day</MenuItem>
+								</Select>
+							</FormControl>
+						</Grid>
+
+						<Grid item xs={12} md={6}>
+							<TextField
+								id="start-date"
+								label="Start Date"
+								type="date"
+								value={startDate}
+								onChange={handleStartDateChange}
+								InputLabelProps={{
+									shrink: true
+								}}
+								fullWidth
+							/>
+						</Grid>
+
+						<Grid item xs={12} md={6}>
+							<TextField
+								id="end-date"
+								label="End Date"
+								type="date"
+								value={endDate}
+								onChange={handleEndDateChange}
+								InputLabelProps={{
+									shrink: true
+								}}
+								fullWidth
+							/>
+						</Grid>
+
+						<Grid item xs={12}>
+							<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
+								<Table sx={{ minWidth: 650 }} aria-label="country table">
+									<TableHead>
+										<TableRow>
+											<TableCell>COUNTRY</TableCell>
+											<TableCell>USERS</TableCell>
+											<TableCell>PERCENTAGE</TableCell>
+										</TableRow>
+									</TableHead>
+									<TableBody>
+										{data && data.countries && data.countries.length > 0 ? (
+											data.countries.map((country, index) => (
+												<TableRow key={index}>
+													<TableCell>{country[0]}</TableCell>
+													<TableCell>{country[2]}</TableCell>
+													<TableCell>{((country[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
+												</TableRow>
+											))
+										) : (
+											<TableRow>
+												<TableCell colSpan={3} align="center">
+													No data available
+												</TableCell>
+											</TableRow>
+										)}
+									</TableBody>
+								</Table>
+							</TableContainer>
+						</Grid>
+
+						<Grid item xs={12} style={{ marginTop: "3rem" }}>
+							<Box id="chart" sx={{ marginTop: 3 }} />
+						</Grid>
+					</Grid>
 				</Grid>
 			</Grid>
 		</Box>
