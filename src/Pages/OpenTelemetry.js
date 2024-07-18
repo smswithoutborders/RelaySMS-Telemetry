@@ -3,11 +3,15 @@ import {
 	Box,
 	Grid,
 	Card,
+	CardContent,
 	Typography,
 	FormControl,
 	InputLabel,
 	Select,
 	MenuItem,
+	RadioGroup,
+	FormControlLabel,
+	Radio,
 	TextField,
 	Table,
 	TableBody,
@@ -15,14 +19,15 @@ import {
 	TableContainer,
 	TableHead,
 	TableRow,
-	Paper
+	Paper,
+	FormLabel
 } from "@mui/material";
 import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
-import { Card as BootstrapCard } from "react-bootstrap";
 import axios from "axios";
 import ApexCharts from "apexcharts";
 import "../index.css";
 
+const drawerWidth = 240;
 const baseUrl = "https://smswithoutborders.com:11000";
 
 const OpenTelemetry = () => {
@@ -160,99 +165,147 @@ const OpenTelemetry = () => {
 		<Box
 			component="main"
 			sx={{
-				paddingX: { md: 3, sm: 3, xs: 2 },
-				paddingBottom: { md: 3, sm: 3, xs: 14 },
-				flexGrow: 1,
-				marginTop: 6
+				px: { md: 3, sm: 3, xs: 2 },
+				pb: { md: 3, sm: 3, xs: 14 },
+				flexGrow: 1
 			}}
 		>
-			<Grid container spacing={2} justifyContent="center">
-				<Grid item xs={12} md={8}>
-					<Grid container spacing={2}>
-						<Grid item xs={12} sm={6} md={3}>
-							<Card>
-								<BootstrapCard>
-									<BootstrapCard.Body>
-										<BarChartIcon fontSize="large" />
-										<Typography variant="h3">{totalUsers}</Typography>
-										<Typography className="textsmall">TOTAL</Typography>
-									</BootstrapCard.Body>
-								</BootstrapCard>
-							</Card>
+			{/* Container Grid for Main Layout */}
+			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
+				{/* Sidebar Section */}
+				<Grid
+					item
+					lg={2}
+					md={3}
+					xs={0}
+					sm={3}
+					sx={{
+						display: { xs: "none", sm: "none", md: "block" },
+						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
+					}}
+				></Grid>
+
+				{/* Main Content Area */}
+				<Grid
+					mx="auto"
+					item
+					lg={10}
+					md={9}
+					xs={12}
+					sm={12}
+					sx={{
+						p: { md: 3, sm: 2, xs: 0 },
+						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
+					}}
+				>
+					<Box>
+						{/* Total and Country Cards */}
+						<Grid container spacing={2} sx={{ mt: 3 }}>
+							{/* Total Card */}
+							<Grid item xs={12} sm={6} md={2}>
+								<Card className={" card1 text-center"}>
+									<CardContent>
+										<Grid container justifyContent="center" alignItems="center">
+											<Grid item xs={3} className="icondiv">
+												<BarChartIcon fontSize="large" className="icon1" />
+											</Grid>
+											<Grid item xs={6}>
+												<Typography variant="h3">{totalUsers}</Typography>
+												<Typography className="textsmall">TOTAL</Typography>
+											</Grid>
+										</Grid>
+									</CardContent>
+								</Card>
+							</Grid>
+
+							{/* Country Total Card */}
+							<Grid item xs={12} sm={6} md={2}>
+								<Card className={" card2 text-center"} id="card2">
+									<CardContent>
+										<Grid container justifyContent="center" alignItems="center">
+											<Grid item xs={3}>
+												<LocationOnIcon fontSize="large" className="icon2" />
+											</Grid>
+											<Grid item xs={6} id="countrytotaldiv">
+												<Typography variant="h3">{data ? data.total_countries || 0 : 0}</Typography>
+												<Typography className="textsmall">COUNTRY TOTAL</Typography>
+											</Grid>
+										</Grid>
+									</CardContent>
+								</Card>
+							</Grid>
 						</Grid>
 
-						<Grid item xs={12} sm={6} md={3}>
-							<Card>
-								<BootstrapCard>
-									<BootstrapCard.Body>
-										<LocationOnIcon fontSize="large" />
-										<Typography variant="h3">{data ? data.total_countries || 0 : 0}</Typography>
-										<Typography className="textsmall">COUNTRY TOTAL</Typography>
-									</BootstrapCard.Body>
-								</BootstrapCard>
-							</Card>
+						{/* Form Controls for Filtering Data */}
+						<Grid container spacing={2} sx={{ mt: 3 }}>
+							{/* Type Select */}
+							<Grid item xs={12} sm={6} md={3}>
+								<FormControl variant="outlined" fullWidth>
+									<InputLabel id="display-type-label">Display Type</InputLabel>
+									<Select
+										labelId="display-type-label"
+										id="display-type"
+										value={displayType}
+										onChange={handleDisplayTypeChange}
+										label="Display Type"
+									>
+										<MenuItem value="available">Total Users</MenuItem>
+										<MenuItem value="signup">Sign Up Users</MenuItem>
+									</Select>
+								</FormControl>
+							</Grid>
+
+							{/* Format Radio Buttons */}
+							<Grid item xs={12} sm={6} md={3}>
+								<Grid item xs={12} sm={6} md={3}>
+									<FormControl component="fieldset">
+										<FormLabel component="legend">Format</FormLabel>
+										<RadioGroup
+											row
+											aria-label="format"
+											name="format"
+											value={format}
+											onChange={handleFormatChange}
+										>
+											<FormControlLabel value="month" control={<Radio />} label="Month" />
+											<FormControlLabel value="day" control={<Radio />} label="Day" />
+										</RadioGroup>
+									</FormControl>
+								</Grid>
+							</Grid>
+
+							{/* Start Date Picker */}
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									id="start-date"
+									label="Start Date"
+									type="date"
+									value={startDate}
+									onChange={handleStartDateChange}
+									InputLabelProps={{
+										shrink: true
+									}}
+									fullWidth
+								/>
+							</Grid>
+
+							{/* End Date Picker */}
+							<Grid item xs={12} sm={6} md={3}>
+								<TextField
+									id="end-date"
+									label="End Date"
+									type="date"
+									value={endDate}
+									onChange={handleEndDateChange}
+									InputLabelProps={{
+										shrink: true
+									}}
+									fullWidth
+								/>
+							</Grid>
 						</Grid>
 
-						<Grid item xs={12} sm={6} md={3}>
-							<FormControl fullWidth variant="outlined">
-								<InputLabel id="display-type-label">Display Type</InputLabel>
-								<Select
-									labelId="display-type-label"
-									id="display-type"
-									value={displayType}
-									onChange={handleDisplayTypeChange}
-									label="Display Type"
-								>
-									<MenuItem value="available">Total Users</MenuItem>
-									<MenuItem value="signup">Sign Up Users</MenuItem>
-								</Select>
-							</FormControl>
-						</Grid>
-
-						<Grid item xs={12} sm={6} md={3}>
-							<FormControl fullWidth variant="outlined">
-								<InputLabel id="format-label">Format</InputLabel>
-								<Select
-									labelId="format-label"
-									id="format"
-									value={format}
-									onChange={handleFormatChange}
-									label="Format"
-								>
-									<MenuItem value="month">Month</MenuItem>
-									<MenuItem value="day">Day</MenuItem>
-								</Select>
-							</FormControl>
-						</Grid>
-
-						<Grid item xs={12} md={6}>
-							<TextField
-								id="start-date"
-								label="Start Date"
-								type="date"
-								value={startDate}
-								onChange={handleStartDateChange}
-								InputLabelProps={{
-									shrink: true
-								}}
-								fullWidth
-							/>
-						</Grid>
-
-						<Grid item xs={12} md={6}>
-							<TextField
-								id="end-date"
-								label="End Date"
-								type="date"
-								value={endDate}
-								onChange={handleEndDateChange}
-								InputLabelProps={{
-									shrink: true
-								}}
-								fullWidth
-							/>
-						</Grid>
-
+						{/* Add the map, table, chart, and other sections here */}
 						<Grid item xs={12}>
 							<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
 								<Table sx={{ minWidth: 650 }} aria-label="country table">
@@ -287,7 +340,7 @@ const OpenTelemetry = () => {
 						<Grid item xs={12} style={{ marginTop: "3rem" }}>
 							<Box id="chart" sx={{ marginTop: 3 }} />
 						</Grid>
-					</Grid>
+					</Box>
 				</Grid>
 			</Grid>
 		</Box>
