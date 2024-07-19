@@ -20,13 +20,14 @@ import {
 	TableHead,
 	TableRow,
 	Paper,
-	Stack,
 	Button,
 	FormLabel
 } from "@mui/material";
 import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts"; // Updated import for Recharts
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import axios from "axios";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import "../index.css";
 
 const drawerWidth = 240;
@@ -40,6 +41,12 @@ const OpenTelemetry = () => {
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [chartData, setChartData] = useState([]);
+
+	const theme = useTheme();
+	const isDarkMode = theme.palette.mode === "dark";
+	const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+	const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
+	const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
 
 	useEffect(() => {
 		const today = new Date().toISOString().split("T")[0];
@@ -75,17 +82,18 @@ const OpenTelemetry = () => {
 
 	const prepareChartData = (data) => {
 		const chartData = [];
+		const countries = data.countries || {}; // Ensure countries is defined
 
-		for (const year in data) {
-			if (year !== "countries" && year !== "total_countries" && year !== "total_users") {
-				data[year].forEach((entry) => {
-					const month = entry[0];
-					const users = entry[1];
-					chartData.push({ month, users });
+		for (const date in data) {
+			if (date !== "countries" && date !== "total_countries" && date !== "total_users") {
+				data[date].forEach((entry) => {
+					const [monthDay, users, countryCode] = entry;
+					const country = countries[countryCode] || "N/A"; // Use country name or "N/A"
+					const percentage = totalUsers ? ((users / totalUsers) * 100).toFixed(2) + "%" : "0%";
+					chartData.push({ monthDay, users, country, percentage });
 				});
 			}
 		}
-
 		setChartData(chartData);
 	};
 
@@ -115,6 +123,27 @@ const OpenTelemetry = () => {
 
 	const handleRefresh = () => {
 		fetchData(startDate, endDate, displayType, format);
+	};
+
+	// Custom Tooltip component
+	const CustomTooltip = ({ active, payload }) => {
+		if (active && payload && payload.length) {
+			const { monthDay, users, country } = payload[0].payload;
+			return (
+				<div
+					className="custom-tooltip"
+					style={{
+						backgroundColor: isDarkMode ? "#333" : "#fff",
+						color: isDarkMode ? "#fff" : "#000"
+					}}
+				>
+					<p className="label">{`Date: ${monthDay}`}</p>
+					<p className="intro">{`Users: ${users}`}</p>
+					<p className="intro">{`Country: ${country}`}</p>
+				</div>
+			);
+		}
+		return null;
 	};
 
 	return (
@@ -157,7 +186,7 @@ const OpenTelemetry = () => {
 						<Grid container spacing={2} sx={{ mt: 3 }}>
 							{/* Total Card */}
 							<Grid item xs={12} sm={6} md={2}>
-								<Card className={" card1 text-center"}>
+								<Card className={"card1 text-center"}>
 									<CardContent>
 										<Grid container justifyContent="center" alignItems="center">
 											<Grid item xs={3} className="icondiv">
@@ -175,7 +204,7 @@ const OpenTelemetry = () => {
 							{/* Conditional Country Total Card */}
 							{displayType === "available" && (
 								<Grid item xs={12} sm={6} md={2}>
-									<Card className={" card2 text-center"} id="card2">
+									<Card className={"card2 text-center"} id="card2">
 										<CardContent>
 											<Grid container justifyContent="center" alignItems="center">
 												<Grid item xs={3}>
@@ -215,11 +244,11 @@ const OpenTelemetry = () => {
 							{/* Format Radio Buttons */}
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl component="fieldset">
-									<FormLabel component="legend">Format</FormLabel>
+									<FormLabel component="legend">Date Format</FormLabel>
 									<RadioGroup
 										row
-										aria-label="format"
-										name="format"
+										aria-label="date-format"
+										name="date-format"
 										value={format}
 										onChange={handleFormatChange}
 									>
@@ -229,91 +258,101 @@ const OpenTelemetry = () => {
 								</FormControl>
 							</Grid>
 
-							{/* Start Date Picker */}
+							{/* Date Range */}
 							<Grid item xs={12} sm={6} md={3}>
 								<TextField
-									id="start-date"
 									label="Start Date"
 									type="date"
 									value={startDate}
 									onChange={handleStartDateChange}
-									InputLabelProps={{ shrink: true }}
+									InputLabelProps={{
+										shrink: true
+									}}
 									fullWidth
 								/>
 							</Grid>
-
-							{/* End Date Picker */}
 							<Grid item xs={12} sm={6} md={3}>
 								<TextField
-									id="end-date"
 									label="End Date"
 									type="date"
 									value={endDate}
 									onChange={handleEndDateChange}
-									InputLabelProps={{ shrink: true }}
+									InputLabelProps={{
+										shrink: true
+									}}
 									fullWidth
 								/>
 							</Grid>
-						</Grid>
-
-						{/* Refresh Button */}
-						<Grid item xs={12} sx={{ mt: 2 }}>
-							<Stack direction="row" spacing={2}>
-								<Button variant="contained" color="primary" onClick={handleRefresh}>
+							<Grid item xs={12} sm={6} md={3}>
+								<Button variant="contained" onClick={handleRefresh} sx={{ mt: 2 }}>
 									Refresh
 								</Button>
-							</Stack>
+							</Grid>
 						</Grid>
 
 						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Table */}
-							<Grid item xs={12} sm={12} md={6}>
-								<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
-									<Table>
-										<TableHead>
-											<TableRow>
-												<TableCell>COUNTRY</TableCell>
-												<TableCell>USERS</TableCell>
-												<TableCell>PERCENTAGE</TableCell>
-											</TableRow>
-										</TableHead>
-										<TableBody>
-											{data && data.countries && data.countries.length > 0 ? (
-												data.countries.map((country, index) => (
-													<TableRow key={index}>
-														<TableCell>{country[0]}</TableCell>
-														<TableCell>{country[2]}</TableCell>
-														<TableCell>{((country[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
-													</TableRow>
-												))
-											) : (
-												<TableRow>
-													<TableCell colSpan={3} align="center">
-														No data available
-													</TableCell>
-												</TableRow>
-											)}
-										</TableBody>
-									</Table>
-								</TableContainer>
-							</Grid>
-
 							{/* Chart */}
-							<Grid item xs={12} sx={{ mt: 3 }}>
-								<Box sx={{ width: "100%" }}>
+							<Grid item xs={12} md={6}>
+								<Box
+									sx={{
+										width: "100%",
+										maxWidth: "100%"
+									}}
+								>
 									<LineChart
-										width={1000}
-										height={400}
 										data={chartData}
 										margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+										width={
+											isSmallScreen
+												? window.innerWidth
+												: isMediumScreen
+													? 600
+													: isLargeScreen
+														? 800
+														: window.innerWidth
+										}
+										height={450}
 									>
 										<CartesianGrid strokeDasharray="3 3" />
-										<XAxis dataKey="month" />
+										<XAxis dataKey="monthDay" />
 										<YAxis />
-										<Tooltip />
+										<Tooltip content={<CustomTooltip />} />
 										<Legend />
-										<Line type="monotone" dataKey="users" stroke="#8884d8" activeDot={{ r: 8 }} />
+										<Line
+											type="monotone"
+											dataKey="users"
+											stroke={isDarkMode ? "#82ca9d" : "#8884d8"}
+											activeDot={{ r: 8 }}
+										/>
 									</LineChart>
+								</Box>
+							</Grid>
+
+							{/* Table */}
+							<Grid item xs={12} md={6}>
+								<Box sx={{ overflowX: "auto" }}>
+									<TableContainer component={Paper}>
+										<Table sx={{ minWidth: 800 }}>
+											<TableHead>
+												<TableRow>
+													<TableCell>Date</TableCell>
+													<TableCell align="right">Users</TableCell>
+													<TableCell align="right">Country</TableCell>
+													<TableCell align="right">Percentage</TableCell>
+												</TableRow>
+											</TableHead>
+											<TableBody>
+												{chartData.map((row, index) => (
+													<TableRow key={index}>
+														<TableCell>{row.monthDay}</TableCell>
+														<TableCell align="right">{row.users}</TableCell>
+														<TableCell align="right">{row.country || "N/A"}</TableCell>
+														<TableCell align="right">{row.percentage}</TableCell>
+													</TableRow>
+												))}
+											</TableBody>
+										</Table>
+									</TableContainer>
 								</Box>
 							</Grid>
 						</Grid>
