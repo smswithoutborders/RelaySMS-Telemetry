@@ -25,8 +25,9 @@ import {
 	FormLabel
 } from "@mui/material";
 import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts"; // Updated import for Recharts
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import axios from "axios";
+import { useTheme } from "@mui/material/styles";
 import "../index.css";
 
 const drawerWidth = 240;
@@ -40,6 +41,9 @@ const OpenTelemetry = () => {
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [chartData, setChartData] = useState([]);
+
+	const theme = useTheme();
+	const isDarkMode = theme.palette.mode === "dark";
 
 	useEffect(() => {
 		const today = new Date().toISOString().split("T")[0];
@@ -75,17 +79,16 @@ const OpenTelemetry = () => {
 
 	const prepareChartData = (data) => {
 		const chartData = [];
-
 		for (const year in data) {
 			if (year !== "countries" && year !== "total_countries" && year !== "total_users") {
 				data[year].forEach((entry) => {
 					const month = entry[0];
 					const users = entry[1];
-					chartData.push({ month, users });
+					const country = entry[2] || "N/A"; // Adjust as needed
+					chartData.push({ month, users, country });
 				});
 			}
 		}
-
 		setChartData(chartData);
 	};
 
@@ -115,6 +118,27 @@ const OpenTelemetry = () => {
 
 	const handleRefresh = () => {
 		fetchData(startDate, endDate, displayType, format);
+	};
+
+	// Custom Tooltip component
+	const CustomTooltip = ({ active, payload }) => {
+		if (active && payload && payload.length) {
+			const { month, users, country } = payload[0].payload;
+			return (
+				<div
+					className="custom-tooltip"
+					style={{
+						backgroundColor: isDarkMode ? "#333" : "#fff",
+						color: isDarkMode ? "#fff" : "#000"
+					}}
+				>
+					<p className="label">{`Month: ${month}`}</p>
+					<p className="intro">{`Users: ${users}`}</p>
+					<p className="intro">{`Country: ${country}`}</p>
+				</div>
+			);
+		}
+		return null;
 	};
 
 	return (
@@ -157,7 +181,7 @@ const OpenTelemetry = () => {
 						<Grid container spacing={2} sx={{ mt: 3 }}>
 							{/* Total Card */}
 							<Grid item xs={12} sm={6} md={2}>
-								<Card className={" card1 text-center"}>
+								<Card className={"card1 text-center"}>
 									<CardContent>
 										<Grid container justifyContent="center" alignItems="center">
 											<Grid item xs={3} className="icondiv">
@@ -175,7 +199,7 @@ const OpenTelemetry = () => {
 							{/* Conditional Country Total Card */}
 							{displayType === "available" && (
 								<Grid item xs={12} sm={6} md={2}>
-									<Card className={" card2 text-center"} id="card2">
+									<Card className={"card2 text-center"} id="card2">
 										<CardContent>
 											<Grid container justifyContent="center" alignItems="center">
 												<Grid item xs={3}>
@@ -224,15 +248,14 @@ const OpenTelemetry = () => {
 										onChange={handleFormatChange}
 									>
 										<FormControlLabel value="month" control={<Radio />} label="Month" />
-										<FormControlLabel value="day" control={<Radio />} label="Day" />
+										<FormControlLabel value="year" control={<Radio />} label="Year" />
 									</RadioGroup>
 								</FormControl>
 							</Grid>
 
-							{/* Start Date Picker */}
+							{/* Date Range Inputs */}
 							<Grid item xs={12} sm={6} md={3}>
 								<TextField
-									id="start-date"
 									label="Start Date"
 									type="date"
 									value={startDate}
@@ -242,10 +265,8 @@ const OpenTelemetry = () => {
 								/>
 							</Grid>
 
-							{/* End Date Picker */}
 							<Grid item xs={12} sm={6} md={3}>
 								<TextField
-									id="end-date"
 									label="End Date"
 									type="date"
 									value={endDate}
@@ -254,21 +275,46 @@ const OpenTelemetry = () => {
 									fullWidth
 								/>
 							</Grid>
+
+							{/* Refresh Button */}
+							<Grid item xs={12}>
+								<Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+									<Button variant="contained" color="primary" onClick={handleRefresh}>
+										Refresh Data
+									</Button>
+								</Stack>
+							</Grid>
 						</Grid>
 
-						{/* Refresh Button */}
-						<Grid item xs={12} sx={{ mt: 2 }}>
-							<Stack direction="row" spacing={2}>
-								<Button variant="contained" color="primary" onClick={handleRefresh}>
-									Refresh
-								</Button>
-							</Stack>
-						</Grid>
-
+						{/* Chart and Table */}
 						<Grid container spacing={2} sx={{ mt: 3 }}>
+							{/* Chart */}
+							<Grid item xs={12} md={6}>
+								<Box sx={{ width: "100%" }}>
+									<LineChart
+										data={chartData}
+										margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+										width={500}
+										height={300}
+									>
+										<CartesianGrid strokeDasharray="3 3" />
+										<XAxis dataKey="month" />
+										<YAxis />
+										<Tooltip content={<CustomTooltip />} />
+										<Legend />
+										<Line
+											type="monotone"
+											dataKey="users"
+											stroke={isDarkMode ? "#82ca9d" : "#8884d8"}
+											activeDot={{ r: 8 }}
+										/>
+									</LineChart>
+								</Box>
+							</Grid>
+
 							{/* Table */}
-							<Grid item xs={12} sm={12} md={6}>
-								<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
+							<Grid item xs={12} md={6}>
+								<TableContainer component={Paper} sx={{ maxHeight: 400, overflowX: "auto" }}>
 									<Table>
 										<TableHead>
 											<TableRow>
@@ -296,25 +342,6 @@ const OpenTelemetry = () => {
 										</TableBody>
 									</Table>
 								</TableContainer>
-							</Grid>
-
-							{/* Chart */}
-							<Grid item xs={12} sx={{ mt: 3 }}>
-								<Box sx={{ width: "100%" }}>
-									<LineChart
-										width={1000}
-										height={400}
-										data={chartData}
-										margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-									>
-										<CartesianGrid strokeDasharray="3 3" />
-										<XAxis dataKey="month" />
-										<YAxis />
-										<Tooltip />
-										<Legend />
-										<Line type="monotone" dataKey="users" stroke="#8884d8" activeDot={{ r: 8 }} />
-									</LineChart>
-								</Box>
 							</Grid>
 						</Grid>
 					</Box>
