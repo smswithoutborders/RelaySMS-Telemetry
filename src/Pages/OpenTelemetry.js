@@ -288,30 +288,6 @@ const OpenTelemetry = () => {
 
 						{/* Chart and Table */}
 						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Chart */}
-							<Grid item xs={12} md={6}>
-								<Box sx={{ width: "100%" }}>
-									<LineChart
-										data={chartData}
-										margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-										width={500}
-										height={300}
-									>
-										<CartesianGrid strokeDasharray="3 3" />
-										<XAxis dataKey="month" />
-										<YAxis />
-										<Tooltip content={<CustomTooltip />} />
-										<Legend />
-										<Line
-											type="monotone"
-											dataKey="users"
-											stroke={isDarkMode ? "#82ca9d" : "#8884d8"}
-											activeDot={{ r: 8 }}
-										/>
-									</LineChart>
-								</Box>
-							</Grid>
-
 							{/* Table */}
 							<Grid item xs={12} md={6}>
 								<TableContainer component={Paper} sx={{ maxHeight: 400, overflowX: "auto" }}>
@@ -342,6 +318,29 @@ const OpenTelemetry = () => {
 										</TableBody>
 									</Table>
 								</TableContainer>
+							</Grid>
+							{/* Chart */}
+							<Grid item xs={12} md={6}>
+								<Box sx={{ width: "100%", maxWidth: "100%", overflowX: "auto" }}>
+									<LineChart
+										data={chartData}
+										margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+										width={window.innerWidth < 600 ? window.innerWidth : 800}
+										height={450}
+									>
+										<CartesianGrid strokeDasharray="3 3" />
+										<XAxis dataKey="month" />
+										<YAxis />
+										<Tooltip content={<CustomTooltip />} />
+										<Legend />
+										<Line
+											type="monotone"
+											dataKey="users"
+											stroke={isDarkMode ? "#82ca9d" : "#8884d8"}
+											activeDot={{ r: 8 }}
+										/>
+									</LineChart>
+								</Box>
 							</Grid>
 						</Grid>
 					</Box>
