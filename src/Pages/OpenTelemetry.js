@@ -25,8 +25,8 @@ import {
 	FormLabel
 } from "@mui/material";
 import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts"; // Updated import for Recharts
 import axios from "axios";
-import ApexCharts from "apexcharts";
 import "../index.css";
 
 const drawerWidth = 240;
@@ -39,7 +39,7 @@ const OpenTelemetry = () => {
 	const [format, setFormat] = useState("month");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
-	const [chart, setChart] = useState(null);
+	const [chartData, setChartData] = useState([]);
 
 	useEffect(() => {
 		const today = new Date().toISOString().split("T")[0];
@@ -51,20 +51,9 @@ const OpenTelemetry = () => {
 	useEffect(() => {
 		if (data) {
 			handleData(data);
-			extractChartData(data);
+			prepareChartData(data);
 		}
 	}, [data]);
-
-	useEffect(() => {
-		if (chart) {
-			try {
-				const apexChart = new ApexCharts(document.querySelector("#chart"), chart);
-				apexChart.render();
-			} catch (error) {
-				console.error("Error rendering chart:", error);
-			}
-		}
-	}, [chart]);
 
 	const fetchData = async (start, end, type, format) => {
 		try {
@@ -81,53 +70,23 @@ const OpenTelemetry = () => {
 	};
 
 	const handleData = (data) => {
-		if (displayType === "signup") {
-			setTotalUsers(data.total_signups || 0); // Set total signups for the "Sign Up Users" display type
-		} else {
-			setTotalUsers(data.total_users || 0); // Set total users for the "Total Users" display type
-		}
+		setTotalUsers(data.total_users || 0);
 	};
 
-	const extractChartData = (data) => {
-		if (!data || !data[displayType]) {
-			console.error(`Data for display type '${displayType}' is undefined.`);
-			return;
+	const prepareChartData = (data) => {
+		const chartData = [];
+
+		for (const year in data) {
+			if (year !== "countries" && year !== "total_countries" && year !== "total_users") {
+				data[year].forEach((entry) => {
+					const month = entry[0];
+					const users = entry[1];
+					chartData.push({ month, users });
+				});
+			}
 		}
 
-		const months = [
-			"Jan",
-			"Feb",
-			"Mar",
-			"Apr",
-			"May",
-			"Jun",
-			"Jul",
-			"Aug",
-			"Sep",
-			"Oct",
-			"Nov",
-			"Dec"
-		];
-		const days = Array.from({ length: 31 }, (_, i) => i + 1);
-		const categories = format === "month" ? months : days;
-
-		const chartData = categories.map((_, index) => {
-			return data[displayType][index] ? data[displayType][index][1] : 0;
-		});
-
-		const options = {
-			chart: {
-				height: 350,
-				type: "line",
-				zoom: { enabled: false }
-			},
-			series: [{ name: displayType, data: chartData }],
-			dataLabels: { enabled: false },
-			stroke: { curve: "smooth" },
-			xaxis: { categories }
-		};
-
-		setChart(options);
+		setChartData(chartData);
 	};
 
 	const handleDisplayTypeChange = (e) => {
@@ -206,7 +165,7 @@ const OpenTelemetry = () => {
 											</Grid>
 											<Grid item xs={6}>
 												<Typography variant="h3">{totalUsers}</Typography>
-												<Typography className="textsmall">TOTAL</Typography>
+												<Typography className="textsmall">TOTAL USERS</Typography>
 											</Grid>
 										</Grid>
 									</CardContent>
@@ -299,45 +258,65 @@ const OpenTelemetry = () => {
 
 						{/* Refresh Button */}
 						<Grid item xs={12} sx={{ mt: 2 }}>
-							<Stack direction="row" spacing={2} justifyContent="center">
+							<Stack direction="row" spacing={2}>
 								<Button variant="contained" color="primary" onClick={handleRefresh}>
 									Refresh
 								</Button>
 							</Stack>
 						</Grid>
 
-						{/* Data Table */}
-						<Grid item xs={6}>
-							<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
-								<Table>
-									<TableHead>
-										<TableRow>
-											<TableCell>COUNTRY</TableCell>
-											<TableCell>USERS</TableCell>
-											<TableCell>PERCENTAGE</TableCell>
-										</TableRow>
-									</TableHead>
-									<TableBody>
-										{data && data.countries && data.countries.length > 0 ? (
-											data.countries.map((country, index) => (
-												<TableRow key={index}>
-													<TableCell>{country[0]}</TableCell>
-													<TableCell>{country[2]}</TableCell>
-													<TableCell>{((country[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
-												</TableRow>
-											))
-										) : (
+						<Grid container spacing={2} sx={{ mt: 3 }}>
+							{/* Table */}
+							<Grid item xs={12} sm={12} md={6}>
+								<TableContainer component={Paper} sx={{ maxHeight: 400, marginTop: 3 }}>
+									<Table>
+										<TableHead>
 											<TableRow>
-												<TableCell colSpan={3} align="center">
-													No data available
-												</TableCell>
+												<TableCell>COUNTRY</TableCell>
+												<TableCell>USERS</TableCell>
+												<TableCell>PERCENTAGE</TableCell>
 											</TableRow>
-										)}
-									</TableBody>
-								</Table>
-							</TableContainer>
+										</TableHead>
+										<TableBody>
+											{data && data.countries && data.countries.length > 0 ? (
+												data.countries.map((country, index) => (
+													<TableRow key={index}>
+														<TableCell>{country[0]}</TableCell>
+														<TableCell>{country[2]}</TableCell>
+														<TableCell>{((country[2] / totalUsers) * 100).toFixed(2)}%</TableCell>
+													</TableRow>
+												))
+											) : (
+												<TableRow>
+													<TableCell colSpan={3} align="center">
+														No data available
+													</TableCell>
+												</TableRow>
+											)}
+										</TableBody>
+									</Table>
+								</TableContainer>
+							</Grid>
+
+							{/* Chart */}
+							<Grid item xs={12} sx={{ mt: 3 }}>
+								<Box sx={{ width: "100%" }}>
+									<LineChart
+										width={1000}
+										height={400}
+										data={chartData}
+										margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+									>
+										<CartesianGrid strokeDasharray="3 3" />
+										<XAxis dataKey="month" />
+										<YAxis />
+										<Tooltip />
+										<Legend />
+										<Line type="monotone" dataKey="users" stroke="#8884d8" activeDot={{ r: 8 }} />
+									</LineChart>
+								</Box>
+							</Grid>
 						</Grid>
-						<Grid item xs={6}></Grid>
 					</Box>
 				</Grid>
 			</Grid>
