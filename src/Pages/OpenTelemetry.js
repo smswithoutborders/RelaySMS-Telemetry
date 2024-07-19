@@ -330,7 +330,7 @@ const OpenTelemetry = () => {
 
 							{/* Table */}
 							<Grid item xs={12} md={6}>
-								<Box sx={{ overflowX: "auto" }}>
+								<Box sx={{ maxHeight: "30rem", overflow: "auto" }}>
 									<TableContainer component={Paper}>
 										<Table sx={{ minWidth: 800 }}>
 											<TableHead>
