@@ -1,4 +1,4 @@
-# SMSWithoutBorders Dashboard
+# SMSWithoutBorders Visibility Dashboard
 
 Welcome to the SMSWithoutBorders Dashboard, a powerful tool designed to measure the reliability of gateway clients and available gateway servers.
 
