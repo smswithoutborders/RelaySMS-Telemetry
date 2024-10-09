@@ -1,150 +1,64 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
 	Box,
 	Grid,
-	Card,
-	CardContent,
 	Typography,
-	FormControl,
-	InputLabel,
+	TextField,
 	Select,
 	MenuItem,
-	RadioGroup,
-	FormControlLabel,
-	Radio,
-	TextField,
+	FormControl,
+	InputLabel,
 	Table,
 	TableBody,
 	TableCell,
 	TableContainer,
 	TableHead,
 	TableRow,
-	Paper,
-	Button,
-	FormLabel
+	Paper
 } from "@mui/material";
-import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
-import axios from "axios";
-import { useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import "../index.css";
 
 const drawerWidth = 240;
-const baseUrl = "https://smswithoutborders.com:11000";
 
 const OpenTelemetry = () => {
-	const [data, setData] = useState(null);
-	const [totalUsers, setTotalUsers] = useState(0);
-	const [displayType, setDisplayType] = useState("available");
-	const [format, setFormat] = useState("month");
-	const [startDate, setStartDate] = useState("");
-	const [endDate, setEndDate] = useState("");
-	const [chartData, setChartData] = useState([]);
+	// State variables for filtering and data representation
+	const [filterType, setFilterType] = useState("perDay");
+	const [filterCountry, setFilterCountry] = useState("");
+	const [filterDate, setFilterDate] = useState("");
 
-	const theme = useTheme();
-	const isDarkMode = theme.palette.mode === "dark";
-	const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-	const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
-	const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
+	// Sample data
+	const countries = ["USA", "Canada", "Germany", "France"];
+	const signupData = [
+		{ id: 1, signupTime: "2024-10-01", country: "USA" },
+		{ id: 2, signupTime: "2024-10-02", country: "Canada" },
+		{ id: 3, signupTime: "2024-09-15", country: "Germany" },
+		{ id: 4, signupTime: "2024-08-21", country: "France" }
+	];
+	const deletedAccounts = 15;
+	const totalSignupUsers = signupData.length;
+	const totalCountries = new Set(signupData.map((data) => data.country)).size;
 
-	useEffect(() => {
-		const today = new Date().toISOString().split("T")[0];
-		setStartDate(today);
-		setEndDate(today);
-		fetchData(today, today, displayType, format);
-	}, []);
-
-	useEffect(() => {
-		if (data) {
-			handleData(data);
-			prepareChartData(data);
-		}
-	}, [data]);
-
-	const fetchData = async (start, end, type, format) => {
-		try {
-			const response = await axios.get(
-				`${baseUrl}/users?start=${start}&end=${end}&type=${type}&format=${format}`
-			);
-			if (response.status === 200) {
-				const responseData = response.data;
-				setData(responseData);
-			}
-		} catch (error) {
-			console.error("Error fetching data:", error);
-		}
+	// Handle filter change
+	const handleFilterChange = (e) => {
+		setFilterType(e.target.value);
 	};
 
-	const handleData = (data) => {
-		setTotalUsers(data.total_users || 0);
+	// Handle country filter change
+	const handleCountryChange = (e) => {
+		setFilterCountry(e.target.value);
 	};
 
-	const prepareChartData = (data) => {
-		const chartData = [];
-		const countries = data.countries || {}; // Ensure countries is defined
-
-		for (const date in data) {
-			if (date !== "countries" && date !== "total_countries" && date !== "total_users") {
-				data[date].forEach((entry) => {
-					const [monthDay, users, countryCode] = entry;
-					const country = countries[countryCode] || "N/A"; // Use country name or "N/A"
-					const percentage = totalUsers ? ((users / totalUsers) * 100).toFixed(2) + "%" : "0%";
-					chartData.push({ monthDay, users, country, percentage });
-				});
-			}
-		}
-		setChartData(chartData);
+	// Handle date filter change
+	const handleDateChange = (e) => {
+		setFilterDate(e.target.value);
 	};
 
-	const handleDisplayTypeChange = (e) => {
-		const newDisplayType = e.target.value;
-		setDisplayType(newDisplayType);
-		fetchData(startDate, endDate, newDisplayType, format);
-	};
-
-	const handleFormatChange = (e) => {
-		const newFormat = e.target.value;
-		setFormat(newFormat);
-		fetchData(startDate, endDate, displayType, newFormat);
-	};
-
-	const handleStartDateChange = (e) => {
-		const newStartDate = e.target.value;
-		setStartDate(newStartDate);
-		fetchData(newStartDate, endDate, displayType, format);
-	};
-
-	const handleEndDateChange = (e) => {
-		const newEndDate = e.target.value;
-		setEndDate(newEndDate);
-		fetchData(startDate, newEndDate, displayType, format);
-	};
-
-	const handleRefresh = () => {
-		fetchData(startDate, endDate, displayType, format);
-	};
-
-	// Custom Tooltip component
-	const CustomTooltip = ({ active, payload }) => {
-		if (active && payload && payload.length) {
-			const { monthDay, users, country } = payload[0].payload;
-			return (
-				<div
-					className="custom-tooltip"
-					style={{
-						backgroundColor: isDarkMode ? "#333" : "#fff",
-						color: isDarkMode ? "#fff" : "#000"
-					}}
-				>
-					<p className="label">{`Date: ${monthDay}`}</p>
-					<p className="intro">{`Users: ${users}`}</p>
-					<p className="intro">{`Country: ${country}`}</p>
-				</div>
-			);
-		}
-		return null;
-	};
+	// Filtered data based on filters applied
+	const filteredData = signupData.filter((item) => {
+		return (
+			(filterCountry === "" || item.country === filterCountry) &&
+			(filterDate === "" || item.signupTime.includes(filterDate))
+		);
+	});
 
 	return (
 		<Box
@@ -153,11 +67,11 @@ const OpenTelemetry = () => {
 			sx={{
 				px: { md: 3, sm: 3, xs: 2 },
 				pb: { md: 3, sm: 3, xs: 14 },
-				pr: { md: 3, sm: 3, xs: 2 },
 				flexGrow: 1
 			}}
 		>
-			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
+			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center">
+				{/* sidenavbar */}
 				<Grid
 					item
 					lg={2}
@@ -170,6 +84,7 @@ const OpenTelemetry = () => {
 					}}
 				></Grid>
 
+				{/* Main content area that adjusts based on screen size */}
 				<Grid
 					mx="auto"
 					item
@@ -179,184 +94,104 @@ const OpenTelemetry = () => {
 					sm={12}
 					sx={{
 						p: { md: 3, sm: 2, xs: 0 },
-						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
+						width: {
+							sm: `calc(100% - ${drawerWidth}px)`,
+							md: `calc(100% - ${drawerWidth}px)`
+						}
 					}}
 				>
-					<Box>
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={"card1 text-center"}>
-									<CardContent>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3} className="icondiv">
-												<BarChartIcon fontSize="large" className="icon1" />
-											</Grid>
-											<Grid item xs={6}>
-												<Typography variant="h3">{totalUsers}</Typography>
-												<Typography className="textsmall">TOTAL USERS</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
-							</Grid>
-
-							{/* Conditional Country Total Card */}
-							{displayType === "available" && (
-								<Grid item xs={12} sm={6} md={2}>
-									<Card className={"card2 text-center"} id="card2">
-										<CardContent>
-											<Grid container justifyContent="center" alignItems="center">
-												<Grid item xs={3}>
-													<LocationOnIcon fontSize="large" className="icon2" />
-												</Grid>
-												<Grid item xs={6} id="countrytotaldiv">
-													<Typography variant="h3">
-														{data ? data.total_countries || 0 : 0}
-													</Typography>
-													<Typography className="textsmall">COUNTRY TOTAL</Typography>
-												</Grid>
-											</Grid>
-										</CardContent>
-									</Card>
-								</Grid>
-							)}
+					{/* Nested Grid for additional layout control (spacing between elements) */}
+					<Grid container columnSpacing={4} rowSpacing={4} alignItems="flex-end">
+						<Grid item xs={12}>
+							<Typography variant="h4">Open Telemetry Data</Typography>
 						</Grid>
 
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Display Type Select */}
-							<Grid item xs={12} sm={6} md={3}>
-								<FormControl variant="outlined" fullWidth>
-									<InputLabel id="display-type-label">Display Type</InputLabel>
-									<Select
-										labelId="display-type-label"
-										id="display-type"
-										value={displayType}
-										onChange={handleDisplayTypeChange}
-										label="Display Type"
-									>
-										<MenuItem value="available">Total Users</MenuItem>
-										<MenuItem value="signup">Sign Up Users</MenuItem>
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Format Radio Buttons */}
-							<Grid item xs={12} sm={6} md={3}>
-								<FormControl component="fieldset">
-									<FormLabel component="legend">Date Format</FormLabel>
-									<RadioGroup
-										row
-										aria-label="date-format"
-										name="date-format"
-										value={format}
-										onChange={handleFormatChange}
-									>
-										<FormControlLabel value="month" control={<Radio />} label="Month" />
-										<FormControlLabel value="day" control={<Radio />} label="Day" />
-									</RadioGroup>
-								</FormControl>
-							</Grid>
-
-							{/* Date Range */}
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									label="Start Date"
-									type="date"
-									value={startDate}
-									onChange={handleStartDateChange}
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-								/>
-							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									label="End Date"
-									type="date"
-									value={endDate}
-									onChange={handleEndDateChange}
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-								/>
-							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<Button variant="contained" onClick={handleRefresh} sx={{ mt: 2 }}>
-									Refresh
-								</Button>
-							</Grid>
+						{/* Display Boxes for Total Counts */}
+						<Grid item xs={12} md={4}>
+							<Box p={2} bgcolor="lightblue" borderRadius={2}>
+								<Typography variant="h6">Total Countries</Typography>
+								<Typography variant="h5">{totalCountries}</Typography>
+							</Box>
 						</Grid>
 
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Chart */}
-							<Grid item xs={12} md={6}>
-								<Box
-									sx={{
-										width: "100%",
-										maxWidth: "100%"
-									}}
-								>
-									<LineChart
-										data={chartData}
-										margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-										width={
-											isSmallScreen
-												? window.innerWidth
-												: isMediumScreen
-													? 600
-													: isLargeScreen
-														? 800
-														: window.innerWidth
-										}
-										height={450}
-									>
-										<CartesianGrid strokeDasharray="3 3" />
-										<XAxis dataKey="monthDay" />
-										<YAxis />
-										<Tooltip content={<CustomTooltip />} />
-										<Legend />
-										<Line
-											type="monotone"
-											dataKey="users"
-											stroke={isDarkMode ? "#82ca9d" : "#8884d8"}
-											activeDot={{ r: 8 }}
+						<Grid item xs={12} md={4}>
+							<Box p={2} bgcolor="lightgreen" borderRadius={2}>
+								<Typography variant="h6">Total Signup Users</Typography>
+								<Typography variant="h5">{totalSignupUsers}</Typography>
+							</Box>
+						</Grid>
+
+						<Grid item xs={12} md={4}>
+							<Box p={2} bgcolor="lightcoral" borderRadius={2}>
+								<Typography variant="h6">Deleted Accounts</Typography>
+								<Typography variant="h5">{deletedAccounts}</Typography>
+							</Box>
+						</Grid>
+
+						{/* Filter Section */}
+						<Grid item xs={12}>
+							<Box p={2} border="1px solid lightgray" borderRadius={2}>
+								<Grid container spacing={2}>
+									<Grid item xs={12} sm={4}>
+										<FormControl fullWidth>
+											<InputLabel>Filter By</InputLabel>
+											<Select value={filterType} onChange={handleFilterChange}>
+												<MenuItem value="perDay">Per Day</MenuItem>
+												<MenuItem value="perMonth">Per Month</MenuItem>
+												<MenuItem value="perYear">Per Year</MenuItem>
+											</Select>
+										</FormControl>
+									</Grid>
+									<Grid item xs={12} sm={4}>
+										<TextField
+											fullWidth
+											label="Filter by Date"
+											type="date"
+											InputLabelProps={{ shrink: true }}
+											value={filterDate}
+											onChange={handleDateChange}
 										/>
-									</LineChart>
-								</Box>
-							</Grid>
-
-							{/* Table */}
-							<Grid item xs={12} md={6}>
-								<Box sx={{ maxHeight: "30rem", overflow: "auto" }}>
-									<TableContainer component={Paper}>
-										<Table sx={{ minWidth: 800 }}>
-											<TableHead>
-												<TableRow>
-													<TableCell>Date</TableCell>
-													<TableCell align="right">Users</TableCell>
-													<TableCell align="right">Country</TableCell>
-													<TableCell align="right">Percentage</TableCell>
-												</TableRow>
-											</TableHead>
-											<TableBody>
-												{chartData.map((row, index) => (
-													<TableRow key={index}>
-														<TableCell>{row.monthDay}</TableCell>
-														<TableCell align="right">{row.users}</TableCell>
-														<TableCell align="right">{row.country || "N/A"}</TableCell>
-														<TableCell align="right">{row.percentage}</TableCell>
-													</TableRow>
+									</Grid>
+									<Grid item xs={12} sm={4}>
+										<FormControl fullWidth>
+											<InputLabel>Filter by Country</InputLabel>
+											<Select value={filterCountry} onChange={handleCountryChange}>
+												<MenuItem value="">All Countries</MenuItem>
+												{countries.map((country) => (
+													<MenuItem key={country} value={country}>
+														{country}
+													</MenuItem>
 												))}
-											</TableBody>
-										</Table>
-									</TableContainer>
-								</Box>
-							</Grid>
+											</Select>
+										</FormControl>
+									</Grid>
+								</Grid>
+							</Box>
 						</Grid>
-					</Box>
+
+						{/* Tables for displaying filtered data */}
+						<Grid item xs={12}>
+							<Typography variant="h6">Filtered Signup Data</Typography>
+							<TableContainer component={Paper}>
+								<Table>
+									<TableHead>
+										<TableRow>
+											<TableCell>Signup Time</TableCell>
+											<TableCell>Country</TableCell>
+										</TableRow>
+									</TableHead>
+									<TableBody>
+										{filteredData.map((row) => (
+											<TableRow key={row.id}>
+												<TableCell>{row.signupTime}</TableCell>
+												<TableCell>{row.country}</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</TableContainer>
+						</Grid>
+					</Grid>
 				</Grid>
 			</Grid>
 		</Box>
