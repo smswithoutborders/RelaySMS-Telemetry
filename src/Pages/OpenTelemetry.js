@@ -16,7 +16,8 @@ import {
 	TableRow,
 	Paper,
 	CircularProgress,
-	Button
+	Button,
+	TablePagination
 } from "@mui/material";
 
 const OpenTelemetry = () => {
@@ -29,7 +30,8 @@ const OpenTelemetry = () => {
 	const [countryFilter, setCountryFilter] = useState("");
 	const [totalCountries, setTotalCountries] = useState(0);
 	const [totalSignupUsers, setTotalSignupUsers] = useState(0);
-	const [deletedAccounts, setDeletedAccounts] = useState(0);
+	const [page, setPage] = useState(0);
+	const [rowsPerPage, setRowsPerPage] = useState(5);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -55,11 +57,9 @@ const OpenTelemetry = () => {
 	const calculateTotals = (apiData) => {
 		const countries = new Set(apiData.map((item) => item.summary?.country));
 		const totalSignups = apiData.reduce((sum, item) => sum + (item.summary?.signup || 0), 0);
-		const deleted = apiData.reduce((sum, item) => sum + (item.summary?.deleted || 0), 0);
 
 		setTotalCountries(countries.size);
 		setTotalSignupUsers(totalSignups);
-		setDeletedAccounts(deleted);
 	};
 
 	const applyFilters = () => {
@@ -76,11 +76,18 @@ const OpenTelemetry = () => {
 		}
 
 		setFilteredData(result);
+		setPage(0);
 	};
 
 	const handleStartDateChange = (e) => setStartDate(e.target.value);
 	const handleEndDateChange = (e) => setEndDate(e.target.value);
 	const handleCountryChange = (e) => setCountryFilter(e.target.value);
+
+	const handleChangePage = (event, newPage) => setPage(newPage);
+	const handleChangeRowsPerPage = (event) => {
+		setRowsPerPage(parseInt(event.target.value, 10));
+		setPage(0);
+	};
 
 	if (loading) {
 		return (
@@ -127,14 +134,8 @@ const OpenTelemetry = () => {
 					</Typography>
 				</Grid>
 
-				{/* =========== Totals ============ */}
+				{/* ============= Totals ================ */}
 				<Grid container spacing={2}>
-					<Grid item xs={12} sm={4}>
-						<Box p={2} bgcolor="lightblue" borderRadius={2}>
-							<Typography variant="h6">Total Countries</Typography>
-							<Typography variant="h5">{totalCountries}</Typography>
-						</Box>
-					</Grid>
 					<Grid item xs={12} sm={4}>
 						<Box p={2} bgcolor="lightgreen" borderRadius={2}>
 							<Typography variant="h6">Total Signup Users</Typography>
@@ -142,14 +143,14 @@ const OpenTelemetry = () => {
 						</Box>
 					</Grid>
 					<Grid item xs={12} sm={4}>
-						<Box p={2} bgcolor="lightcoral" borderRadius={2}>
-							<Typography variant="h6">Deleted Accounts</Typography>
-							<Typography variant="h5">{deletedAccounts}</Typography>
+						<Box p={2} bgcolor="lightblue" borderRadius={2}>
+							<Typography variant="h6">Total Countries</Typography>
+							<Typography variant="h5">{totalCountries}</Typography>
 						</Box>
 					</Grid>
 				</Grid>
 
-				{/*=========== Filters================= */}
+				{/* ================= Filters =============== */}
 				<Grid item xs={12}>
 					<Box p={2} border="1px solid lightgray" borderRadius={2}>
 						<Grid container spacing={2}>
@@ -195,6 +196,7 @@ const OpenTelemetry = () => {
 					</Box>
 				</Grid>
 
+				{/* ================== Data Table ================ */}
 				<Grid item xs={12}>
 					<Typography variant="h6" gutterBottom>
 						Filtered Data
@@ -210,17 +212,27 @@ const OpenTelemetry = () => {
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{filteredData.map((item, index) => (
-									<TableRow key={index}>
-										<TableCell>{item.date || "N/A"}</TableCell>
-										<TableCell>{item.summary?.country || "N/A"}</TableCell>
-										<TableCell>{item.summary?.available || 0}</TableCell>
-										<TableCell>{item.summary?.signup || 0}</TableCell>
-									</TableRow>
-								))}
+								{filteredData
+									.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+									.map((item, index) => (
+										<TableRow key={index}>
+											<TableCell>{item.date || "N/A"}</TableCell>
+											<TableCell>{item.summary?.country || "N/A"}</TableCell>
+											<TableCell>{item.summary?.available || 0}</TableCell>
+											<TableCell>{item.summary?.signup || 0}</TableCell>
+										</TableRow>
+									))}
 							</TableBody>
 						</Table>
 					</TableContainer>
+					<TablePagination
+						component="div"
+						count={filteredData.length}
+						page={page}
+						onPageChange={handleChangePage}
+						rowsPerPage={rowsPerPage}
+						onRowsPerPageChange={handleChangeRowsPerPage}
+					/>
 				</Grid>
 			</Grid>
 		</Box>
