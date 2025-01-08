@@ -20,7 +20,6 @@ import {
 	Paper
 } from "@mui/material";
 import dayjs from "dayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
@@ -31,20 +30,20 @@ const DataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage }) => (
 	<Box>
 		<Typography variant="h6">Month Data Table</Typography>
 		<TableContainer component={Paper}>
-			<Table>
+			<Table stickyHeader>
 				<TableHead>
 					<TableRow>
 						<TableCell>Date</TableCell>
-						<TableCell>Country</TableCell>
-						<TableCell>Category</TableCell>
+						<TableCell align="right">Users</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
 					{data.slice((page - 1) * rowsPerPage, page * rowsPerPage).map((row, index) => (
 						<TableRow key={index}>
-							<TableCell>{row.date}</TableCell>
-							<TableCell>{row.summary.country}</TableCell>
-							<TableCell>{row.summary.category}</TableCell>
+							<TableCell>{row.summary.date}</TableCell>
+							<TableCell align="right" style={{ color: row.summary.user > 100 ? "green" : "red" }}>
+								{row.summary.user}
+							</TableCell>
 						</TableRow>
 					))}
 				</TableBody>
@@ -56,10 +55,10 @@ const DataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage }) => (
 			count={data.length}
 			rowsPerPage={rowsPerPage}
 			page={page - 1}
-			onPageChange={(event, newPage) => setPage(newPage + 1)} // Adjust to 1-based index
+			onPageChange={(event, newPage) => setPage(newPage + 1)}
 			onRowsPerPageChange={(event) => {
 				setRowsPerPage(parseInt(event.target.value, 10));
-				setPage(1); // Reset to first page
+				setPage(1);
 			}}
 		/>
 	</Box>
@@ -72,7 +71,6 @@ const CountryDataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage }) 
 			<Table>
 				<TableHead>
 					<TableRow>
-						<TableCell>Date</TableCell>
 						<TableCell>Country</TableCell>
 						<TableCell>Category</TableCell>
 					</TableRow>
@@ -80,7 +78,6 @@ const CountryDataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage }) 
 				<TableBody>
 					{data.slice((page - 1) * rowsPerPage, page * rowsPerPage).map((row, index) => (
 						<TableRow key={index}>
-							<TableCell>{row.date}</TableCell>
 							<TableCell>{row.summary.country}</TableCell>
 							<TableCell>{row.summary.category}</TableCell>
 						</TableRow>
@@ -94,10 +91,10 @@ const CountryDataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage }) 
 			count={data.length}
 			rowsPerPage={rowsPerPage}
 			page={page - 1}
-			onPageChange={(event, newPage) => setPage(newPage + 1)} // Adjust to 1-based index
+			onPageChange={(event, newPage) => setPage(newPage + 1)}
 			onRowsPerPageChange={(event) => {
 				setRowsPerPage(parseInt(event.target.value, 10));
-				setPage(1); // Reset to first page
+				setPage(1);
 			}}
 		/>
 	</Box>
@@ -118,6 +115,8 @@ const OpenTelemetry = () => {
 			try {
 				const formattedStartDate = startDate ? dayjs(startDate).format("YYYY-MM-DD") : "";
 				const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
+				console.log("start date:", formattedStartDate);
+				console.log("end date:", formattedStartDate);
 
 				const response = await fetch(
 					`https://api.telemetry.staging.smswithoutborders.com/v1/summary?start_date=${formattedStartDate}&end_date=${formattedEndDate}&country_code=${country}`
@@ -157,7 +156,6 @@ const OpenTelemetry = () => {
 	if (!filteredData) {
 		return <Typography>Loading...</Typography>;
 	}
-
 	const totalCountries = new Set(filteredData.map((item) => item.summary?.country)).size;
 
 	return (
@@ -252,21 +250,27 @@ const OpenTelemetry = () => {
 								<LocalizationProvider dateAdapter={AdapterDayjs}>
 									<Grid container spacing={2}>
 										<Grid item xs={12} sm={6}>
-											<DatePicker
+											<TextField
 												label="Start Date"
+												type="date"
+												onChange={(e) => setStartDate(e.target.value)}
 												value={startDate}
-												onChange={(newValue) => setStartDate(newValue)}
-												format="YYYY-MM-DD"
-												renderInput={(params) => <TextField {...params} fullWidth />}
+												InputLabelProps={{
+													shrink: true
+												}}
+												fullWidth
 											/>
 										</Grid>
 										<Grid item xs={12} sm={6}>
-											<DatePicker
+											<TextField
 												label="End Date"
+												type="date"
+												onChange={(e) => setEndDate(e.target.value)}
 												value={endDate}
-												onChange={(newValue) => setEndDate(newValue)}
-												format="YYYY-MM-DD"
-												renderInput={(params) => <TextField {...params} fullWidth />}
+												InputLabelProps={{
+													shrink: true
+												}}
+												fullWidth
 											/>
 										</Grid>
 									</Grid>
