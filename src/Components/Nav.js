@@ -51,6 +51,14 @@ function ResponsiveDrawer() {
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
+					<ListItemButton component={Link} to="/OpenTelematry">
+						<ListItemIcon>
+							<FaTable />
+						</ListItemIcon>
+						<ListItemText>Open Telematry</ListItemText>
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
 					<ListItemButton component={Link} to="/help">
 						<ListItemIcon>
 							<FaCircleQuestion />
