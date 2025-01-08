@@ -29,7 +29,7 @@ function ResponsiveDrawer() {
 			<Box display="flex" sx={{ p: 3 }}>
 				<Box component="img" src="/logo.png" sx={{ width: "35px" }} />
 				<Typography variant="body2" sx={{ px: 1, pt: 1, fontWeight: 600 }}>
-					SMSWithoutBorders
+					RelaySMS
 				</Typography>
 			</Box>
 			<Divider />
@@ -63,7 +63,7 @@ function ResponsiveDrawer() {
 						<ListItemIcon>
 							<FaCircleQuestion />
 						</ListItemIcon>
-						<ListItemText> Help </ListItemText>
+						<ListItemText>Help</ListItemText>
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
@@ -71,7 +71,7 @@ function ResponsiveDrawer() {
 						<ListItemIcon>
 							<FaHeadphones />
 						</ListItemIcon>
-						<ListItemText> Contact </ListItemText>
+						<ListItemText>Contact</ListItemText>
 					</ListItemButton>
 				</ListItem>
 			</List>
@@ -85,7 +85,7 @@ function ResponsiveDrawer() {
 				}}
 			>
 				<Paper elevation={3} sx={{ p: 2 }}>
-					<Typography sx={{ py: 2 }}>Check out SMSWithoutBorders blog posts</Typography>
+					<Typography sx={{ py: 2 }}>Check out RelaySMS blog posts</Typography>
 					<Button
 						component="a"
 						href="https://blog.smswithoutborders.com/"
