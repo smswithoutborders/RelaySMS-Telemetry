@@ -12,7 +12,6 @@ import Data from "./Pages/TableDialog";
 import PageNotFound from "./Pages/404";
 import Reliability from "./Pages/Reliability";
 import Resilience from "./Pages/Resilience";
-import OpenTelematry from "./Pages/OpenTelematry";
 import MobileNav from "./Components/MobileNav";
 import OpenTelemetry from "./Pages/OpenTelemetry";
 
@@ -79,7 +78,6 @@ function App() {
 				<Routes>
 					<Route path="/" element={<Reliability />} />
 					<Route path="/resilience" element={<Resilience />} />
-					<Route path="/OpenTelematry" element={<OpenTelematry />} />
 					<Route path="/help" element={<Help />} />
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/tests" element={<Data />} />
