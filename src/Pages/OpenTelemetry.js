@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Box,
 	Grid,
 	Card,
-	CardContent,
+	Button,
 	Typography,
-	FormControl,
-	InputLabel,
 	Select,
 	MenuItem,
-	RadioGroup,
-	FormControlLabel,
-	Radio,
+	FormControl,
+	InputLabel,
 	TextField,
 	Table,
 	TableBody,
@@ -19,344 +16,419 @@ import {
 	TableContainer,
 	TableHead,
 	TableRow,
-	Paper,
-	Button,
-	FormLabel
+	TablePagination,
+	Paper
 } from "@mui/material";
-import { BarChart as BarChartIcon, LocationOn as LocationOnIcon } from "@mui/icons-material";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
-import axios from "axios";
-import { useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import "../index.css";
+import dayjs from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-const drawerWidth = 240;
-const baseUrl = "https://smswithoutborders.com:11000";
+const categories = [
+	{ key: "summary", label: "Summary" },
+	{ key: "signup", label: "Signup Users" },
+	{ key: "retained", label: "Retained Users" }
+];
 
 const OpenTelemetry = () => {
-	const [data, setData] = useState(null);
-	const [totalUsers, setTotalUsers] = useState(0);
-	const [displayType, setDisplayType] = useState("available");
-	const [format, setFormat] = useState("month");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
-	const [chartData, setChartData] = useState([]);
-
-	const theme = useTheme();
-	const isDarkMode = theme.palette.mode === "dark";
-	const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-	const isMediumScreen = useMediaQuery(theme.breakpoints.between("sm", "md"));
-	const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"));
-
-	useEffect(() => {
-		const today = new Date().toISOString().split("T")[0];
-		setStartDate(today);
-		setEndDate(today);
-		fetchData(today, today, displayType, format);
-	}, []);
+	const [country, setCountry] = useState("");
+	const [category, setCategory] = useState("summary");
+	const [data, setData] = useState([]);
+	const [filteredData, setFilteredData] = useState([]);
+	const [page, setPage] = useState(1);
+	const [rowsPerPage, setRowsPerPage] = useState(5);
+	const [error, setError] = useState(null);
 
 	useEffect(() => {
-		if (data) {
-			handleData(data);
-			prepareChartData(data);
-		}
-	}, [data]);
+		const fetchData = async () => {
+			if (!startDate || !endDate) return;
 
-	const fetchData = async (start, end, type, format) => {
-		try {
-			const response = await axios.get(
-				`${baseUrl}/users?start=${start}&end=${end}&type=${type}&format=${format}`
-			);
-			if (response.status === 200) {
-				const responseData = response.data;
-				setData(responseData);
+			try {
+				const formattedStartDate = dayjs(startDate).format("YYYY-MM-DD");
+				const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
+				const countryParam = country ? `&country_code=${country}` : "";
+				console.log("start date:", formattedStartDate);
+				console.log("end date:", formattedStartDate);
+
+				const response = await fetch(
+					`https://api.telemetry.staging.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}${countryParam}`
+				);
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+				console.log("response:", response);
+				const apiData = await response.json();
+				setData(apiData);
+				setFilteredData(apiData);
+				setError(null);
+				console.log("apiData:", apiData);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+				setError("Failed to fetch data. Please try again later.");
 			}
-		} catch (error) {
-			console.error("Error fetching data:", error);
+		};
+		fetchData();
+	}, [startDate, endDate, country, category]);
+
+	const applyFilters = () => {
+		let result = data;
+		if (startDate) result = result.filter((item) => new Date(item.date) >= new Date(startDate));
+		if (endDate) result = result.filter((item) => new Date(item.date) <= new Date(endDate));
+		if (country) result = result.filter((item) => item.signup?.country === country);
+		if (category) result = result.filter((item) => item.summary?.category === category);
+		setFilteredData(result);
+	};
+
+	// Reset Filters Function
+	const resetFilters = () => {
+		setStartDate("");
+		setEndDate("");
+		setCountry("");
+		setCategory("summary");
+		setFilteredData(data);
+	};
+
+	if (!filteredData) {
+		return <Typography>Loading...</Typography>;
+	}
+	// const totalCountries = new Set(filteredData.map((item) => item.signup?.country)).size;
+
+	// DataTable
+	const DataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage, category }) => {
+		const tableData = data?.[category]?.data || [];
+		console.log("category:", category);
+		console.log("Data being passed to the table:", tableData);
+
+		if (!Array.isArray(tableData) || tableData.length === 0) {
+			console.error("Data is either not an array or it is empty");
+			return <Typography variant="body1">No data available or invalid format</Typography>;
 		}
-	};
 
-	const handleData = (data) => {
-		setTotalUsers(data.total_users || 0);
-	};
+		const startIdx = (page - 1) * rowsPerPage;
+		const endIdx = startIdx + rowsPerPage;
 
-	const prepareChartData = (data) => {
-		const chartData = [];
-		const countries = data.countries || {}; // Ensure countries is defined
+		const paginatedData = tableData.slice(startIdx, endIdx);
 
-		for (const date in data) {
-			if (date !== "countries" && date !== "total_countries" && date !== "total_users") {
-				data[date].forEach((entry) => {
-					const [monthDay, users, countryCode] = entry;
-					const country = countries[countryCode] || "N/A"; // Use country name or "N/A"
-					const percentage = totalUsers ? ((users / totalUsers) * 100).toFixed(2) + "%" : "0%";
-					chartData.push({ monthDay, users, country, percentage });
-				});
-			}
-		}
-		setChartData(chartData);
-	};
+		return (
+			<Card sx={{ borderRadius: 2, boxShadow: 3, padding: 2 }}>
+				<Typography variant="h6">Data Table</Typography>
+				<TableContainer component={Paper}>
+					<Table stickyHeader>
+						<TableHead>
+							<TableRow>
+								<TableCell
+									sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#e0e0e0" }}
+								>
+									Timeframe
+								</TableCell>
+								<TableCell
+									sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#e0e0e0" }}
+									align="right"
+								>
+									{category === "signup" ? "Signup Users" : "Retained Users"}
+								</TableCell>
+							</TableRow>
+						</TableHead>
 
-	const handleDisplayTypeChange = (e) => {
-		const newDisplayType = e.target.value;
-		setDisplayType(newDisplayType);
-		fetchData(startDate, endDate, newDisplayType, format);
-	};
-
-	const handleFormatChange = (e) => {
-		const newFormat = e.target.value;
-		setFormat(newFormat);
-		fetchData(startDate, endDate, displayType, newFormat);
-	};
-
-	const handleStartDateChange = (e) => {
-		const newStartDate = e.target.value;
-		setStartDate(newStartDate);
-		fetchData(newStartDate, endDate, displayType, format);
-	};
-
-	const handleEndDateChange = (e) => {
-		const newEndDate = e.target.value;
-		setEndDate(newEndDate);
-		fetchData(startDate, newEndDate, displayType, format);
-	};
-
-	const handleRefresh = () => {
-		fetchData(startDate, endDate, displayType, format);
-	};
-
-	// Custom Tooltip component
-	const CustomTooltip = ({ active, payload }) => {
-		if (active && payload && payload.length) {
-			const { monthDay, users, country } = payload[0].payload;
-			return (
-				<div
-					className="custom-tooltip"
-					style={{
-						backgroundColor: isDarkMode ? "#333" : "#fff",
-						color: isDarkMode ? "#fff" : "#000"
+						<TableBody>
+							{paginatedData.map((row, index) => (
+								<TableRow key={index}>
+									<TableCell>{row.timeframe}</TableCell>
+									<TableCell
+										align="right"
+										style={{
+											color:
+												(category === "signup" ? row.signup_users : row.retained_users) > 100
+													? "green"
+													: "red"
+										}}
+									>
+										{category === "signup" ? row.signup_users : row.retained_users}
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</TableContainer>
+				<TablePagination
+					rowsPerPageOptions={[4, 10, 25]}
+					component="div"
+					count={tableData.length}
+					rowsPerPage={rowsPerPage}
+					page={page - 1}
+					onPageChange={(event, newPage) => setPage(newPage + 1)}
+					onRowsPerPageChange={(event) => {
+						setRowsPerPage(parseInt(event.target.value, 10));
+						setPage(1);
 					}}
-				>
-					<p className="label">{`Date: ${monthDay}`}</p>
-					<p className="intro">{`Users: ${users}`}</p>
-					<p className="intro">{`Country: ${country}`}</p>
-				</div>
-			);
+				/>
+			</Card>
+		);
+	};
+
+	// ======================================================================================================
+	//  second table display data Coountry table
+	const CountryDataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage, category }) => {
+		const tableData = data?.[category]?.data || [];
+		console.log("category:", category);
+		console.log("Data being passed to the table:", tableData);
+
+		if (!Array.isArray(tableData) || tableData.length === 0) {
+			console.error("Data is either not an array or it is empty");
+			return <Typography variant="body1">No data available or invalid format</Typography>;
 		}
-		return null;
+
+		const startIdx = (page - 1) * rowsPerPage;
+		const endIdx = startIdx + rowsPerPage;
+
+		const paginatedData = tableData.slice(startIdx, endIdx);
+
+		return (
+			<Card sx={{ borderRadius: 2, boxShadow: 3, padding: 2 }}>
+				<Typography variant="h6">Country Data Table</Typography>
+				<TableContainer component={Paper}>
+					<Table stickyHeader>
+						<TableHead>
+							<TableRow>
+								<TableCell
+									sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#e0e0e0" }}
+								>
+									Countries
+								</TableCell>
+								<TableCell
+									sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#e0e0e0" }}
+									align="right"
+								>
+									{category === "signup" ? "Signup Users" : "Retained Users"}
+								</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{paginatedData.map((row, index) => (
+								<TableRow key={index}>
+									<TableCell>{row.timeframe}</TableCell>
+									<TableCell
+										align="right"
+										style={{
+											color:
+												(category === "signup" ? row.signup_users : row.retained_users) > 100
+													? "green"
+													: "red"
+										}}
+									>
+										{category === "signup" ? row.signup_users : row.retained_users}
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</TableContainer>
+				<TablePagination
+					rowsPerPageOptions={[4, 10, 25]}
+					component="div"
+					count={tableData.length}
+					rowsPerPage={rowsPerPage}
+					page={page - 1}
+					onPageChange={(event, newPage) => setPage(newPage + 1)}
+					onRowsPerPageChange={(event) => {
+						setRowsPerPage(parseInt(event.target.value, 10));
+						setPage(1);
+					}}
+				/>
+			</Card>
+		);
 	};
 
 	return (
 		<Box
-			className="bg"
 			component="main"
 			sx={{
 				px: { md: 3, sm: 3, xs: 2 },
 				pb: { md: 3, sm: 3, xs: 14 },
-				pr: { md: 3, sm: 3, xs: 2 },
 				flexGrow: 1
 			}}
 		>
-			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
+			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center">
+				<Grid item lg={2} md={3} sx={{ display: { xs: "none", md: "block" } }}></Grid>
 				<Grid
-					item
-					lg={2}
-					md={3}
-					xs={0}
-					sm={3}
-					sx={{
-						display: { xs: "none", sm: "none", md: "block" },
-						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
-					}}
-				></Grid>
-
-				<Grid
-					mx="auto"
 					item
 					lg={10}
 					md={9}
 					xs={12}
-					sm={12}
 					sx={{
-						p: { md: 3, sm: 2, xs: 0 },
-						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
+						p: { md: 3, sm: 2, xs: 1 }
 					}}
 				>
-					<Box>
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Total Card */}
-							<Grid item xs={12} sm={6} md={2}>
-								<Card className={"card1 text-center"}>
-									<CardContent>
-										<Grid container justifyContent="center" alignItems="center">
-											<Grid item xs={3} className="icondiv">
-												<BarChartIcon fontSize="large" className="icon1" />
-											</Grid>
-											<Grid item xs={6}>
-												<Typography variant="h3">{totalUsers}</Typography>
-												<Typography className="textsmall">TOTAL USERS</Typography>
-											</Grid>
-										</Grid>
-									</CardContent>
-								</Card>
-							</Grid>
+					{error && (
+						<Typography color="error" sx={{ mb: 2 }}>
+							{error}
+						</Typography>
+					)}
 
-							{/* Conditional Country Total Card */}
-							{displayType === "available" && (
-								<Grid item xs={12} sm={6} md={2}>
-									<Card className={"card2 text-center"} id="card2">
-										<CardContent>
-											<Grid container justifyContent="center" alignItems="center">
-												<Grid item xs={3}>
-													<LocationOnIcon fontSize="large" className="icon2" />
-												</Grid>
-												<Grid item xs={6} id="countrytotaldiv">
-													<Typography variant="h3">
-														{data ? data.total_countries || 0 : 0}
-													</Typography>
-													<Typography className="textsmall">COUNTRY TOTAL</Typography>
-												</Grid>
-											</Grid>
-										</CardContent>
-									</Card>
-								</Grid>
-							)}
+					{/* ============== Data Display section ================ */}
+					<Grid container spacing={4}>
+						<Grid item xs={10} md={3}>
+							<Card sx={{ p: 3, textAlign: "center" }}>
+								<Typography variant="h6">Total signup Users</Typography>
+								<Typography variant="h4">{filteredData.total_signup_users}</Typography>
+							</Card>
 						</Grid>
+						<Grid item xs={10} md={3}>
+							<Card sx={{ p: 3, textAlign: "center" }}>
+								<Typography variant="h6">Total retained Users</Typography>
+								<Typography variant="h4">{filteredData.total_retained_users}</Typography>
+							</Card>
+						</Grid>
+						<Grid item xs={12} md={3}>
+							<Card sx={{ p: 3, textAlign: "center" }}>
+								<Typography variant="h6">Total signup Countries</Typography>
+								<Typography variant="h4">{filteredData.total_signup_country}</Typography>
+							</Card>
+						</Grid>
+						<Grid item xs={12} md={3}>
+							<Card sx={{ p: 3, textAlign: "center" }}>
+								<Typography variant="h6">total retained countries</Typography>
+								<Typography variant="h4">{filteredData.total_retained_country}</Typography>
+							</Card>
+						</Grid>
+					</Grid>
+					{/* ================== filter ======================== */}
 
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Display Type Select */}
+					{/* Filter Section */}
+					<Card
+						sx={{
+							mt: 4,
+							p: 3,
+							borderRadius: 3,
+							boxShadow: 3
+						}}
+					>
+						<Grid container spacing={3}>
+							{/* Category Filter */}
 							<Grid item xs={12} sm={6} md={3}>
-								<FormControl variant="outlined" fullWidth>
-									<InputLabel id="display-type-label">Display Type</InputLabel>
-									<Select
-										labelId="display-type-label"
-										id="display-type"
-										value={displayType}
-										onChange={handleDisplayTypeChange}
-										label="Display Type"
-									>
-										<MenuItem value="available">Total Users</MenuItem>
-										<MenuItem value="signup">Sign Up Users</MenuItem>
+								<FormControl fullWidth>
+									<InputLabel>Category</InputLabel>
+									<Select value={category} onChange={(e) => setCategory(e.target.value)}>
+										{categories.map((cat) => (
+											<MenuItem key={cat.key} value={cat.key}>
+												{cat.label}
+											</MenuItem>
+										))}
 									</Select>
 								</FormControl>
 							</Grid>
 
-							{/* Format Radio Buttons */}
+							{/* Country Filter */}
 							<Grid item xs={12} sm={6} md={3}>
-								<FormControl component="fieldset">
-									<FormLabel component="legend">Date Format</FormLabel>
-									<RadioGroup
-										row
-										aria-label="date-format"
-										name="date-format"
-										value={format}
-										onChange={handleFormatChange}
-									>
-										<FormControlLabel value="month" control={<Radio />} label="Month" />
-										<FormControlLabel value="day" control={<Radio />} label="Day" />
-									</RadioGroup>
+								<FormControl fullWidth>
+									<InputLabel id="country-label">Country</InputLabel>
+									<Select value={country} onChange={(e) => setCountry(e.target.value)}>
+										<MenuItem value="">
+											<em>All Countries</em>
+										</MenuItem>
+									</Select>
 								</FormControl>
 							</Grid>
 
-							{/* Date Range */}
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									label="Start Date"
-									type="date"
-									value={startDate}
-									onChange={handleStartDateChange}
-									InputLabelProps={{
-										shrink: true
-									}}
-									fullWidth
-								/>
+							{/* Date Filters */}
+							<Grid item xs={12} sm={12} md={6}>
+								<LocalizationProvider dateAdapter={AdapterDayjs}>
+									<Grid container spacing={2}>
+										{/* Start Date */}
+										<Grid item xs={12} sm={6}>
+											<TextField
+												label="Start Date"
+												type="date"
+												onChange={(e) => setStartDate(e.target.value)}
+												value={startDate}
+												InputLabelProps={{
+													shrink: true
+												}}
+												fullWidth
+											/>
+										</Grid>
+										{/* End Date */}
+										<Grid item xs={12} sm={6}>
+											<TextField
+												label="End Date"
+												type="date"
+												onChange={(e) => setEndDate(e.target.value)}
+												value={endDate}
+												InputLabelProps={{
+													shrink: true
+												}}
+												fullWidth
+											/>
+										</Grid>
+									</Grid>
+								</LocalizationProvider>
 							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									label="End Date"
-									type="date"
-									value={endDate}
-									onChange={handleEndDateChange}
-									InputLabelProps={{
-										shrink: true
-									}}
+
+							{/* Filter Buttons */}
+							<Grid item xs={8} sm={6} md={3}>
+								<Button
 									fullWidth
-								/>
+									variant="contained"
+									color="primary"
+									sx={{
+										textTransform: "none",
+										fontWeight: "bold"
+									}}
+									onClick={applyFilters}
+								>
+									Apply
+								</Button>
 							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<Button variant="contained" onClick={handleRefresh} sx={{ mt: 2 }}>
-									Refresh
+							<Grid item xs={8} sm={6} md={3}>
+								<Button
+									fullWidth
+									variant="outlined"
+									color="secondary"
+									sx={{
+										textTransform: "none",
+										fontWeight: "bold"
+									}}
+									onClick={resetFilters}
+								>
+									Reset
 								</Button>
 							</Grid>
 						</Grid>
+					</Card>
 
-						<Grid container spacing={2} sx={{ mt: 3 }}>
-							{/* Chart */}
+					{/* =========== Tables Display ============================== */}
+					<Card
+						sx={{
+							mt: 4,
+							p: 3,
+							borderRadius: 3,
+							boxShadow: 3
+						}}
+					>
+						<Grid container spacing={3}>
 							<Grid item xs={12} md={6}>
-								<Box
-									sx={{
-										width: "100%",
-										maxWidth: "100%"
-									}}
-								>
-									<LineChart
-										data={chartData}
-										margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-										width={
-											isSmallScreen
-												? window.innerWidth
-												: isMediumScreen
-													? 600
-													: isLargeScreen
-														? 800
-														: window.innerWidth
-										}
-										height={450}
-									>
-										<CartesianGrid strokeDasharray="3 3" />
-										<XAxis dataKey="monthDay" />
-										<YAxis />
-										<Tooltip content={<CustomTooltip />} />
-										<Legend />
-										<Line
-											type="monotone"
-											dataKey="users"
-											stroke={isDarkMode ? "#82ca9d" : "#8884d8"}
-											activeDot={{ r: 8 }}
-										/>
-									</LineChart>
-								</Box>
+								<DataTable
+									data={data}
+									page={page}
+									rowsPerPage={rowsPerPage}
+									setPage={setPage}
+									setRowsPerPage={setRowsPerPage}
+									category={category}
+								/>
 							</Grid>
-
-							{/* Table */}
 							<Grid item xs={12} md={6}>
-								<Box sx={{ maxHeight: "30rem", overflow: "auto" }}>
-									<TableContainer component={Paper}>
-										<Table sx={{ minWidth: 800 }}>
-											<TableHead>
-												<TableRow>
-													<TableCell>Date</TableCell>
-													<TableCell align="right">Users</TableCell>
-													<TableCell align="right">Country</TableCell>
-													<TableCell align="right">Percentage</TableCell>
-												</TableRow>
-											</TableHead>
-											<TableBody>
-												{chartData.map((row, index) => (
-													<TableRow key={index}>
-														<TableCell>{row.monthDay}</TableCell>
-														<TableCell align="right">{row.users}</TableCell>
-														<TableCell align="right">{row.country || "N/A"}</TableCell>
-														<TableCell align="right">{row.percentage}</TableCell>
-													</TableRow>
-												))}
-											</TableBody>
-										</Table>
-									</TableContainer>
-								</Box>
+								<CountryDataTable
+									data={data}
+									page={page}
+									rowsPerPage={rowsPerPage}
+									setPage={setPage}
+									setRowsPerPage={setRowsPerPage}
+									category={category}
+								/>
 							</Grid>
 						</Grid>
-					</Box>
+					</Card>
 				</Grid>
 			</Grid>
 		</Box>
