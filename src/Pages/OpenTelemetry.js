@@ -23,44 +23,6 @@ import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-const drawerWidth = 240;
-
-// const CountryDataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage }) => (
-// 	<Box>
-// 		<Typography variant="h6">Country Data Table</Typography>
-// 		<TableContainer component={Paper}>
-// 			<Table>
-// 				<TableHead>
-// 					<TableRow>
-// 						<TableCell>Country</TableCell>
-// 						<TableCell>Category</TableCell>
-// 					</TableRow>
-// 				</TableHead>
-// 				<TableBody>
-// 					{data.slice((page - 1) * rowsPerPage, page * rowsPerPage).map((row, index) => (
-// 						<TableRow key={index}>
-// 							<TableCell>{row.summary.country}</TableCell>
-// 							<TableCell>{row.summary.category}</TableCell>
-// 						</TableRow>
-// 					))}
-// 				</TableBody>
-// 			</Table>
-// 		</TableContainer>
-// 		<TablePagination
-// 			rowsPerPageOptions={[4, 10, 25]}
-// 			component="div"
-// 			count={data.length}
-// 			rowsPerPage={rowsPerPage}
-// 			page={page - 1}
-// 			onPageChange={(event, newPage) => setPage(newPage + 1)}
-// 			onRowsPerPageChange={(event) => {
-// 				setRowsPerPage(parseInt(event.target.value, 10));
-// 				setPage(1);
-// 			}}
-// 		/>
-// 	</Box>
-// );
-
 const categories = [
 	{ key: "summary", label: "Summary" },
 	{ key: "signup", label: "Signup Users" },
@@ -68,14 +30,14 @@ const categories = [
 ];
 
 const OpenTelemetry = () => {
-	const [startDate, setStartDate] = useState(null);
-	const [endDate, setEndDate] = useState(null);
+	const [startDate, setStartDate] = useState("");
+	const [endDate, setEndDate] = useState("");
 	const [country, setCountry] = useState("");
 	const [category, setCategory] = useState("summary");
 	const [data, setData] = useState([]);
 	const [filteredData, setFilteredData] = useState([]);
 	const [page, setPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(4);
+	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
@@ -118,9 +80,10 @@ const OpenTelemetry = () => {
 		setFilteredData(result);
 	};
 
+	// Reset Filters Function
 	const resetFilters = () => {
-		setStartDate(null);
-		setEndDate(null);
+		setStartDate("");
+		setEndDate("");
 		setCountry("");
 		setCategory("summary");
 		setFilteredData(data);
@@ -148,14 +111,95 @@ const OpenTelemetry = () => {
 		const paginatedData = tableData.slice(startIdx, endIdx);
 
 		return (
-			<Box>
+			<Card sx={{ borderRadius: 2, boxShadow: 3, padding: 2 }}>
 				<Typography variant="h6">Data Table</Typography>
 				<TableContainer component={Paper}>
 					<Table stickyHeader>
 						<TableHead>
 							<TableRow>
-								<TableCell>Timeframe</TableCell>
-								<TableCell align="right">
+								<TableCell
+									sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#e0e0e0" }}
+								>
+									Timeframe
+								</TableCell>
+								<TableCell
+									sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#e0e0e0" }}
+									align="right"
+								>
+									{category === "signup" ? "Signup Users" : "Retained Users"}
+								</TableCell>
+							</TableRow>
+						</TableHead>
+
+						<TableBody>
+							{paginatedData.map((row, index) => (
+								<TableRow key={index}>
+									<TableCell>{row.timeframe}</TableCell>
+									<TableCell
+										align="right"
+										style={{
+											color:
+												(category === "signup" ? row.signup_users : row.retained_users) > 100
+													? "green"
+													: "red"
+										}}
+									>
+										{category === "signup" ? row.signup_users : row.retained_users}
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</TableContainer>
+				<TablePagination
+					rowsPerPageOptions={[4, 10, 25]}
+					component="div"
+					count={tableData.length}
+					rowsPerPage={rowsPerPage}
+					page={page - 1}
+					onPageChange={(event, newPage) => setPage(newPage + 1)}
+					onRowsPerPageChange={(event) => {
+						setRowsPerPage(parseInt(event.target.value, 10));
+						setPage(1);
+					}}
+				/>
+			</Card>
+		);
+	};
+
+	// ======================================================================================================
+	//  second table display data Coountry table
+	const CountryDataTable = ({ data, page, rowsPerPage, setPage, setRowsPerPage, category }) => {
+		const tableData = data?.[category]?.data || [];
+		console.log("category:", category);
+		console.log("Data being passed to the table:", tableData);
+
+		if (!Array.isArray(tableData) || tableData.length === 0) {
+			console.error("Data is either not an array or it is empty");
+			return <Typography variant="body1">No data available or invalid format</Typography>;
+		}
+
+		const startIdx = (page - 1) * rowsPerPage;
+		const endIdx = startIdx + rowsPerPage;
+
+		const paginatedData = tableData.slice(startIdx, endIdx);
+
+		return (
+			<Card sx={{ borderRadius: 2, boxShadow: 3, padding: 2 }}>
+				<Typography variant="h6">Country Data Table</Typography>
+				<TableContainer component={Paper}>
+					<Table stickyHeader>
+						<TableHead>
+							<TableRow>
+								<TableCell
+									sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#e0e0e0" }}
+								>
+									Countries
+								</TableCell>
+								<TableCell
+									sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#e0e0e0" }}
+									align="right"
+								>
 									{category === "signup" ? "Signup Users" : "Retained Users"}
 								</TableCell>
 							</TableRow>
@@ -192,13 +236,12 @@ const OpenTelemetry = () => {
 						setPage(1);
 					}}
 				/>
-			</Box>
+			</Card>
 		);
 	};
 
 	return (
 		<Box
-			className="bg"
 			component="main"
 			sx={{
 				px: { md: 3, sm: 3, xs: 2 },
@@ -206,58 +249,61 @@ const OpenTelemetry = () => {
 				flexGrow: 1
 			}}
 		>
-			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
-				{error && (
-					<Typography color="error" sx={{ mb: 2 }}>
-						{error}
-					</Typography>
-				)}
+			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center">
+				<Grid item lg={2} md={3} sx={{ display: { xs: "none", md: "block" } }}></Grid>
 				<Grid
-					item
-					lg={2}
-					md={3}
-					xs={0}
-					sm={3}
-					sx={{
-						display: { xs: "none", sm: "none", md: "block" },
-						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
-					}}
-				></Grid>
-				<Grid
-					mx="auto"
 					item
 					lg={10}
 					md={9}
 					xs={12}
-					sm={12}
 					sx={{
-						p: { md: 3, sm: 2, xs: 0 },
-						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
+						p: { md: 3, sm: 2, xs: 1 }
 					}}
 				>
+					{error && (
+						<Typography color="error" sx={{ mb: 2 }}>
+							{error}
+						</Typography>
+					)}
+
 					{/* ============== Data Display section ================ */}
-					<Grid container spacing={3}>
-						<Grid item xs={12} md={4}>
+					<Grid container spacing={4}>
+						<Grid item xs={10} md={3}>
 							<Card sx={{ p: 3, textAlign: "center" }}>
-								<Typography variant="h6">Total Countries</Typography>
-								{/* <Typography variant="h4">{totalCountries}</Typography> */}
+								<Typography variant="h6">Total signup Users</Typography>
+								<Typography variant="h4">{filteredData.total_signup_users}</Typography>
 							</Card>
 						</Grid>
-						<Grid item xs={12} md={4}>
+						<Grid item xs={10} md={3}>
 							<Card sx={{ p: 3, textAlign: "center" }}>
-								<Typography variant="h6">Total Users</Typography>
-								<Typography variant="h4">{filteredData.total_sigup_users}</Typography>
+								<Typography variant="h6">Total retained Users</Typography>
+								<Typography variant="h4">{filteredData.total_retained_users}</Typography>
 							</Card>
 						</Grid>
-						<Grid item xs={12} md={4}>
+						<Grid item xs={12} md={3}>
 							<Card sx={{ p: 3, textAlign: "center" }}>
-								<Typography variant="h6">Rows per Page</Typography>
-								<Typography variant="h4">{rowsPerPage}</Typography>
+								<Typography variant="h6">Total signup Countries</Typography>
+								<Typography variant="h4">{filteredData.total_signup_country}</Typography>
+							</Card>
+						</Grid>
+						<Grid item xs={12} md={3}>
+							<Card sx={{ p: 3, textAlign: "center" }}>
+								<Typography variant="h6">total retained countries</Typography>
+								<Typography variant="h4">{filteredData.total_retained_country}</Typography>
 							</Card>
 						</Grid>
 					</Grid>
 					{/* ================== filter ======================== */}
-					<Box sx={{ mt: 4, mb: 4 }}>
+
+					{/* Filter Section */}
+					<Card
+						sx={{
+							mt: 4,
+							p: 3,
+							borderRadius: 3,
+							boxShadow: 3
+						}}
+					>
 						<Grid container spacing={3}>
 							{/* Category Filter */}
 							<Grid item xs={12} sm={6} md={3}>
@@ -276,8 +322,12 @@ const OpenTelemetry = () => {
 							{/* Country Filter */}
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl fullWidth>
-									<InputLabel>Country</InputLabel>
-									<Select value={country} onChange={(e) => setCountry(e.target.value)}></Select>
+									<InputLabel id="country-label">Country</InputLabel>
+									<Select value={country} onChange={(e) => setCountry(e.target.value)}>
+										<MenuItem value="">
+											<em>All Countries</em>
+										</MenuItem>
+									</Select>
 								</FormControl>
 							</Grid>
 
@@ -285,6 +335,7 @@ const OpenTelemetry = () => {
 							<Grid item xs={12} sm={12} md={6}>
 								<LocalizationProvider dateAdapter={AdapterDayjs}>
 									<Grid container spacing={2}>
+										{/* Start Date */}
 										<Grid item xs={12} sm={6}>
 											<TextField
 												label="Start Date"
@@ -297,6 +348,7 @@ const OpenTelemetry = () => {
 												fullWidth
 											/>
 										</Grid>
+										{/* End Date */}
 										<Grid item xs={12} sm={6}>
 											<TextField
 												label="End Date"
@@ -314,41 +366,69 @@ const OpenTelemetry = () => {
 							</Grid>
 
 							{/* Filter Buttons */}
-							<Grid item xs={12} sm={6} md={3}>
-								<Button variant="contained" onClick={applyFilters} fullWidth>
+							<Grid item xs={8} sm={6} md={3}>
+								<Button
+									fullWidth
+									variant="contained"
+									color="primary"
+									sx={{
+										textTransform: "none",
+										fontWeight: "bold"
+									}}
+									onClick={applyFilters}
+								>
 									Apply
 								</Button>
 							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<Button variant="outlined" color="secondary" onClick={resetFilters} fullWidth>
+							<Grid item xs={8} sm={6} md={3}>
+								<Button
+									fullWidth
+									variant="outlined"
+									color="secondary"
+									sx={{
+										textTransform: "none",
+										fontWeight: "bold"
+									}}
+									onClick={resetFilters}
+								>
 									Reset
 								</Button>
 							</Grid>
 						</Grid>
-					</Box>
+					</Card>
 
 					{/* =========== Tables Display ============================== */}
-					<Grid container spacing={3}>
-						<Grid item xs={12} md={6}>
-							<DataTable
-								data={data}
-								page={page}
-								rowsPerPage={rowsPerPage}
-								setPage={setPage}
-								setRowsPerPage={setRowsPerPage}
-								category={category}
-							/>
+					<Card
+						sx={{
+							mt: 4,
+							p: 3,
+							borderRadius: 3,
+							boxShadow: 3
+						}}
+					>
+						<Grid container spacing={3}>
+							<Grid item xs={12} md={6}>
+								<DataTable
+									data={data}
+									page={page}
+									rowsPerPage={rowsPerPage}
+									setPage={setPage}
+									setRowsPerPage={setRowsPerPage}
+									category={category}
+								/>
+							</Grid>
+							<Grid item xs={12} md={6}>
+								<CountryDataTable
+									data={data}
+									page={page}
+									rowsPerPage={rowsPerPage}
+									setPage={setPage}
+									setRowsPerPage={setRowsPerPage}
+									category={category}
+								/>
+							</Grid>
 						</Grid>
-						{/* <Grid item xs={12} md={6}>
-							<CountryDataTable
-								data={filteredData}
-								page={page}
-								rowsPerPage={rowsPerPage}
-								setPage={setPage}
-								setRowsPerPage={setRowsPerPage}
-							/>
-						</Grid> */}
-					</Grid>
+					</Card>
 				</Grid>
 			</Grid>
 		</Box>

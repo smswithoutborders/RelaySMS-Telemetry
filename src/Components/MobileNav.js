@@ -75,7 +75,7 @@ function MobileNav({ darkMode, toggleDarkMode }) {
 								<Typography textAlign="center">Resilience</Typography>
 							</MenuItem>
 
-							<MenuItem onClick={handleCloseNavMenu} component={Link} href="/OpenTelematry">
+							<MenuItem onClick={handleCloseNavMenu} component={Link} href="/OpenTelemetry">
 								<Typography textAlign="center">Open Telematry</Typography>
 							</MenuItem>
 
