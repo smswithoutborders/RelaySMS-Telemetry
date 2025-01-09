@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
 	Box,
 	Grid,
@@ -40,36 +40,30 @@ const OpenTelemetry = () => {
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [error, setError] = useState(null);
 
-	useEffect(() => {
-		const fetchData = async () => {
-			if (!startDate || !endDate) return;
+	const fetchData = async () => {
+		if (!startDate || !endDate) return;
 
-			try {
-				const formattedStartDate = dayjs(startDate).format("YYYY-MM-DD");
-				const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
-				const countryParam = country ? `&country_code=${country}` : "";
-				console.log("start date:", formattedStartDate);
-				console.log("end date:", formattedStartDate);
+		try {
+			const formattedStartDate = dayjs(startDate).format("YYYY-MM-DD");
+			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
+			const countryParam = country ? `&country_code=${country}` : "";
 
-				const response = await fetch(
-					`https://api.telemetry.staging.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}${countryParam}`
-				);
-				if (!response.ok) {
-					throw new Error(`HTTP error! Status: ${response.status}`);
-				}
-				console.log("response:", response);
-				const apiData = await response.json();
-				setData(apiData);
-				setFilteredData(apiData);
-				setError(null);
-				console.log("apiData:", apiData);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-				setError("Failed to fetch data. Please try again later.");
+			const response = await fetch(
+				`https://api.telemetry.staging.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}${countryParam}`
+			);
+			if (!response.ok) {
+				throw new Error(`HTTP error! Status: ${response.status}`);
 			}
-		};
-		fetchData();
-	}, [startDate, endDate, country, category]);
+
+			const apiData = await response.json();
+			setData(apiData);
+			setError(null);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+			setError("Failed to fetch data. Please try again later.");
+		}
+	};
+	fetchData();
 
 	const applyFilters = () => {
 		let result = data;
@@ -78,6 +72,7 @@ const OpenTelemetry = () => {
 		if (country) result = result.filter((item) => item.signup?.country === country);
 		if (category) result = result.filter((item) => item.summary?.category === category);
 		setFilteredData(result);
+		console.log(result);
 	};
 
 	// Reset Filters Function
@@ -240,6 +235,7 @@ const OpenTelemetry = () => {
 		);
 	};
 
+	// =======================================================================
 	return (
 		<Box
 			component="main"
@@ -267,32 +263,45 @@ const OpenTelemetry = () => {
 					)}
 
 					{/* ============== Data Display section ================ */}
+					{/* Data Display Section */}
 					<Grid container spacing={4}>
-						<Grid item xs={10} md={3}>
-							<Card sx={{ p: 3, textAlign: "center" }}>
-								<Typography variant="h6">Total signup Users</Typography>
-								<Typography variant="h4">{filteredData.total_signup_users}</Typography>
-							</Card>
-						</Grid>
-						<Grid item xs={10} md={3}>
-							<Card sx={{ p: 3, textAlign: "center" }}>
-								<Typography variant="h6">Total retained Users</Typography>
-								<Typography variant="h4">{filteredData.total_retained_users}</Typography>
-							</Card>
-						</Grid>
+						{/* Total Signup Users */}
 						<Grid item xs={12} md={3}>
-							<Card sx={{ p: 3, textAlign: "center" }}>
-								<Typography variant="h6">Total signup Countries</Typography>
-								<Typography variant="h4">{filteredData.total_signup_country}</Typography>
+							<Card sx={{ p: 3 }}>
+								<Typography variant="h6">Total Signup Users</Typography>
+								<Typography variant="h4">{data?.summary?.total_signup_users || 0}</Typography>
 							</Card>
 						</Grid>
+
+						{/* Total Retained Users */}
+						<Grid item xs={8} md={3}>
+							<Card sx={{ p: 3 }}>
+								<Typography variant="h6"> Total Retained Users</Typography>
+								<Typography variant="h5">{data?.summary?.total_retained_users || 0}</Typography>
+							</Card>
+						</Grid>
+
+						{/* Signup Countries List */}
 						<Grid item xs={12} md={3}>
-							<Card sx={{ p: 3, textAlign: "center" }}>
-								<Typography variant="h6">total retained countries</Typography>
-								<Typography variant="h4">{filteredData.total_retained_country}</Typography>
+							<Card sx={{ p: 3 }}>
+								<Typography variant="h6"> Total Signup Countries</Typography>
+								<Typography variant="h5">
+									{data?.summary?.total_signup_countries || "N/A"}
+								</Typography>
+							</Card>
+						</Grid>
+
+						{/* Retained Countries List */}
+						<Grid item xs={12} md={3}>
+							<Card sx={{ p: 3 }}>
+								<Typography variant="h6"> Total Retained Countries</Typography>
+								<Typography variant="h5">
+									{data?.summary?.total_retained_countries || "N/A"}
+								</Typography>
 							</Card>
 						</Grid>
 					</Grid>
+
 					{/* ================== filter ======================== */}
 
 					{/* Filter Section */}
@@ -367,17 +376,8 @@ const OpenTelemetry = () => {
 
 							{/* Filter Buttons */}
 							<Grid item xs={8} sm={6} md={3}>
-								<Button
-									fullWidth
-									variant="contained"
-									color="primary"
-									sx={{
-										textTransform: "none",
-										fontWeight: "bold"
-									}}
-									onClick={applyFilters}
-								>
-									Apply
+								<Button variant="contained" color="primary" onClick={applyFilters}>
+									Apply Filters
 								</Button>
 							</Grid>
 							<Grid item xs={8} sm={6} md={3}>
