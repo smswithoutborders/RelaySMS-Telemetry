@@ -33,7 +33,7 @@ const OpenTelemetry = () => {
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const [totalUsers, setTotalUsers] = useState(0);
 	const [totalRetained, setTotalRetained] = useState(0);
-	const [error, setError] = useState(null);
+	const [, setError] = useState(null);
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [country, setCountry] = useState("");
@@ -207,7 +207,7 @@ const OpenTelemetry = () => {
 									Signup Countries
 								</Typography>
 								<Typography variant="h5" component="p" sx={{ fontWeight: 700, color: "#333" }}>
-									{totalUsers}
+									Null
 								</Typography>
 							</Card>
 						</Grid>
@@ -233,7 +233,7 @@ const OpenTelemetry = () => {
 									Retained Countries
 								</Typography>
 								<Typography variant="h5" component="p" sx={{ fontWeight: 700, color: "#333" }}>
-									{totalUsers}
+									Null
 								</Typography>
 							</Card>
 						</Grid>
@@ -384,11 +384,8 @@ const OpenTelemetry = () => {
 					<Grid item xs={12} mt={2}>
 						<Card sx={{ p: 3 }}>
 							<Typography variant="subtitle1">Data Table</Typography>
-							{error ? (
-								<Typography color="error">Error: {error}</Typography>
-							) : (
-								<DataTable data={data} page={page} rowsPerPage={rowsPerPage} />
-							)}
+
+							<DataTable data={data} page={page} rowsPerPage={rowsPerPage} />
 						</Card>
 					</Grid>
 				</Grid>
