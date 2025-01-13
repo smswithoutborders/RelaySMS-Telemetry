@@ -91,8 +91,6 @@ const OpenTelemetry = () => {
 		}
 	};
 
-	// const totalCountries = new Set(filteredData.map((item) => item.signup?.country)).size;
-
 	// Reset Filters Function
 	const resetFilters = () => {
 		setStartDate("");
