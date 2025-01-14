@@ -244,10 +244,19 @@ const OpenTelemetry = () => {
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl fullWidth>
 									<InputLabel id="country-label">Country</InputLabel>
-									<Select value={country} onChange={(e) => setCountry(e.target.value)}>
+									<Select
+										value={country}
+										onChange={(e) => setCountry(e.target.value)}
+										label="Country"
+									>
 										<MenuItem value="">
 											<em>All Countries</em>
 										</MenuItem>
+										{Object.entries(countries.getNames("en")).map(([code, name]) => (
+											<MenuItem key={code} value={code}>
+												{name}
+											</MenuItem>
+										))}
 									</Select>
 								</FormControl>
 							</Grid>
