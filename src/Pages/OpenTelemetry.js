@@ -48,6 +48,21 @@ const OpenTelemetry = () => {
 	const [retainedCountries, setRetainedCountries] = useState(0);
 	const countryNames = Object.entries(countries.getNames("en"));
 
+	// Apply filters and set the filtered data
+	const filteredData = country
+		? tableData.filter((row) => countries.getName(row.country_code, "en") === country)
+		: tableData;
+
+	// Calculate totals for filtered data
+	const countryTotals = filteredData?.reduce(
+		(totals, row) => {
+			totals.signup_users += row.signup_users || 0;
+			totals.retained_users += row.retained_users || 0;
+			return totals;
+		},
+		{ signup_users: 0, retained_users: 0 }
+	) || { signup_users: 0, retained_users: 0 };
+
 	const applyFilters = async () => {
 		if (!startDate || !endDate) {
 			setError("Please select both start and end dates.");
@@ -102,6 +117,7 @@ const OpenTelemetry = () => {
 	};
 
 	// Define columns for User data Table
+
 	const columns = [
 		{ field: "timeframe", headerName: "Timeframe", flex: 1 },
 		{
@@ -124,6 +140,9 @@ const OpenTelemetry = () => {
 		}
 	];
 
+	// ==================================
+	// Paginate data
+
 	const startIdx = (page - 1) * rowsPerPage;
 	const endIdx = startIdx + rowsPerPage;
 	const paginatedData = tableData.slice(startIdx, endIdx);
@@ -135,7 +154,7 @@ const OpenTelemetry = () => {
 		retained_users: row.retained_users
 	}));
 
-	const CountryRows = paginatedData.map((row, index) => ({
+	const CountryRows = filteredData.map((row, index) => ({
 		id: index + 1,
 		country_code: countries.getName(row.country_code, "en") || "Unknown",
 		signup_users: row.signup_users,
@@ -169,39 +188,49 @@ const OpenTelemetry = () => {
 					)}
 
 					{/* ============== Data Display section ================ */}
+
+					{/* -=========================================== */}
 					<Grid container spacing={3}>
-						<Grid item xs={10} md={2}>
+						{/* Display Cards */}
+						<Grid item xs={12} sm={6} md={3}>
+							<Card sx={{ p: 2, textAlign: "center" }}>
+								<Typography variant="h6">Total Users in {country || "All Countries"}</Typography>
+								<Typography variant="h4">{countryTotals.signup_users}</Typography>
+							</Card>
+						</Grid>
+						<Grid item xs={12} sm={6} md={3}>
+							<Card sx={{ p: 2, textAlign: "center" }}>
+								<Typography variant="h6">Retained Users in {country || "All Countries"}</Typography>
+								<Typography variant="h4">{countryTotals.retained_users}</Typography>
+							</Card>
+						</Grid>
+
+						<Grid item xs={12} sm={6} md={3}>
 							<Card sx={{ p: 2, textAlign: "center" }}>
 								<Typography variant="h6">Signup Users</Typography>
 								<Typography variant="h4">{totalUsers}</Typography>
 							</Card>
 						</Grid>
-
-						<Grid item xs={10} md={2}>
+						<Grid item xs={12} sm={6} md={3}>
 							<Card sx={{ p: 2, textAlign: "center" }}>
 								<Typography variant="h6">Retained Users</Typography>
-								<Typography variant="h4"> {totalRetained}</Typography>
+								<Typography variant="h4">{totalRetained}</Typography>
 							</Card>
 						</Grid>
-						<Grid item xs={12} md={2}>
+						<Grid item xs={12} sm={6} md={3}>
 							<Card sx={{ p: 2, textAlign: "center" }}>
 								<Typography variant="h6">Signup Countries</Typography>
 								<Typography variant="h4">{signupCountries}</Typography>
 							</Card>
 						</Grid>
-						<Grid item xs={12} md={2}>
+						<Grid item xs={12} sm={6} md={3}>
 							<Card sx={{ p: 2, textAlign: "center" }}>
-								<Typography variant="h6">Retained countries</Typography>
+								<Typography variant="h6">Retained Countries</Typography>
 								<Typography variant="h4">{retainedCountries}</Typography>
 							</Card>
 						</Grid>
-						<Grid item xs={10} md={2}>
-							<Card sx={{ p: 2, textAlign: "center" }}>
-								<Typography variant="h6">Users Tokens</Typography>
-								<Typography variant="h4">Null</Typography>
-							</Card>
-						</Grid>
 					</Grid>
+
 					{/* ================== filter ======================== */}
 
 					{/* Filter Section */}
@@ -245,11 +274,18 @@ const OpenTelemetry = () => {
 							{/* Country Filter */}
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl fullWidth>
-									<InputLabel id="country-label"></InputLabel>
+									<InputLabel id="country-label"> </InputLabel>
 
 									<Autocomplete
 										value={country}
-										onChange={(event, newValue) => setCountry(newValue)}
+										onChange={(event, newValue) => {
+											if (newValue && !countryNames.some(([, name]) => name === newValue)) {
+												setError("This country is not available.");
+											} else {
+												setCountry(newValue);
+												setError(null);
+											}
+										}}
 										options={countryNames.map(([, name]) => name)}
 										renderInput={(params) => <TextField {...params} label="Country" />}
 										renderOption={(props, option) => (
@@ -259,6 +295,12 @@ const OpenTelemetry = () => {
 										)}
 										freeSolo
 									/>
+
+									{error && (
+										<Typography color="error" variant="body2">
+											{error}
+										</Typography>
+									)}
 								</FormControl>
 							</Grid>
 
