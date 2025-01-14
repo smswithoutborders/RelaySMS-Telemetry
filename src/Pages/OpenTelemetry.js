@@ -9,7 +9,8 @@ import {
 	MenuItem,
 	FormControl,
 	InputLabel,
-	TextField
+	TextField,
+	Autocomplete
 } from "@mui/material";
 import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -45,6 +46,7 @@ const OpenTelemetry = () => {
 	const [totalRetained, setTotalRetained] = useState(0);
 	const [signupCountries, setSignupCountries] = useState(0);
 	const [retainedCountries, setRetainedCountries] = useState(0);
+	const countryNames = Object.entries(countries.getNames("en"));
 
 	const applyFilters = async () => {
 		if (!startDate || !endDate) {
@@ -243,21 +245,20 @@ const OpenTelemetry = () => {
 							{/* Country Filter */}
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl fullWidth>
-									<InputLabel id="country-label">Country</InputLabel>
-									<Select
+									<InputLabel id="country-label"></InputLabel>
+
+									<Autocomplete
 										value={country}
-										onChange={(e) => setCountry(e.target.value)}
-										label="Country"
-									>
-										<MenuItem value="">
-											<em>All Countries</em>
-										</MenuItem>
-										{Object.entries(countries.getNames("en")).map(([code, name]) => (
-											<MenuItem key={code} value={code}>
-												{name}
+										onChange={(event, newValue) => setCountry(newValue)}
+										options={countryNames.map(([, name]) => name)}
+										renderInput={(params) => <TextField {...params} label="Country" />}
+										renderOption={(props, option) => (
+											<MenuItem {...props} value={option}>
+												{option}
 											</MenuItem>
-										))}
-									</Select>
+										)}
+										freeSolo
+									/>
 								</FormControl>
 							</Grid>
 
