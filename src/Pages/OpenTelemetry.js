@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Box,
 	Grid,
@@ -48,20 +48,9 @@ const OpenTelemetry = () => {
 	const [retainedCountries, setRetainedCountries] = useState(0);
 	const countryNames = Object.entries(countries.getNames("en"));
 
-	// Apply filters and set the filtered data
 	const filteredData = country
 		? tableData.filter((row) => countries.getName(row.country_code, "en") === country)
 		: tableData;
-
-	// Calculate totals for filtered data
-	const countryTotals = filteredData?.reduce(
-		(totals, row) => {
-			totals.signup_users += row.signup_users || 0;
-			totals.retained_users += row.retained_users || 0;
-			return totals;
-		},
-		{ signup_users: 0, retained_users: 0 }
-	) || { signup_users: 0, retained_users: 0 };
 
 	const applyFilters = async () => {
 		if (!startDate || !endDate) {
@@ -85,7 +74,6 @@ const OpenTelemetry = () => {
 			setData(apiData);
 			setError(null);
 
-			// Update stats based on category
 			if (category === "summary") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
 				setTotalRetained(apiData[category]?.total_retained_users ?? 0);
@@ -108,16 +96,46 @@ const OpenTelemetry = () => {
 		}
 	};
 
-	// Reset Filters Function
+	const fetchSummaryData = async () => {
+		try {
+			const response = await fetch(
+				"https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=2025-01-10&granularity=day&group_by=country&page=1&page_size=100"
+			);
+			const data = await response.json();
+
+			if (data && data.summary) {
+				const {
+					total_signup_users,
+					total_retained_users,
+					total_signup_countries,
+					total_retained_countries
+				} = data.summary;
+
+				setTotalUsers(total_signup_users);
+				setTotalRetained(total_retained_users);
+				setSignupCountries(total_signup_countries);
+				setRetainedCountries(total_retained_countries);
+			} else {
+				console.error("Invalid data structure received", data);
+			}
+		} catch (error) {
+			console.error("Error fetching summary data:", error);
+		}
+	};
+
+	useEffect(() => {
+		fetchSummaryData();
+	}, []);
+
 	const resetFilters = () => {
 		setStartDate("");
 		setEndDate("");
 		setCountry("");
 		setCategory("summary");
+		fetchSummaryData();
 	};
 
 	// Define columns for User data Table
-
 	const columns = [
 		{ field: "timeframe", headerName: "Timeframe", flex: 1 },
 		{
@@ -139,9 +157,6 @@ const OpenTelemetry = () => {
 				category === "signup" ? params.row.signup_users : params.row.retained_users
 		}
 	];
-
-	// ==================================
-	// Paginate data
 
 	const startIdx = (page - 1) * rowsPerPage;
 	const endIdx = startIdx + rowsPerPage;
@@ -188,23 +203,7 @@ const OpenTelemetry = () => {
 					)}
 
 					{/* ============== Data Display section ================ */}
-
-					{/* -=========================================== */}
 					<Grid container spacing={3}>
-						{/* Display Cards */}
-						<Grid item xs={12} sm={6} md={3}>
-							<Card sx={{ p: 2, textAlign: "center" }}>
-								<Typography variant="h6">Total Users in {country || "All Countries"}</Typography>
-								<Typography variant="h4">{countryTotals.signup_users}</Typography>
-							</Card>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<Card sx={{ p: 2, textAlign: "center" }}>
-								<Typography variant="h6">Retained Users in {country || "All Countries"}</Typography>
-								<Typography variant="h4">{countryTotals.retained_users}</Typography>
-							</Card>
-						</Grid>
-
 						<Grid item xs={12} sm={6} md={3}>
 							<Card sx={{ p: 2, textAlign: "center" }}>
 								<Typography variant="h6">Signup Users</Typography>
@@ -232,8 +231,6 @@ const OpenTelemetry = () => {
 					</Grid>
 
 					{/* ================== filter ======================== */}
-
-					{/* Filter Section */}
 					<Card
 						sx={{
 							mt: 4,
@@ -243,7 +240,6 @@ const OpenTelemetry = () => {
 						}}
 					>
 						<Grid container spacing={3}>
-							{/* Category Filter */}
 							<Grid item xs={12} sm={6} md={3}>
 								<FormControl fullWidth>
 									<InputLabel>Category</InputLabel>
