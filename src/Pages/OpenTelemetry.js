@@ -40,12 +40,13 @@ const OpenTelemetry = () => {
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [country, setCountry] = useState("");
+	const [totalRows, setTotalRows] = useState("");
 	const [category, setCategory] = useState("summary");
 	const [granularity, setGranularity] = useState("month");
 	const [group_by, setGroup_by] = useState("month");
 	const [data, setData] = useState([]);
 	const [page, setPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(5);
+	const [rowsPerPage, setRowsPerPage] = useState(100);
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const tableData = data?.[category]?.data || [];
@@ -53,8 +54,6 @@ const OpenTelemetry = () => {
 	const [totalRetained, setTotalRetained] = useState(0);
 	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
 	const [totalRetainedCountries, setTotalRetainedCountries] = useState(0);
-	// const [signupCountries, setSignupCountries] = useState(0);
-	// const [retainedCountries, setRetainedCountries] = useState(0);
 	const countryNames = Object.entries(countries.getNames("en"));
 
 	const filteredData = country
@@ -74,7 +73,7 @@ const OpenTelemetry = () => {
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=${group_by}`
+				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=${group_by}&page=${page}&page_size=${rowsPerPage}`
 			);
 
 			if (!response.ok) {
@@ -84,6 +83,8 @@ const OpenTelemetry = () => {
 			const apiData = await response.json();
 			setData(apiData);
 			console.log("apiData", apiData);
+			setTotalRows(apiData.pagination.total_records);
+			console.log("apiData.pagination.total_records", apiData.pagination.total_records);
 			setError(null);
 
 			if (category === "summary") {
@@ -149,6 +150,10 @@ const OpenTelemetry = () => {
 	useEffect(() => {
 		fetchSummaryData();
 	}, []);
+
+	useEffect(() => {
+		applyFilters();
+	}, [page, rowsPerPage]);
 
 	const resetFilters = () => {
 		setStartDate("");
@@ -404,18 +409,25 @@ const OpenTelemetry = () => {
 									<DataGrid
 										rows={CountryRows}
 										columns={countryColumns}
-										pageSize={5}
-										rowsPerPageOptions={[5]}
+										pageSize={rowsPerPage}
+										rowsPerPageOptions={[10, 20, 50]}
 										components={{
 											Toolbar: GridToolbar
 										}}
 										getRowId={(row) => row.id}
 										autoHeight
 										pagination
-										rowCount={tableData.length}
+										rowCount={totalRows}
 										paginationMode="server"
-										onPageChange={(newPage) => setPage(newPage + 1)}
-										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
+										onPageChange={(newPage) => {
+											setPage(newPage + 1);
+											applyFilters();
+										}}
+										onPageSizeChange={(newPageSize) => {
+											setRowsPerPage(newPageSize);
+											setPage(1);
+											applyFilters();
+										}}
 									/>
 								</div>
 							</Card>
@@ -430,18 +442,25 @@ const OpenTelemetry = () => {
 									<DataGrid
 										rows={rows}
 										columns={columns}
-										pageSize={5}
-										rowsPerPageOptions={[5]}
+										pageSize={rowsPerPage}
+										rowsPerPageOptions={[10, 20, 50, 100]}
 										components={{
 											Toolbar: GridToolbar
 										}}
 										getRowId={(row) => row.id}
 										autoHeight
 										pagination
-										rowCount={tableData.length}
+										rowCount={totalRows}
 										paginationMode="server"
-										onPageChange={(newPage) => setPage(newPage + 1)}
-										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
+										onPageChange={(newPage) => {
+											setPage(newPage + 1);
+											applyFilters();
+										}}
+										onPageSizeChange={(newPageSize) => {
+											setRowsPerPage(newPageSize);
+											setPage(1);
+											applyFilters();
+										}}
 									/>
 								</div>
 							</Card>
