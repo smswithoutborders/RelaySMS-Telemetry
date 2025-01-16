@@ -31,21 +31,30 @@ const granularities = [
 	{ key: "month", label: "Month" }
 ];
 
+const groupes = [
+	{ key: "date", label: "Date" },
+	{ key: "country", label: "country" }
+];
+
 const OpenTelemetry = () => {
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [country, setCountry] = useState("");
 	const [category, setCategory] = useState("summary");
 	const [granularity, setGranularity] = useState("month");
+	const [group_by, setGroup_by] = useState("month");
 	const [data, setData] = useState([]);
 	const [page, setPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(false);
 	const tableData = data?.[category]?.data || [];
 	const [totalUsers, setTotalUsers] = useState(0);
 	const [totalRetained, setTotalRetained] = useState(0);
-	const [signupCountries, setSignupCountries] = useState(0);
-	const [retainedCountries, setRetainedCountries] = useState(0);
+	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
+	const [totalRetainedCountries, setTotalRetainedCountries] = useState(0);
+	// const [signupCountries, setSignupCountries] = useState(0);
+	// const [retainedCountries, setRetainedCountries] = useState(0);
 	const countryNames = Object.entries(countries.getNames("en"));
 
 	const filteredData = country
@@ -58,12 +67,14 @@ const OpenTelemetry = () => {
 			return;
 		}
 
+		setLoading(true);
+
 		try {
 			const formattedStartDate = dayjs(startDate).format("YYYY-MM-DD");
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=1&page_size=100`
+				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=${group_by}`
 			);
 
 			if (!response.ok) {
@@ -72,36 +83,47 @@ const OpenTelemetry = () => {
 
 			const apiData = await response.json();
 			setData(apiData);
+			console.log("apiData", apiData);
 			setError(null);
 
 			if (category === "summary") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
 				setTotalRetained(apiData[category]?.total_retained_users ?? 0);
-				setSignupCountries(apiData[category]?.total_signup_countries ?? 0);
-				setRetainedCountries(apiData[category]?.total_retained_countries ?? 0);
+				setTotalSignupCountries(apiData[category]?.total_signup_countries ?? 0);
+				setTotalRetainedCountries(apiData[category]?.total_retained_countries ?? 0);
 			} else if (category === "signup") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
-				setSignupCountries(apiData[category]?.total_countries ?? 0);
+				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
 				setTotalRetained(0);
-				setRetainedCountries(0);
+				setTotalRetainedCountries(0);
 			} else if (category === "retained") {
 				setTotalRetained(apiData[category]?.total_retained_users ?? 0);
-				setRetainedCountries(apiData[category]?.total_countries ?? 0);
+				setTotalRetainedCountries(apiData[category]?.total_countries ?? 0);
 				setTotalUsers(0);
-				setSignupCountries(0);
+				setTotalSignupCountries(0);
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
-			setError("Failed to fetch data. Please try again later.");
+			setError("Failed to fetch data. Please try again later");
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	const fetchSummaryData = async () => {
+		setLoading(true);
 		try {
+			// Get today's date in YYYY-MM-DD format
+			const today = new Date();
+			const formattedToday = today.toISOString().split("T")[0]; // Extract the date part
+
+			// Update the API URL with the dynamic end_date
 			const response = await fetch(
-				"https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=2025-01-10&granularity=day&group_by=country&page=1&page_size=100"
+				`https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=1&page_size=100`
 			);
+
 			const data = await response.json();
+			console.log("data", data);
 
 			if (data && data.summary) {
 				const {
@@ -113,16 +135,17 @@ const OpenTelemetry = () => {
 
 				setTotalUsers(total_signup_users);
 				setTotalRetained(total_retained_users);
-				setSignupCountries(total_signup_countries);
-				setRetainedCountries(total_retained_countries);
+				setTotalSignupCountries(total_signup_countries);
+				setTotalRetainedCountries(total_retained_countries);
 			} else {
 				console.error("Invalid data structure received", data);
 			}
 		} catch (error) {
 			console.error("Error fetching summary data:", error);
+		} finally {
+			setLoading(false);
 		}
 	};
-
 	useEffect(() => {
 		fetchSummaryData();
 	}, []);
@@ -146,6 +169,7 @@ const OpenTelemetry = () => {
 				category === "signup" ? params.row.signup_users : params.row.retained_users
 		}
 	];
+	console.log("columns", columns);
 
 	const countryColumns = [
 		{ field: "country_code", headerName: "Country", flex: 1 },
@@ -157,6 +181,7 @@ const OpenTelemetry = () => {
 				category === "signup" ? params.row.signup_users : params.row.retained_users
 		}
 	];
+	console.log("countryColumns", countryColumns);
 
 	const startIdx = (page - 1) * rowsPerPage;
 	const endIdx = startIdx + rowsPerPage;
@@ -168,14 +193,17 @@ const OpenTelemetry = () => {
 		signup_users: row.signup_users,
 		retained_users: row.retained_users
 	}));
+	console.log("rows", rows);
 
-	const CountryRows = filteredData.map((row, index) => ({
-		id: index + 1,
-		country_code: countries.getName(row.country_code, "en") || "Unknown",
-		signup_users: row.signup_users,
-		retained_users: row.retained_users
-	}));
-
+	const CountryRows = [
+		...filteredData.map((row, index) => ({
+			id: index + 1,
+			country_code: countries.getName(row.country_code, "en") || "Unknown",
+			signup_users: row.signup_users,
+			retained_users: row.retained_users
+		}))
+	];
+	console.log("CountryRows", CountryRows);
 	return (
 		<Box
 			component="main"
@@ -202,7 +230,7 @@ const OpenTelemetry = () => {
 						</Typography>
 					)}
 
-					{/* ============== Data Display section ================ */}
+					{/* Data Display section */}
 					<Grid container spacing={3}>
 						<Grid item xs={12} sm={6} md={3}>
 							<Card sx={{ p: 2, textAlign: "center" }}>
@@ -219,31 +247,35 @@ const OpenTelemetry = () => {
 						<Grid item xs={12} sm={6} md={3}>
 							<Card sx={{ p: 2, textAlign: "center" }}>
 								<Typography variant="h6">Signup Countries</Typography>
-								<Typography variant="h4">{signupCountries}</Typography>
+								<Typography variant="h4">{totalSignupCountries}</Typography>
 							</Card>
 						</Grid>
 						<Grid item xs={12} sm={6} md={3}>
 							<Card sx={{ p: 2, textAlign: "center" }}>
 								<Typography variant="h6">Retained Countries</Typography>
-								<Typography variant="h4">{retainedCountries}</Typography>
+								<Typography variant="h4">{totalRetainedCountries}</Typography>
 							</Card>
 						</Grid>
 					</Grid>
 
-					{/* ================== filter ======================== */}
 					<Card
 						sx={{
 							mt: 4,
-							p: 3,
+							p: 6,
 							borderRadius: 3,
 							boxShadow: 3
 						}}
 					>
 						<Grid container spacing={3}>
-							<Grid item xs={12} sm={6} md={3}>
+							{/* Category Filters */}
+							<Grid item xs={12} md={6}>
 								<FormControl fullWidth>
 									<InputLabel>Category</InputLabel>
-									<Select value={category} onChange={(e) => setCategory(e.target.value)}>
+									<Select
+										label="Category"
+										value={category}
+										onChange={(e) => setCategory(e.target.value)}
+									>
 										{categories.map((cat) => (
 											<MenuItem key={cat.key} value={cat.key}>
 												{cat.label}
@@ -253,14 +285,36 @@ const OpenTelemetry = () => {
 								</FormControl>
 							</Grid>
 
-							{/* Granularity Filter */}
-							<Grid item xs={12} sm={6} md={3}>
+							{/* Granularity Filters */}
+							<Grid item xs={12} md={6}>
 								<FormControl fullWidth>
 									<InputLabel>Granularity</InputLabel>
-									<Select value={granularity} onChange={(e) => setGranularity(e.target.value)}>
-										{granularities.map((cat) => (
-											<MenuItem key={cat.key} value={cat.key}>
-												{cat.label}
+									<Select
+										label="Granularity"
+										value={granularity}
+										onChange={(e) => setGranularity(e.target.value)}
+									>
+										{granularities.map((gran) => (
+											<MenuItem key={gran.key} value={gran.key}>
+												{gran.label}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+							{/* ====== country and date filter ============ */}
+							<Grid item xs={12} md={6}>
+								<FormControl fullWidth>
+									<InputLabel>Ground By</InputLabel>
+
+									<Select
+										label="Group_by"
+										value={group_by}
+										onChange={(e) => setGroup_by(e.target.value)}
+									>
+										{groupes.map((gran) => (
+											<MenuItem key={gran.key} value={gran.key}>
+												{gran.label}
 											</MenuItem>
 										))}
 									</Select>
@@ -268,10 +322,8 @@ const OpenTelemetry = () => {
 							</Grid>
 
 							{/* Country Filter */}
-							<Grid item xs={12} sm={6} md={3}>
+							<Grid item xs={12} md={6}>
 								<FormControl fullWidth>
-									<InputLabel id="country-label"> </InputLabel>
-
 									<Autocomplete
 										value={country}
 										onChange={(event, newValue) => {
@@ -284,16 +336,10 @@ const OpenTelemetry = () => {
 										}}
 										options={countryNames.map(([, name]) => name)}
 										renderInput={(params) => <TextField {...params} label="Country" />}
-										renderOption={(props, option) => (
-											<MenuItem {...props} value={option}>
-												{option}
-											</MenuItem>
-										)}
 										freeSolo
 									/>
-
 									{error && (
-										<Typography color="error" variant="body2">
+										<Typography color="error" variant="body2" sx={{ mt: 1 }}>
 											{error}
 										</Typography>
 									)}
@@ -301,123 +347,106 @@ const OpenTelemetry = () => {
 							</Grid>
 
 							{/* Date Filters */}
-							<Grid item xs={12} sm={12} md={6}>
+							<Grid item xs={12} md={6}>
 								<LocalizationProvider dateAdapter={AdapterDayjs}>
-									<Grid container spacing={2}>
-										{/* Start Date */}
+									<Grid container spacing={3}>
 										<Grid item xs={12} sm={6}>
 											<TextField
+												fullWidth
 												label="Start Date"
 												type="date"
-												onChange={(e) => setStartDate(e.target.value)}
 												value={startDate}
-												InputLabelProps={{
-													shrink: true
-												}}
-												fullWidth
+												onChange={(e) => setStartDate(e.target.value)}
+												InputLabelProps={{ shrink: true }}
 											/>
 										</Grid>
-										{/* End Date */}
 										<Grid item xs={12} sm={6}>
 											<TextField
+												fullWidth
 												label="End Date"
 												type="date"
-												onChange={(e) => setEndDate(e.target.value)}
 												value={endDate}
-												InputLabelProps={{
-													shrink: true
-												}}
-												fullWidth
+												onChange={(e) => setEndDate(e.target.value)}
+												InputLabelProps={{ shrink: true }}
 											/>
 										</Grid>
 									</Grid>
 								</LocalizationProvider>
 							</Grid>
 
-							{/* Filter Buttons */}
-							<Grid item xs={8} sm={6} md={3}>
+							{/* Buttons */}
+							<Grid item xs={12} display="flex" justifyContent="flex-start" gap={2}>
 								<Button
-									onClick={applyFilters}
-									fullWidth
 									variant="contained"
 									color="primary"
-									sx={{
-										textTransform: "none",
-										fontWeight: "bold"
-									}}
+									onClick={applyFilters}
+									disabled={loading}
 								>
-									Apply
+									Apply Filters
 								</Button>
-							</Grid>
-							<Grid item xs={8} sm={6} md={3}>
-								<Button
-									fullWidth
-									variant="outlined"
-									color="secondary"
-									sx={{
-										textTransform: "none",
-										fontWeight: "bold"
-									}}
-									onClick={resetFilters}
-								>
-									Reset
+								<Button variant="outlined" color="secondary" onClick={resetFilters}>
+									Reset Filters
 								</Button>
 							</Grid>
 						</Grid>
 					</Card>
 
-					{/* =========== Tables Display ============================== */}
-					<Card
-						sx={{
-							mt: 4,
-							p: 3,
-							borderRadius: 3,
-							boxShadow: 3
-						}}
-					>
-						<Grid container spacing={3}>
-							<Grid item xs={12} md={6}>
-								<Card sx={{ p: 3 }}>
-									<Typography variant="h6" sx={{ mb: 2 }}>
-										User Data
-									</Typography>
-									<DataGrid
-										rows={rows}
-										columns={columns}
-										getRowId={(row) => row.id}
-										autoHeight
-										pagination
-										pageSize={rowsPerPage}
-										rowCount={tableData.length}
-										paginationMode="server"
-										onPageChange={(newPage) => setPage(newPage + 1)}
-										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
-										components={{ Toolbar: GridToolbar }}
-									/>
-								</Card>
-							</Grid>
-							<Grid item xs={12} md={6}>
-								<Card sx={{ p: 3 }}>
-									<Typography variant="h6" sx={{ mb: 2 }}>
-										Country data
+					{/* Tables */}
+					<Grid container spacing={2} sx={{ mt: 4 }}>
+						<Grid item xs={12} md={6}>
+							<Card>
+								<div style={{ width: "100%" }}>
+									<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
+										{category === "signup"
+											? "Signup Users by Country"
+											: "Retained Users by Country"}
 									</Typography>
 									<DataGrid
 										rows={CountryRows}
 										columns={countryColumns}
+										pageSize={5}
+										rowsPerPageOptions={[5]}
+										components={{
+											Toolbar: GridToolbar
+										}}
 										getRowId={(row) => row.id}
 										autoHeight
 										pagination
-										pageSize={rowsPerPage}
 										rowCount={tableData.length}
 										paginationMode="server"
 										onPageChange={(newPage) => setPage(newPage + 1)}
 										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
-										components={{ Toolbar: GridToolbar }}
 									/>
-								</Card>
-							</Grid>
+								</div>
+							</Card>
 						</Grid>
-					</Card>
+
+						<Grid item xs={12} md={6}>
+							<Card>
+								<div style={{ width: "100%" }}>
+									<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
+										{category === "signup" ? "Signup Users" : "Retained Users"}
+									</Typography>
+									<DataGrid
+										rows={rows}
+										columns={columns}
+										pageSize={5}
+										rowsPerPageOptions={[5]}
+										components={{
+											Toolbar: GridToolbar
+										}}
+										getRowId={(row) => row.id}
+										autoHeight
+										pagination
+										rowCount={tableData.length}
+										paginationMode="server"
+										onPageChange={(newPage) => setPage(newPage + 1)}
+										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
+									/>
+								</div>
+							</Card>
+						</Grid>
+					</Grid>
 				</Grid>
 			</Grid>
 		</Box>
