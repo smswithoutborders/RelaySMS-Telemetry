@@ -55,7 +55,7 @@ function ResponsiveDrawer() {
 						<ListItemIcon>
 							<FaTable />
 						</ListItemIcon>
-						<ListItemText>Open Telematry</ListItemText>
+						<ListItemText>Open Telemetry</ListItemText>
 					</ListItemButton>
 				</ListItem>
 				<ListItem>
