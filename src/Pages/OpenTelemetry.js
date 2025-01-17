@@ -10,7 +10,8 @@ import {
 	FormControl,
 	InputLabel,
 	TextField,
-	Autocomplete
+	Autocomplete,
+	CircularProgress
 } from "@mui/material";
 import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -41,8 +42,8 @@ const OpenTelemetry = () => {
 	const [endDate, setEndDate] = useState("");
 	const [country, setCountry] = useState("");
 	const [category, setCategory] = useState("summary");
-	const [granularity, setGranularity] = useState("month");
-	const [group_by, setGroup_by] = useState("month");
+	const [granularity, setGranularity] = useState("day");
+	const [group_by, setGroup_by] = useState("country");
 	const [data, setData] = useState([]);
 	const [page, setPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -52,7 +53,7 @@ const OpenTelemetry = () => {
 	const [totalUsers, setTotalUsers] = useState(0);
 	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
 	const countryNames = Object.entries(countries.getNames("en"));
-	const [userswithToken, setUsers_with_Tokens] = useState(0);
+	const [total_retained_users_with_tokens, setTotal_retained_users_with_tokens] = useState(0);
 
 	const filteredData = country
 		? tableData.filter((row) => countries.getName(row.country_code, "en") === country)
@@ -85,14 +86,18 @@ const OpenTelemetry = () => {
 
 			if (category === "summary") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
-				setUsers_with_Tokens(apiData[category]?.users_withToken ?? 0);
+				setTotal_retained_users_with_tokens(
+					apiData[category]?.total_retained_users_with_tokens ?? 0
+				);
 				setTotalSignupCountries(apiData[category]?.total_signup_countries ?? 0);
 			} else if (category === "signup") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
 				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
-				setUsers_with_Tokens(0);
+				setTotal_retained_users_with_tokens(0);
 			} else if (category === "retained") {
-				setUsers_with_Tokens(apiData[category]?.total_retained_users ?? 0);
+				setTotal_retained_users_with_tokens(
+					apiData[category]?.Total_retained_users_with_tokens ?? 0
+				);
 				setTotalUsers(0);
 				setTotalSignupCountries(0);
 			}
@@ -118,10 +123,11 @@ const OpenTelemetry = () => {
 			console.log("data", data);
 
 			if (data && data.summary) {
-				const { total_signup_users, users_withToken, total_signup_countries } = data.summary;
+				const { total_signup_users, total_retained_users_with_tokens, total_signup_countries } =
+					data.summary;
 
 				setTotalUsers(total_signup_users);
-				setUsers_with_Tokens(users_withToken);
+				setTotal_retained_users_with_tokens(total_retained_users_with_tokens);
 				setTotalSignupCountries(total_signup_countries);
 			} else {
 				console.error("Invalid data structure received", data);
@@ -145,6 +151,8 @@ const OpenTelemetry = () => {
 	};
 
 	// Define columns for User data Table
+
+	// Define columns for User data Table
 	const columns = [
 		{ field: "timeframe", headerName: "Timeframe", flex: 1 },
 		{
@@ -153,9 +161,14 @@ const OpenTelemetry = () => {
 			flex: 1,
 			valueGetter: (params) =>
 				category === "signup" ? params.row.signup_users : params.row.retained_users
+		},
+		{
+			field: "users_with_tokens",
+			headerName: "Users with Stored Tokens",
+			flex: 1,
+			valueGetter: (params) => params.row.users_with_tokens || 0
 		}
 	];
-	console.log("columns", columns);
 
 	const countryColumns = [
 		{ field: "country_code", headerName: "Country", flex: 1 },
@@ -165,9 +178,14 @@ const OpenTelemetry = () => {
 			flex: 1,
 			valueGetter: (params) =>
 				category === "signup" ? params.row.signup_users : params.row.retained_users
+		},
+		{
+			field: "users_with_tokens",
+			headerName: "Users with Stored Tokens",
+			flex: 1,
+			valueGetter: (params) => params.row.users_with_tokens || 0
 		}
 	];
-	console.log("countryColumns", countryColumns);
 
 	const startIdx = (page - 1) * rowsPerPage;
 	const endIdx = startIdx + rowsPerPage;
@@ -179,7 +197,6 @@ const OpenTelemetry = () => {
 		signup_users: row.signup_users,
 		retained_users: row.retained_users
 	}));
-	console.log("rows", rows);
 
 	const CountryRows = [
 		...filteredData.map((row, index) => ({
@@ -189,7 +206,7 @@ const OpenTelemetry = () => {
 			retained_users: row.retained_users
 		}))
 	];
-	console.log("CountryRows", CountryRows);
+
 	return (
 		<Box
 			component="main"
@@ -215,43 +232,63 @@ const OpenTelemetry = () => {
 							{error}
 						</Typography>
 					)}
-
 					<Grid container spacing={3}>
 						<Grid container spacing={3} sx={{ mt: 4 }}>
-							{[
-								{ title: "Signup Users", value: totalUsers, icon: "👥" },
-								{ title: "Signup Countries", value: totalSignupCountries, icon: "🌍" },
-								{ title: "Users with stored accounts", value: userswithToken, icon: "💾" }
-							].map((item, index) => (
-								<Grid item xs={12} sm={6} md={3} key={index}>
-									<Card
-										sx={{
-											p: 3,
-											textAlign: "center",
-											borderRadius: 2,
-											display: "flex",
-											flexDirection: "column",
-											justifyContent: "space-between",
-											alignItems: "center",
-											height: "100%",
-											minHeight: "150px",
-											boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-											"&:hover": {
-												boxShadow: "0 8px 12px rgba(0, 0, 0, 0.2)",
-												transform: "translateY(-4px)",
-												transition: "0.3s ease-in-out"
-											}
-										}}
-									>
-										<Typography variant="h6" sx={{ fontWeight: "bold" }}>
-											{item.icon} {item.title}
-										</Typography>
-										<Typography variant="h4" sx={{ color: "primary.main", mt: 1 }}>
-											{item.value}
-										</Typography>
-									</Card>
+							{loading ? (
+								// Loader (spinner) is shown when loading is true
+								<Grid
+									item
+									xs={12}
+									sx={{
+										display: "flex",
+										justifyContent: "center",
+										alignItems: "center",
+										minHeight: "150px"
+									}}
+								>
+									<CircularProgress size={60} />
 								</Grid>
-							))}
+							) : (
+								// Show the content once data is loaded
+								[
+									{ title: "Signup Users", value: totalUsers, icon: "👥" },
+									{ title: "Signup Countries", value: totalSignupCountries, icon: "🌍" },
+									{
+										title: "Users with stored accounts",
+										value: total_retained_users_with_tokens,
+										icon: "💾"
+									}
+								].map((item, index) => (
+									<Grid item xs={12} sm={6} md={3} key={index}>
+										<Card
+											sx={{
+												p: 3,
+												textAlign: "center",
+												borderRadius: 2,
+												display: "flex",
+												flexDirection: "column",
+												justifyContent: "space-between",
+												alignItems: "center",
+												height: "100%",
+												minHeight: "150px",
+												boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+												"&:hover": {
+													boxShadow: "0 8px 12px rgba(0, 0, 0, 0.2)",
+													transform: "translateY(-4px)",
+													transition: "0.3s ease-in-out"
+												}
+											}}
+										>
+											<Typography variant="h6" sx={{ fontWeight: "bold" }}>
+												{item.icon} {item.title}
+											</Typography>
+											<Typography variant="h4" sx={{ color: "primary.main", mt: 1 }}>
+												{item.value}
+											</Typography>
+										</Card>
+									</Grid>
+								))
+							)}
 						</Grid>
 					</Grid>
 
@@ -398,22 +435,27 @@ const OpenTelemetry = () => {
 											? "Signup Users by Country"
 											: "Retained Users by Country"}
 									</Typography>
-									<DataGrid
-										rows={CountryRows}
-										columns={countryColumns}
-										pageSize={5}
-										rowsPerPageOptions={[5]}
-										components={{
-											Toolbar: GridToolbar
-										}}
-										getRowId={(row) => row.id}
-										autoHeight
-										pagination
-										rowCount={tableData.length}
-										paginationMode="server"
-										onPageChange={(newPage) => setPage(newPage + 1)}
-										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
-									/>
+
+									{loading ? (
+										<CircularProgress sx={{ margin: "auto" }} />
+									) : (
+										<DataGrid
+											rows={CountryRows}
+											columns={countryColumns}
+											pageSize={5}
+											rowsPerPageOptions={[5]}
+											components={{
+												Toolbar: GridToolbar
+											}}
+											getRowId={(row) => row.id}
+											autoHeight
+											pagination
+											rowCount={tableData.length}
+											paginationMode="server"
+											onPageChange={(newPage) => setPage(newPage + 1)}
+											onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
+										/>
+									)}
 								</div>
 							</Card>
 						</Grid>
@@ -424,22 +466,27 @@ const OpenTelemetry = () => {
 									<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
 										{category === "signup" ? "Signup Users" : "Retained Users"}
 									</Typography>
-									<DataGrid
-										rows={rows}
-										columns={columns}
-										pageSize={5}
-										rowsPerPageOptions={[5]}
-										components={{
-											Toolbar: GridToolbar
-										}}
-										getRowId={(row) => row.id}
-										autoHeight
-										pagination
-										rowCount={tableData.length}
-										paginationMode="server"
-										onPageChange={(newPage) => setPage(newPage + 1)}
-										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
-									/>
+
+									{loading ? (
+										<CircularProgress sx={{ margin: "auto" }} />
+									) : (
+										<DataGrid
+											rows={rows}
+											columns={columns}
+											pageSize={5}
+											rowsPerPageOptions={[5]}
+											components={{
+												Toolbar: GridToolbar
+											}}
+											getRowId={(row) => row.id}
+											autoHeight
+											pagination
+											rowCount={tableData.length}
+											paginationMode="server"
+											onPageChange={(newPage) => setPage(newPage + 1)}
+											onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
+										/>
+									)}
 								</div>
 							</Card>
 						</Grid>
