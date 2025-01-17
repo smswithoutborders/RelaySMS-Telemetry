@@ -72,7 +72,7 @@ const OpenTelemetry = () => {
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=${group_by}`
+				`https://api.telemetry.staging.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=${group_by}`
 			);
 
 			if (!response.ok) {
@@ -116,7 +116,7 @@ const OpenTelemetry = () => {
 			const formattedToday = today.toISOString().split("T")[0];
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=1&page_size=100`
+				`https://api.telemetry.staging.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=1&page_size=100`
 			);
 
 			const data = await response.json();
@@ -149,8 +149,6 @@ const OpenTelemetry = () => {
 		setCategory("summary");
 		fetchSummaryData();
 	};
-
-	// Define columns for User data Table
 
 	// Define columns for User data Table
 	const columns = [
