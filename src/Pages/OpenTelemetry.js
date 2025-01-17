@@ -114,11 +114,9 @@ const OpenTelemetry = () => {
 	const fetchSummaryData = async () => {
 		setLoading(true);
 		try {
-			// Get today's date in YYYY-MM-DD format
 			const today = new Date();
-			const formattedToday = today.toISOString().split("T")[0]; // Extract the date part
+			const formattedToday = today.toISOString().split("T")[0];
 
-			// Update the API URL with the dynamic end_date
 			const response = await fetch(
 				`https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=1&page_size=100`
 			);
@@ -229,12 +227,6 @@ const OpenTelemetry = () => {
 						p: { md: 3, sm: 2, xs: 1 }
 					}}
 				>
-					{error && (
-						<Typography color="error" sx={{ mb: 2 }}>
-							{error}
-						</Typography>
-					)}
-
 					{/* Data Display section */}
 					<Grid container spacing={3}>
 						<Grid item xs={12} sm={6} md={3}>
