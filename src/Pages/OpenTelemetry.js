@@ -40,21 +40,19 @@ const OpenTelemetry = () => {
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [country, setCountry] = useState("");
-	const [totalRows, setTotalRows] = useState("");
 	const [category, setCategory] = useState("summary");
 	const [granularity, setGranularity] = useState("month");
 	const [group_by, setGroup_by] = useState("month");
 	const [data, setData] = useState([]);
 	const [page, setPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(100);
+	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const tableData = data?.[category]?.data || [];
 	const [totalUsers, setTotalUsers] = useState(0);
-	const [totalRetained, setTotalRetained] = useState(0);
 	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
-	const [totalRetainedCountries, setTotalRetainedCountries] = useState(0);
 	const countryNames = Object.entries(countries.getNames("en"));
+	const [userswithToken, setUsers_with_Tokens] = useState(0);
 
 	const filteredData = country
 		? tableData.filter((row) => countries.getName(row.country_code, "en") === country)
@@ -73,7 +71,7 @@ const OpenTelemetry = () => {
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=${group_by}&page=${page}&page_size=${rowsPerPage}`
+				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=${group_by}`
 			);
 
 			if (!response.ok) {
@@ -83,23 +81,18 @@ const OpenTelemetry = () => {
 			const apiData = await response.json();
 			setData(apiData);
 			console.log("apiData", apiData);
-			setTotalRows(apiData.pagination.total_records);
-			console.log("apiData.pagination.total_records", apiData.pagination.total_records);
 			setError(null);
 
 			if (category === "summary") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
-				setTotalRetained(apiData[category]?.total_retained_users ?? 0);
+				setUsers_with_Tokens(apiData[category]?.users_withToken ?? 0);
 				setTotalSignupCountries(apiData[category]?.total_signup_countries ?? 0);
-				setTotalRetainedCountries(apiData[category]?.total_retained_countries ?? 0);
 			} else if (category === "signup") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
 				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
-				setTotalRetained(0);
-				setTotalRetainedCountries(0);
+				setUsers_with_Tokens(0);
 			} else if (category === "retained") {
-				setTotalRetained(apiData[category]?.total_retained_users ?? 0);
-				setTotalRetainedCountries(apiData[category]?.total_countries ?? 0);
+				setUsers_with_Tokens(apiData[category]?.total_retained_users ?? 0);
 				setTotalUsers(0);
 				setTotalSignupCountries(0);
 			}
@@ -125,17 +118,11 @@ const OpenTelemetry = () => {
 			console.log("data", data);
 
 			if (data && data.summary) {
-				const {
-					total_signup_users,
-					total_retained_users,
-					total_signup_countries,
-					total_retained_countries
-				} = data.summary;
+				const { total_signup_users, users_withToken, total_signup_countries } = data.summary;
 
 				setTotalUsers(total_signup_users);
-				setTotalRetained(total_retained_users);
+				setUsers_with_Tokens(users_withToken);
 				setTotalSignupCountries(total_signup_countries);
-				setTotalRetainedCountries(total_retained_countries);
 			} else {
 				console.error("Invalid data structure received", data);
 			}
@@ -148,10 +135,6 @@ const OpenTelemetry = () => {
 	useEffect(() => {
 		fetchSummaryData();
 	}, []);
-
-	useEffect(() => {
-		applyFilters();
-	}, [page, rowsPerPage]);
 
 	const resetFilters = () => {
 		setStartDate("");
@@ -227,31 +210,48 @@ const OpenTelemetry = () => {
 						p: { md: 3, sm: 2, xs: 1 }
 					}}
 				>
-					{/* Data Display section */}
+					{error && (
+						<Typography color="error" sx={{ mb: 2 }}>
+							{error}
+						</Typography>
+					)}
+
 					<Grid container spacing={3}>
-						<Grid item xs={12} sm={6} md={3}>
-							<Card sx={{ p: 2, textAlign: "center" }}>
-								<Typography variant="h6">Signup Users</Typography>
-								<Typography variant="h4">{totalUsers}</Typography>
-							</Card>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<Card sx={{ p: 2, textAlign: "center" }}>
-								<Typography variant="h6">Retained Users</Typography>
-								<Typography variant="h4">{totalRetained}</Typography>
-							</Card>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<Card sx={{ p: 2, textAlign: "center" }}>
-								<Typography variant="h6">Signup Countries</Typography>
-								<Typography variant="h4">{totalSignupCountries}</Typography>
-							</Card>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<Card sx={{ p: 2, textAlign: "center" }}>
-								<Typography variant="h6">Retained Countries</Typography>
-								<Typography variant="h4">{totalRetainedCountries}</Typography>
-							</Card>
+						<Grid container spacing={3} sx={{ mt: 4 }}>
+							{[
+								{ title: "Signup Users", value: totalUsers, icon: "👥" },
+								{ title: "Signup Countries", value: totalSignupCountries, icon: "🌍" },
+								{ title: "Users with stored accounts", value: userswithToken, icon: "💾" }
+							].map((item, index) => (
+								<Grid item xs={12} sm={6} md={3} key={index}>
+									<Card
+										sx={{
+											p: 3,
+											textAlign: "center",
+											borderRadius: 2,
+											display: "flex",
+											flexDirection: "column",
+											justifyContent: "space-between",
+											alignItems: "center",
+											height: "100%",
+											minHeight: "150px",
+											boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+											"&:hover": {
+												boxShadow: "0 8px 12px rgba(0, 0, 0, 0.2)",
+												transform: "translateY(-4px)",
+												transition: "0.3s ease-in-out"
+											}
+										}}
+									>
+										<Typography variant="h6" sx={{ fontWeight: "bold" }}>
+											{item.icon} {item.title}
+										</Typography>
+										<Typography variant="h4" sx={{ color: "primary.main", mt: 1 }}>
+											{item.value}
+										</Typography>
+									</Card>
+								</Grid>
+							))}
 						</Grid>
 					</Grid>
 
@@ -401,25 +401,18 @@ const OpenTelemetry = () => {
 									<DataGrid
 										rows={CountryRows}
 										columns={countryColumns}
-										pageSize={rowsPerPage}
-										rowsPerPageOptions={[10, 20, 50]}
+										pageSize={5}
+										rowsPerPageOptions={[5]}
 										components={{
 											Toolbar: GridToolbar
 										}}
 										getRowId={(row) => row.id}
 										autoHeight
 										pagination
-										rowCount={totalRows}
+										rowCount={tableData.length}
 										paginationMode="server"
-										onPageChange={(newPage) => {
-											setPage(newPage + 1);
-											applyFilters();
-										}}
-										onPageSizeChange={(newPageSize) => {
-											setRowsPerPage(newPageSize);
-											setPage(1);
-											applyFilters();
-										}}
+										onPageChange={(newPage) => setPage(newPage + 1)}
+										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
 									/>
 								</div>
 							</Card>
@@ -434,25 +427,18 @@ const OpenTelemetry = () => {
 									<DataGrid
 										rows={rows}
 										columns={columns}
-										pageSize={rowsPerPage}
-										rowsPerPageOptions={[10, 20, 50, 100]}
+										pageSize={5}
+										rowsPerPageOptions={[5]}
 										components={{
 											Toolbar: GridToolbar
 										}}
 										getRowId={(row) => row.id}
 										autoHeight
 										pagination
-										rowCount={totalRows}
+										rowCount={tableData.length}
 										paginationMode="server"
-										onPageChange={(newPage) => {
-											setPage(newPage + 1);
-											applyFilters();
-										}}
-										onPageSizeChange={(newPageSize) => {
-											setRowsPerPage(newPageSize);
-											setPage(1);
-											applyFilters();
-										}}
+										onPageChange={(newPage) => setPage(newPage + 1)}
+										onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
 									/>
 								</div>
 							</Card>
