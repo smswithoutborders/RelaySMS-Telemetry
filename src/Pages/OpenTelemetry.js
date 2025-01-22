@@ -10,8 +10,8 @@ import {
 	FormControl,
 	InputLabel,
 	TextField,
-	Autocomplete,
-	CircularProgress
+	CircularProgress,
+	ListItemText
 } from "@mui/material";
 import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -42,18 +42,21 @@ const OpenTelemetry = () => {
 	const [endDate, setEndDate] = useState("");
 	const [country, setCountry] = useState("");
 	const [category, setCategory] = useState("summary");
-	const [granularity, setGranularity] = useState("day");
-	const [group_by, setGroup_by] = useState("country");
+	const [granularity, setGranularity] = useState("month");
 	const [data, setData] = useState([]);
 	const [page, setPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [error, setError] = useState(null);
-	const [loading, setLoading] = useState(false);
 	const tableData = data?.[category]?.data || [];
 	const [totalUsers, setTotalUsers] = useState(0);
-	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
+	const [total_retained_users, setTotal_retained_users] = useState(0);
+	const [loading, setLoading] = useState(false);
+	const [group_by, setGroup_by] = useState("country");
 	const countryNames = Object.entries(countries.getNames("en"));
 	const [total_retained_users_with_tokens, setTotal_retained_users_with_tokens] = useState(0);
+	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
+
+	// ==============
 
 	const filteredData = country
 		? tableData.filter((row) => countries.getName(row.country_code, "en") === country)
@@ -72,7 +75,7 @@ const OpenTelemetry = () => {
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=${group_by}`
+				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=1&page_size=100`
 			);
 
 			if (!response.ok) {
@@ -81,11 +84,13 @@ const OpenTelemetry = () => {
 
 			const apiData = await response.json();
 			setData(apiData);
-			console.log("apiData", apiData);
 			setError(null);
 
+			// Update stats based on category
 			if (category === "summary") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
+				setTotal_retained_users(apiData[category]?.total_retained_users ?? 0);
+				setTotalSignupCountries(apiData[category]?.total_signup_countries ?? 0);
 				setTotal_retained_users_with_tokens(
 					apiData[category]?.total_retained_users_with_tokens ?? 0
 				);
@@ -94,16 +99,25 @@ const OpenTelemetry = () => {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
 				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
 				setTotal_retained_users_with_tokens(0);
+				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
+				setTotal_retained_users_with_tokens(
+					apiData[category]?.total_retained_users_with_tokens ?? 0
+				);
+				setTotal_retained_users(0);
 			} else if (category === "retained") {
 				setTotal_retained_users_with_tokens(
 					apiData[category]?.Total_retained_users_with_tokens ?? 0
 				);
 				setTotalUsers(0);
 				setTotalSignupCountries(0);
+				setTotal_retained_users(apiData[category]?.total_retained_users ?? 0);
+				setTotal_retained_users_with_tokens(
+					apiData[category]?.total_retained_users_with_tokens ?? 0
+				);
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
-			setError("Failed to fetch data. Please try again later");
+			setError("Failed to fetch data. Please try again later.");
 		} finally {
 			setLoading(false);
 		}
@@ -123,12 +137,17 @@ const OpenTelemetry = () => {
 			console.log("data", data);
 
 			if (data && data.summary) {
-				const { total_signup_users, total_retained_users_with_tokens, total_signup_countries } =
-					data.summary;
+				const {
+					total_signup_users,
+					total_retained_users_with_tokens,
+					total_signup_countries,
+					total_retained_users
+				} = data.summary;
 
 				setTotalUsers(total_signup_users);
 				setTotal_retained_users_with_tokens(total_retained_users_with_tokens);
 				setTotalSignupCountries(total_signup_countries);
+				setTotal_retained_users(total_retained_users);
 			} else {
 				console.error("Invalid data structure received", data);
 			}
@@ -138,6 +157,7 @@ const OpenTelemetry = () => {
 			setLoading(false);
 		}
 	};
+
 	useEffect(() => {
 		fetchSummaryData();
 	}, []);
@@ -196,14 +216,12 @@ const OpenTelemetry = () => {
 		retained_users: row.retained_users
 	}));
 
-	const CountryRows = [
-		...filteredData.map((row, index) => ({
-			id: index + 1,
-			country_code: countries.getName(row.country_code, "en") || "Unknown",
-			signup_users: row.signup_users,
-			retained_users: row.retained_users
-		}))
-	];
+	const CountryRows = filteredData.map((row, index) => ({
+		id: index + 1,
+		country_code: countries.getName(row.country_code, "en") || "Unknown",
+		signup_users: row.signup_users,
+		retained_users: row.retained_users
+	}));
 
 	return (
 		<Box
@@ -230,262 +248,397 @@ const OpenTelemetry = () => {
 							{error}
 						</Typography>
 					)}
+
+					{/* ============== Total Display section ================ */}
 					<Grid container spacing={3}>
-						<Grid container spacing={3} sx={{ mt: 4 }}>
-							{loading ? (
-								// Loader (spinner) is shown when loading is true
-								<Grid
-									item
-									xs={12}
+						{loading ? (
+							<Grid
+								item
+								xs={12}
+								sx={{
+									display: "flex",
+									justifyContent: "center",
+									alignItems: "center",
+									minHeight: "150px"
+								}}
+							>
+								<CircularProgress size={60} />
+							</Grid>
+						) : (
+							<>
+								{/* ================= sign up users =================== */}
+								<Grid item xs={12} sm={6} md={4} lg={2}>
+									<Card
+										sx={{
+											p: 3,
+											textAlign: "center",
+											display: "flex",
+											flexDirection: "column",
+											justifyContent: "center",
+											alignItems: "center",
+											height: "100%",
+											boxShadow: 5,
+											borderRadius: "12px",
+											background: "linear-gradient(135deg, #6e7dff, #4d5bff)",
+											color: "white",
+											transition: "transform 0.3s ease-in-out",
+											"&:hover": {
+												transform: "translateY(-10px)"
+											}
+										}}
+									>
+										<Typography variant="h6" sx={{ mb: 1, fontWeight: "bold" }}>
+											Signup Users
+										</Typography>
+										<Typography variant="h4" sx={{ fontWeight: "600" }}>
+											{totalUsers}
+										</Typography>
+									</Card>
+								</Grid>
+
+								{/* ================= Retained Users ================== */}
+								<Grid item xs={12} sm={6} md={4} lg={2}>
+									<Card
+										sx={{
+											p: 3,
+											textAlign: "center",
+											display: "flex",
+											flexDirection: "column",
+											justifyContent: "center",
+											alignItems: "center",
+											height: "100%",
+											boxShadow: 5,
+											borderRadius: "12px",
+											background: "linear-gradient(135deg, #3ecf8e, #1eae65)",
+											color: "white",
+											transition: "transform 0.3s ease-in-out",
+											"&:hover": {
+												transform: "translateY(-10px)"
+											}
+										}}
+									>
+										<Typography variant="h6" sx={{ mb: 1, fontWeight: "bold" }}>
+											Retained Users
+										</Typography>
+										<Typography variant="h4" sx={{ fontWeight: "600" }}>
+											{total_retained_users}
+										</Typography>
+									</Card>
+								</Grid>
+
+								{/* =============== sign ups country ================= */}
+								<Grid item xs={12} sm={6} md={4} lg={2}>
+									<Card
+										sx={{
+											p: 3,
+											textAlign: "center",
+											display: "flex",
+											flexDirection: "column",
+											justifyContent: "center",
+											alignItems: "center",
+											height: "100%",
+											boxShadow: 5,
+											borderRadius: "12px",
+											background: "linear-gradient(135deg, #f39c12, #f1c40f)",
+											color: "white",
+											transition: "transform 0.3s ease-in-out",
+											"&:hover": {
+												transform: "translateY(-10px)"
+											}
+										}}
+									>
+										<Typography variant="h6" sx={{ mb: 1, fontWeight: "bold" }}>
+											Signup Countries
+										</Typography>
+										<Typography variant="h4" sx={{ fontWeight: "600" }}>
+											{totalSignupCountries}
+										</Typography>
+									</Card>
+								</Grid>
+
+								{/* ============ Users with tokens ============ */}
+								<Grid item xs={12} sm={6} md={4} lg={2}>
+									<Card
+										sx={{
+											p: 3,
+											textAlign: "center",
+											display: "flex",
+											flexDirection: "column",
+											justifyContent: "center",
+											alignItems: "center",
+											height: "100%",
+											boxShadow: 5,
+											borderRadius: "12px",
+											background: "linear-gradient(135deg, #3498db, #2980b9)",
+											color: "white",
+											transition: "transform 0.3s ease-in-out",
+											"&:hover": {
+												transform: "translateY(-10px)"
+											}
+										}}
+									>
+										<Typography variant="h6" sx={{ mb: 1, fontWeight: "bold" }}>
+											Users With Tokens
+										</Typography>
+										<Typography variant="h4" sx={{ fontWeight: "600" }}>
+											{total_retained_users_with_tokens}
+										</Typography>
+									</Card>
+								</Grid>
+
+								<Grid item xs={12} sm={6} md={4} lg={3}>
+									<Card
+										sx={{
+											p: 3,
+											textAlign: "center",
+											display: "flex",
+											flexDirection: "column",
+											justifyContent: "center",
+											alignItems: "center",
+											height: "100%",
+											boxShadow: 8,
+											borderRadius: "15px",
+											background: "linear-gradient(135deg, rgb(70, 67, 71), rgb(106, 98, 109))",
+											color: "white",
+											transform: "scale(1.1)",
+											transition: "transform 0.3s ease-in-out",
+											"&:hover": {
+												transform: "scale(1.15)"
+											}
+										}}
+									>
+										<Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+											% Published
+										</Typography>
+										<Typography variant="h4" sx={{ fontWeight: "700", mb: 1 }}>
+											Null
+										</Typography>
+										<Typography variant="body2" sx={{ fontSize: "16px", opacity: 0.9 }}>
+											<strong>Keep track of your content publishing progress</strong>
+										</Typography>
+									</Card>
+								</Grid>
+							</>
+						)}
+					</Grid>
+
+					{/* ================== filter ======================== */}
+
+					<Grid
+						container
+						sx={{
+							mt: 4,
+							p: 4
+						}}
+						spacing={3}
+						justifyContent="center"
+						alignItems="flex-start"
+					>
+						{/* Filter Cards */}
+						{[
+							{ label: "Category", value: category, onChange: setCategory, options: categories },
+							{
+								label: "Granularity",
+								value: granularity,
+								onChange: setGranularity,
+								options: granularities
+							},
+							{ label: "Group By", value: group_by, onChange: setGroup_by, options: groupes },
+							{ label: "Country", value: country, onChange: setCountry, options: countryNames }
+						].map(({ label, value, onChange, options }) => (
+							<Grid key={label} item xs={12} sm={6} md={3}>
+								<Card
 									sx={{
-										display: "flex",
-										justifyContent: "center",
-										alignItems: "center",
-										minHeight: "150px"
+										p: 3,
+										borderRadius: 4,
+										boxShadow: 4,
+										backgroundColor: (theme) => theme.palette.background.default,
+										"&:hover": {
+											boxShadow: 8,
+											transform: "scale(1.03)",
+											transition: "all 0.3s ease"
+										}
 									}}
 								>
-									<CircularProgress size={60} />
-								</Grid>
-							) : (
-								// Show the content once data is loaded
-								[
-									{ title: "Signup Users", value: totalUsers, icon: "👥" },
-									{ title: "Signup Countries", value: totalSignupCountries, icon: "🌍" },
-									{
-										title: "Users with stored accounts",
-										value: total_retained_users_with_tokens,
-										icon: "💾"
-									}
-								].map((item, index) => (
-									<Grid item xs={12} sm={6} md={3} key={index}>
-										<Card
+									<FormControl fullWidth>
+										<InputLabel sx={{ fontSize: 16, fontWeight: 500 }}>{label}</InputLabel>
+										<Select
+											value={value}
+											onChange={(e) => onChange(e.target.value)}
 											sx={{
-												p: 3,
-												textAlign: "center",
 												borderRadius: 2,
-												display: "flex",
-												flexDirection: "column",
-												justifyContent: "space-between",
-												alignItems: "center",
-												height: "100%",
-												minHeight: "150px",
-												boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-												"&:hover": {
-													boxShadow: "0 8px 12px rgba(0, 0, 0, 0.2)",
-													transform: "translateY(-4px)",
-													transition: "0.3s ease-in-out"
+												padding: "8px",
+												"& .MuiOutlinedInput-root": {
+													backgroundColor: (theme) => theme.palette.background.paper,
+													borderColor: (theme) => theme.palette.primary.main
+												},
+												"&:hover .MuiOutlinedInput-notchedOutline": {
+													borderColor: (theme) => theme.palette.secondary.main
+												},
+												"& .MuiSelect-icon": {
+													color: (theme) => theme.palette.primary.main
 												}
 											}}
 										>
-											<Typography variant="h6" sx={{ fontWeight: "bold" }}>
-												{item.icon} {item.title}
-											</Typography>
-											<Typography variant="h4" sx={{ color: "primary.main", mt: 1 }}>
-												{item.value}
-											</Typography>
-										</Card>
+											{options.map((option) => (
+												<MenuItem key={option.key} value={option.key}>
+													<ListItemText>{option.label || option.name}</ListItemText>
+												</MenuItem>
+											))}
+										</Select>
+									</FormControl>
+								</Card>
+							</Grid>
+						))}
+
+						{/* Date Filters */}
+						<Grid item xs={12} sm={12} md={6}>
+							<LocalizationProvider dateAdapter={AdapterDayjs}>
+								<Grid container spacing={2}>
+									<Grid item xs={12} sm={6}>
+										<TextField
+											label="Start Date"
+											type="date"
+											onChange={(e) => setStartDate(e.target.value)}
+											value={startDate}
+											InputLabelProps={{ shrink: true }}
+											fullWidth
+											sx={{
+												"& .MuiOutlinedInput-root": {
+													backgroundColor: (theme) => theme.palette.background.paper,
+													borderRadius: 2,
+													padding: "6px"
+												},
+												"&:hover .MuiOutlinedInput-notchedOutline": {
+													borderColor: (theme) => theme.palette.secondary.main
+												}
+											}}
+										/>
 									</Grid>
-								))
-							)}
+									<Grid item xs={12} sm={6}>
+										<TextField
+											label="End Date"
+											type="date"
+											onChange={(e) => setEndDate(e.target.value)}
+											value={endDate}
+											InputLabelProps={{ shrink: true }}
+											fullWidth
+											sx={{
+												"& .MuiOutlinedInput-root": {
+													backgroundColor: (theme) => theme.palette.background.paper,
+													borderRadius: 2,
+													padding: "6px"
+												},
+												"&:hover .MuiOutlinedInput-notchedOutline": {
+													borderColor: (theme) => theme.palette.secondary.main
+												}
+											}}
+										/>
+									</Grid>
+								</Grid>
+							</LocalizationProvider>
+						</Grid>
+
+						{/* Action Buttons */}
+						<Grid container spacing={2} justifyContent="center">
+							<Grid item xs={12} sm={6} md={3}>
+								<Button
+									onClick={applyFilters}
+									fullWidth
+									variant="contained"
+									color="primary"
+									sx={{
+										textTransform: "none",
+										fontWeight: "bold",
+										borderRadius: "25px",
+										boxShadow: 4,
+										transition: "all 0.3s ease",
+										"&:hover": {
+											boxShadow: 12,
+											transform: "scale(1.05)",
+											backgroundColor: (theme) => theme.palette.primary.dark
+										}
+									}}
+								>
+									Apply
+								</Button>
+							</Grid>
+							<Grid item xs={12} sm={6} md={3}>
+								<Button
+									fullWidth
+									variant="outlined"
+									color="secondary"
+									sx={{
+										textTransform: "none",
+										fontWeight: "bold",
+										borderRadius: "25px",
+										boxShadow: 4,
+										transition: "all 0.3s ease",
+										"&:hover": {
+											boxShadow: 12,
+											transform: "scale(1.05)",
+											backgroundColor: (theme) => theme.palette.secondary.dark
+										}
+									}}
+									onClick={resetFilters}
+								>
+									Reset
+								</Button>
+							</Grid>
 						</Grid>
 					</Grid>
 
-					<Card
+					{/* ========================== TABLE SECTION ============================ */}
+					{/* ===================================================================== */}
+					{/* ===================================================================== */}
+
+					<Grid
+						container
+						spacing={3}
 						sx={{
-							mt: 4,
-							p: 6,
-							borderRadius: 3,
-							boxShadow: 3
+							mt: 2,
+							p: 2,
+							borderRadius: 3
 						}}
 					>
-						<Grid container spacing={3}>
-							{/* Category Filters */}
-							<Grid item xs={12} md={6}>
-								<FormControl fullWidth>
-									<InputLabel>Category</InputLabel>
-									<Select
-										label="Category"
-										value={category}
-										onChange={(e) => setCategory(e.target.value)}
-									>
-										{categories.map((cat) => (
-											<MenuItem key={cat.key} value={cat.key}>
-												{cat.label}
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Granularity Filters */}
-							<Grid item xs={12} md={6}>
-								<FormControl fullWidth>
-									<InputLabel>Granularity</InputLabel>
-									<Select
-										label="Granularity"
-										value={granularity}
-										onChange={(e) => setGranularity(e.target.value)}
-									>
-										{granularities.map((gran) => (
-											<MenuItem key={gran.key} value={gran.key}>
-												{gran.label}
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Grid>
-							{/* ====== country and date filter ============ */}
-							<Grid item xs={12} md={6}>
-								<FormControl fullWidth>
-									<InputLabel>Ground By</InputLabel>
-
-									<Select
-										label="Group_by"
-										value={group_by}
-										onChange={(e) => setGroup_by(e.target.value)}
-									>
-										{groupes.map((gran) => (
-											<MenuItem key={gran.key} value={gran.key}>
-												{gran.label}
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Country Filter */}
-							<Grid item xs={12} md={6}>
-								<FormControl fullWidth>
-									<Autocomplete
-										value={country}
-										onChange={(event, newValue) => {
-											if (newValue && !countryNames.some(([, name]) => name === newValue)) {
-												setError("This country is not available.");
-											} else {
-												setCountry(newValue);
-												setError(null);
-											}
-										}}
-										options={countryNames.map(([, name]) => name)}
-										renderInput={(params) => <TextField {...params} label="Country" />}
-										freeSolo
-									/>
-									{error && (
-										<Typography color="error" variant="body2" sx={{ mt: 1 }}>
-											{error}
-										</Typography>
-									)}
-								</FormControl>
-							</Grid>
-
-							{/* Date Filters */}
-							<Grid item xs={12} md={6}>
-								<LocalizationProvider dateAdapter={AdapterDayjs}>
-									<Grid container spacing={3}>
-										<Grid item xs={12} sm={6}>
-											<TextField
-												fullWidth
-												label="Start Date"
-												type="date"
-												value={startDate}
-												onChange={(e) => setStartDate(e.target.value)}
-												InputLabelProps={{ shrink: true }}
-											/>
-										</Grid>
-										<Grid item xs={12} sm={6}>
-											<TextField
-												fullWidth
-												label="End Date"
-												type="date"
-												value={endDate}
-												onChange={(e) => setEndDate(e.target.value)}
-												InputLabelProps={{ shrink: true }}
-											/>
-										</Grid>
-									</Grid>
-								</LocalizationProvider>
-							</Grid>
-
-							{/* Buttons */}
-							<Grid item xs={12} display="flex" justifyContent="flex-start" gap={2}>
-								<Button
-									variant="contained"
-									color="primary"
-									onClick={applyFilters}
-									disabled={loading}
-								>
-									Apply Filters
-								</Button>
-								<Button variant="outlined" color="secondary" onClick={resetFilters}>
-									Reset Filters
-								</Button>
-							</Grid>
-						</Grid>
-					</Card>
-
-					{/* Tables */}
-					<Grid container spacing={2} sx={{ mt: 4 }}>
 						<Grid item xs={12} md={6}>
-							<Card>
-								<div style={{ width: "100%" }}>
-									<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
-										{category === "signup"
-											? "Signup Users by Country"
-											: "Retained Users by Country"}
-									</Typography>
-
-									{loading ? (
-										<CircularProgress sx={{ margin: "auto" }} />
-									) : (
-										<DataGrid
-											rows={CountryRows}
-											columns={countryColumns}
-											pageSize={5}
-											rowsPerPageOptions={[5]}
-											components={{
-												Toolbar: GridToolbar
-											}}
-											getRowId={(row) => row.id}
-											autoHeight
-											pagination
-											rowCount={tableData.length}
-											paginationMode="server"
-											onPageChange={(newPage) => setPage(newPage + 1)}
-											onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
-										/>
-									)}
-								</div>
+							<Card sx={{ p: 3 }}>
+								<Typography variant="h6" sx={{ mb: 2 }}>
+									User Data
+								</Typography>
+								<DataGrid
+									rows={rows}
+									columns={columns}
+									getRowId={(row) => row.id}
+									autoHeight
+									pagination
+									pageSize={rowsPerPage}
+									rowCount={tableData.length}
+									paginationMode="server"
+									onPageChange={(newPage) => setPage(newPage + 1)}
+									onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
+									components={{ Toolbar: GridToolbar }}
+								/>
 							</Card>
 						</Grid>
-
 						<Grid item xs={12} md={6}>
-							<Card>
-								<div style={{ width: "100%" }}>
-									<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
-										{category === "signup" ? "Signup Users" : "Retained Users"}
-									</Typography>
-
-									{loading ? (
-										<CircularProgress sx={{ margin: "auto" }} />
-									) : (
-										<DataGrid
-											rows={rows}
-											columns={columns}
-											pageSize={5}
-											rowsPerPageOptions={[5]}
-											components={{
-												Toolbar: GridToolbar
-											}}
-											getRowId={(row) => row.id}
-											autoHeight
-											pagination
-											rowCount={tableData.length}
-											paginationMode="server"
-											onPageChange={(newPage) => setPage(newPage + 1)}
-											onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
-										/>
-									)}
-								</div>
+							<Card sx={{ p: 3 }}>
+								<Typography variant="h6" sx={{ mb: 2 }}>
+									Country data
+								</Typography>
+								<DataGrid
+									rows={CountryRows}
+									columns={countryColumns}
+									getRowId={(row) => row.id}
+									autoHeight
+									pagination
+									pageSize={rowsPerPage}
+									rowCount={tableData.length}
+									paginationMode="server"
+									onPageChange={(newPage) => setPage(newPage + 1)}
+									onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
+									components={{ Toolbar: GridToolbar }}
+								/>
 							</Card>
 						</Grid>
 					</Grid>

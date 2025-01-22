@@ -23,20 +23,37 @@ function MobileNav({ darkMode, toggleDarkMode }) {
 	};
 
 	return (
-		<nav style={{ backgroundColor: "transparent" }}>
+		<nav
+			style={{
+				position: "fixed",
+				top: 0,
+				width: "100%",
+				backgroundColor: darkMode ? "#333" : "#fff",
+				boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+				zIndex: 1100
+			}}
+		>
 			<Container
 				maxWidth="sm"
 				sx={{
 					display: { xs: "flex", md: "none" },
 					justifyContent: "space-between",
-					alignItems: "center"
+					alignItems: "center",
+					py: 1
 				}}
 			>
 				<Box display="flex">
-					<Typography variant="body1" sx={{ fontWeight: 600, px: 2 }}>
+					<Typography
+						variant="body1"
+						sx={{
+							fontWeight: 600,
+							px: 2,
+							color: darkMode ? "#fff" : "#000"
+						}}
+					>
 						SWOB Dashboard
 					</Typography>
-				</Box>{" "}
+				</Box>
 				<Toolbar disableGutters>
 					<Box sx={{ flexGrow: 0, left: 0 }}>
 						<IconButton
@@ -101,4 +118,5 @@ function MobileNav({ darkMode, toggleDarkMode }) {
 		</nav>
 	);
 }
+
 export default MobileNav;
