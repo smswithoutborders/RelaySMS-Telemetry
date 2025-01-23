@@ -390,7 +390,7 @@ const OpenTelemetry = () => {
 									</Card>
 								</Grid>
 
-								<Grid item xs={12} sm={6} md={4} lg={3}>
+								{/* <Grid item xs={12} sm={6} md={4} lg={3}>
 									<Card
 										sx={{
 											p: 2,
@@ -419,6 +419,35 @@ const OpenTelemetry = () => {
 										</Typography>
 										<Typography variant="body2" sx={{ fontSize: "16px", opacity: 0.9 }}>
 											<strong>Keep track of your content publishing progress</strong>
+										</Typography>
+									</Card>
+								</Grid> */}
+								<Grid item xs={12} sm={6} md={4} lg={3}>
+									<Card
+										sx={{
+											p: 2,
+											textAlign: "center",
+											display: "flex",
+											flexDirection: "column",
+											justifyContent: "center",
+											alignItems: "center",
+											height: "100%",
+											boxShadow: 8,
+											borderRadius: "15px",
+											background: "linear-gradient(135deg, rgb(70, 67, 71), rgb(106, 98, 109))",
+											color: "white",
+											transform: "scale(1.1)",
+											transition: "transform 0.3s ease-in-out",
+											"&:hover": {
+												transform: "scale(1.15)"
+											}
+										}}
+									>
+										<Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+											Bridge users
+										</Typography>
+										<Typography variant="h4" sx={{ fontWeight: "700", mb: 1 }}>
+											{total_signups_from_bridges}
 										</Typography>
 									</Card>
 								</Grid>
