@@ -1,100 +1,116 @@
-import * as React from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
-import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
+import {
+	Box,
+	CssBaseline,
+	Drawer,
+	List,
+	ListItem,
+	ListItemButton,
+	ListItemIcon,
+	ListItemText,
+	Typography,
+	Divider,
+	Paper,
+	useTheme,
+	Button
+} from "@mui/material";
 import { FaCircleQuestion, FaHeadphones, FaTable, FaTableCells } from "react-icons/fa6";
-import { Button, Divider, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
-import { ChevronRight } from "@mui/icons-material";
 
-const drawerWidth = 240;
+const drawerWidth = 280;
 
 function ResponsiveDrawer() {
+	const theme = useTheme();
+
 	const drawer = (
 		<Box
 			sx={{
-				bgcolor: "transparent",
-				display: { md: "flex", xs: "none", sm: "none" },
+				display: "flex",
 				flexDirection: "column",
-				height: "100%"
+				height: "100%",
+				bgcolor: theme.palette.background.default,
+				color: theme.palette.text.primary,
+				boxShadow: theme.shadows[1],
+				borderRadius: "0 16px 16px 0",
+				overflow: "hidden"
 			}}
 		>
-			<Box display="flex" sx={{ p: 3 }}>
-				<Box component="img" src="/logo.png" sx={{ width: "35px" }} />
-				<Typography variant="body2" sx={{ px: 1, pt: 1, fontWeight: 600 }}>
-					RelaySMS
-				</Typography>
-			</Box>
-			<Divider />
-			<List sx={{ flexGrow: 1 }}>
-				<ListItem>
-					<ListItemButton component={Link} to="/">
-						<ListItemIcon>
-							<FaTableCells />
-						</ListItemIcon>
-						<ListItemText>Reliability</ListItemText>
-					</ListItemButton>
-				</ListItem>
-				<ListItem>
-					<ListItemButton component={Link} to="/resilience">
-						<ListItemIcon>
-							<FaTable />
-						</ListItemIcon>
-						<ListItemText>Resilience</ListItemText>
-					</ListItemButton>
-				</ListItem>
-				<ListItem>
-					<ListItemButton component={Link} to="/OpenTelemetry">
-						<ListItemIcon>
-							<FaTable />
-						</ListItemIcon>
-						<ListItemText>Open Telemetry</ListItemText>
-					</ListItemButton>
-				</ListItem>
-				<ListItem>
-					<ListItemButton component={Link} to="/help">
-						<ListItemIcon>
-							<FaCircleQuestion />
-						</ListItemIcon>
-						<ListItemText>Help</ListItemText>
-					</ListItemButton>
-				</ListItem>
-				<ListItem>
-					<ListItemButton component={Link} to="/contact">
-						<ListItemIcon>
-							<FaHeadphones />
-						</ListItemIcon>
-						<ListItemText>Contact</ListItemText>
-					</ListItemButton>
-				</ListItem>
-			</List>
+			{/* Header */}
 			<Box
-				component="footer"
+				display="flex"
+				alignItems="center"
 				sx={{
-					bottom: 0,
-					justifyContent: "end",
-					alignContent: "baseline",
-					p: 2
+					p: 3,
+					bgcolor: theme.palette.primary.main,
+					color: theme.palette.primary.contrastText,
+					borderRadius: "0 16px 0 0"
 				}}
 			>
-				<Paper elevation={3} sx={{ p: 2 }}>
-					<Typography sx={{ py: 2 }}>Check out RelaySMS blog posts</Typography>
+				<Box component="img" src="/logo.png" sx={{ width: "40px", borderRadius: "50%" }} />
+				<Typography variant="h6" sx={{ px: 2, fontWeight: "bold" }}>
+					SWOB Dashboard
+				</Typography>
+			</Box>
+
+			<Divider sx={{ my: 2 }} />
+
+			{/* Navigation Links */}
+			<List sx={{ flexGrow: 1, px: 1 }}>
+				{[
+					{ text: "Reliability", icon: <FaTableCells />, to: "/" },
+					{ text: "Resilience", icon: <FaTable />, to: "/resilience" },
+					{ text: "OpenTelemetry", icon: <FaTable />, to: "/OpenTelemetry" },
+					{ text: "Help", icon: <FaCircleQuestion />, to: "/help" },
+					{ text: "Contact", icon: <FaHeadphones />, to: "/contact" }
+				].map((item, index) => (
+					<ListItem key={index} disablePadding>
+						<ListItemButton
+							component={Link}
+							to={item.to}
+							sx={{
+								borderRadius: "8px",
+								mx: 2,
+								my: 1,
+								"&:hover": {
+									bgcolor: theme.palette.action.hover
+								}
+							}}
+						>
+							<ListItemIcon sx={{ color: theme.palette.text.secondary }}>{item.icon}</ListItemIcon>
+							<ListItemText primary={item.text} />
+						</ListItemButton>
+					</ListItem>
+				))}
+			</List>
+
+			<Divider sx={{ my: 2 }} />
+
+			{/* Footer */}
+			<Box sx={{ p: 3 }}>
+				<Paper
+					elevation={2}
+					sx={{
+						p: 2,
+						textAlign: "center",
+						borderRadius: "12px",
+						bgcolor: theme.palette.background.paper,
+						color: theme.palette.text.primary
+					}}
+				>
+					<Typography variant="body1" sx={{ fontWeight: "bold", mb: 1 }}>
+						Check out SMSWithoutBorders blog posts
+					</Typography>
 					<Button
 						component="a"
 						href="https://blog.smswithoutborders.com/"
-						rel="noreferrer"
 						target="_blank"
+						rel="noopener noreferrer"
 						variant="contained"
-						sx={{ borderRadius: "50px", textTransform: "none" }}
+						color="primary"
+						sx={{ borderRadius: "50px", px: 3 }}
 					>
-						Read more <ChevronRight />
+						Read More
 					</Button>
 				</Paper>
 			</Box>
@@ -102,23 +118,26 @@ function ResponsiveDrawer() {
 	);
 
 	return (
-		<>
-			<Box sx={{ display: "flex", bgcolor: "transparent" }}>
-				<CssBaseline />
-				<Box component="nav">
-					<Drawer
-						variant="permanent"
-						sx={{
-							display: { xs: "none", sm: "none", md: "block" },
-							"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
-						}}
-						open
-					>
-						{drawer}
-					</Drawer>
-				</Box>
-			</Box>
-		</>
+		<Box sx={{ display: { xs: "none", md: "flex" } }}>
+			{" "}
+			{/* Hide on mobile */}
+			<CssBaseline />
+			<Drawer
+				variant="permanent"
+				sx={{
+					width: drawerWidth,
+					flexShrink: 0,
+					"& .MuiDrawer-paper": {
+						width: drawerWidth,
+						boxSizing: "border-box",
+						bgcolor: theme.palette.background.default,
+						borderRight: `1px solid ${theme.palette.divider}`
+					}
+				}}
+			>
+				{drawer}
+			</Drawer>
+		</Box>
 	);
 }
 
