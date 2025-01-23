@@ -14,8 +14,6 @@ import {
 	ListItemText
 } from "@mui/material";
 import dayjs from "dayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import countries from "i18n-iso-countries";
 
@@ -24,7 +22,8 @@ countries.registerLocale(require("i18n-iso-countries/langs/en.json"));
 const categories = [
 	{ key: "summary", label: "Summary" },
 	{ key: "signup", label: "Signup Users" },
-	{ key: "retained", label: "Retained Users" }
+	{ key: "retained", label: "Retained Users" },
+	{ key: "Total_signups_from_bridges", label: "User with Bridges" }
 ];
 
 const granularities = [
@@ -50,6 +49,7 @@ const OpenTelemetry = () => {
 	const tableData = data?.[category]?.data || [];
 	const [totalUsers, setTotalUsers] = useState(0);
 	const [total_retained_users, setTotal_retained_users] = useState(0);
+	const [total_signups_from_bridges, setTotal_signups_from_bridges] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [group_by, setGroup_by] = useState("country");
 	const countryNames = Object.entries(countries.getNames("en"));
@@ -141,13 +141,15 @@ const OpenTelemetry = () => {
 					total_signup_users,
 					total_retained_users_with_tokens,
 					total_signup_countries,
-					total_retained_users
+					total_retained_users,
+					total_signups_from_bridges
 				} = data.summary;
 
 				setTotalUsers(total_signup_users);
 				setTotal_retained_users_with_tokens(total_retained_users_with_tokens);
 				setTotalSignupCountries(total_signup_countries);
 				setTotal_retained_users(total_retained_users);
+				setTotal_signups_from_bridges(total_signups_from_bridges);
 			} else {
 				console.error("Invalid data structure received", data);
 			}
@@ -216,12 +218,14 @@ const OpenTelemetry = () => {
 		retained_users: row.retained_users
 	}));
 
-	const CountryRows = filteredData.map((row, index) => ({
-		id: index + 1,
-		country_code: countries.getName(row.country_code, "en") || "Unknown",
-		signup_users: row.signup_users,
-		retained_users: row.retained_users
-	}));
+	const CountryRows = [
+		...filteredData.map((row, index) => ({
+			id: index + 1,
+			country_code: countries.getName(row.country_code, "en") || "Unknown",
+			signup_users: row.signup_users,
+			retained_users: row.retained_users
+		}))
+	];
 
 	return (
 		<Box
@@ -357,7 +361,7 @@ const OpenTelemetry = () => {
 								</Grid>
 
 								{/* ============ Users with tokens ============ */}
-								<Grid item xs={12} sm={6} md={4} lg={2}>
+								<Grid item xs={12} sm={6} md={4} lg={3}>
 									<Card
 										sx={{
 											p: 3,
@@ -389,7 +393,7 @@ const OpenTelemetry = () => {
 								<Grid item xs={12} sm={6} md={4} lg={3}>
 									<Card
 										sx={{
-											p: 3,
+											p: 2,
 											textAlign: "center",
 											display: "flex",
 											flexDirection: "column",
@@ -411,7 +415,7 @@ const OpenTelemetry = () => {
 											% Published
 										</Typography>
 										<Typography variant="h4" sx={{ fontWeight: "700", mb: 1 }}>
-											Null
+											{total_signups_from_bridges}
 										</Typography>
 										<Typography variant="body2" sx={{ fontSize: "16px", opacity: 0.9 }}>
 											<strong>Keep track of your content publishing progress</strong>
@@ -422,17 +426,16 @@ const OpenTelemetry = () => {
 						)}
 					</Grid>
 
-					{/* ================== filter ======================== */}
-
+					{/* ================== Filter ======================== */}
 					<Grid
 						container
+						spacing={4}
 						sx={{
 							mt: 4,
-							p: 4
+							px: 4,
+							justifyContent: "space-between",
+							alignItems: "center"
 						}}
-						spacing={3}
-						justifyContent="center"
-						alignItems="flex-start"
 					>
 						{/* Filter Cards */}
 						{[
@@ -446,43 +449,71 @@ const OpenTelemetry = () => {
 							{ label: "Group By", value: group_by, onChange: setGroup_by, options: groupes },
 							{ label: "Country", value: country, onChange: setCountry, options: countryNames }
 						].map(({ label, value, onChange, options }) => (
-							<Grid key={label} item xs={12} sm={6} md={3}>
+							<Grid key={label} item xs={12} sm={6} md={4} lg={3}>
 								<Card
 									sx={{
 										p: 3,
-										borderRadius: 4,
-										boxShadow: 4,
+										borderRadius: 3,
+										boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
 										backgroundColor: (theme) => theme.palette.background.default,
+										display: "flex",
+										flexDirection: "column",
+										justifyContent: "center",
+										transition: "transform 0.25s ease, box-shadow 0.25s ease",
 										"&:hover": {
-											boxShadow: 8,
-											transform: "scale(1.03)",
-											transition: "all 0.3s ease"
+											transform: "translateY(-5px)",
+											boxShadow: "0px 6px 16px rgba(0, 0, 0, 0.15)"
 										}
 									}}
 								>
 									<FormControl fullWidth>
-										<InputLabel sx={{ fontSize: 16, fontWeight: 500 }}>{label}</InputLabel>
+										<InputLabel
+											sx={{
+												fontSize: 15,
+												fontWeight: 600,
+												color: (theme) => theme.palette.text.primary
+											}}
+										>
+											{label}
+										</InputLabel>
 										<Select
 											value={value}
 											onChange={(e) => onChange(e.target.value)}
 											sx={{
+												mt: 1,
 												borderRadius: 2,
-												padding: "8px",
+												backgroundColor: (theme) => theme.palette.background.paper,
 												"& .MuiOutlinedInput-root": {
-													backgroundColor: (theme) => theme.palette.background.paper,
-													borderColor: (theme) => theme.palette.primary.main
+													"& fieldset": {
+														borderColor: (theme) => theme.palette.divider
+													},
+													"&:hover fieldset": {
+														borderColor: (theme) => theme.palette.primary.light
+													},
+													"&.Mui-focused fieldset": {
+														borderColor: (theme) => theme.palette.primary.main
+													}
 												},
-												"&:hover .MuiOutlinedInput-notchedOutline": {
-													borderColor: (theme) => theme.palette.secondary.main
-												},
-												"& .MuiSelect-icon": {
-													color: (theme) => theme.palette.primary.main
+												"& .MuiSelect-select": {
+													padding: "12px",
+													fontSize: 14,
+													fontWeight: 500
 												}
 											}}
 										>
 											{options.map((option) => (
-												<MenuItem key={option.key} value={option.key}>
-													<ListItemText>{option.label || option.name}</ListItemText>
+												<MenuItem
+													key={option.key || option.label}
+													value={option.key}
+													sx={{
+														fontSize: 14,
+														fontWeight: 500,
+														"&:hover": {
+															backgroundColor: (theme) => theme.palette.action.hover
+														}
+													}}
+												>
+													<ListItemText primary={option.label || option.name} />
 												</MenuItem>
 											))}
 										</Select>
@@ -491,99 +522,125 @@ const OpenTelemetry = () => {
 							</Grid>
 						))}
 
-						{/* Date Filters */}
-						<Grid item xs={12} sm={12} md={6}>
-							<LocalizationProvider dateAdapter={AdapterDayjs}>
-								<Grid container spacing={2}>
-									<Grid item xs={12} sm={6}>
-										<TextField
-											label="Start Date"
-											type="date"
-											onChange={(e) => setStartDate(e.target.value)}
-											value={startDate}
-											InputLabelProps={{ shrink: true }}
-											fullWidth
-											sx={{
-												"& .MuiOutlinedInput-root": {
-													backgroundColor: (theme) => theme.palette.background.paper,
-													borderRadius: 2,
-													padding: "6px"
-												},
-												"&:hover .MuiOutlinedInput-notchedOutline": {
-													borderColor: (theme) => theme.palette.secondary.main
-												}
-											}}
-										/>
-									</Grid>
-									<Grid item xs={12} sm={6}>
-										<TextField
-											label="End Date"
-											type="date"
-											onChange={(e) => setEndDate(e.target.value)}
-											value={endDate}
-											InputLabelProps={{ shrink: true }}
-											fullWidth
-											sx={{
-												"& .MuiOutlinedInput-root": {
-													backgroundColor: (theme) => theme.palette.background.paper,
-													borderRadius: 2,
-													padding: "6px"
-												},
-												"&:hover .MuiOutlinedInput-notchedOutline": {
-													borderColor: (theme) => theme.palette.secondary.main
-												}
-											}}
-										/>
-									</Grid>
-								</Grid>
-							</LocalizationProvider>
-						</Grid>
+						<Grid
+							container
+							spacing={4}
+							sx={{
+								mt: 4,
+								px: 4,
+								justifyContent: "space-between",
+								alignItems: "center"
+							}}
+						>
+							{/* Date Filters Section */}
+							<Grid item xs={12} md={8}>
+								<Card
+									sx={{
+										p: 3,
+										borderRadius: 4,
+										boxShadow: 4,
+										display: "flex",
+										flexDirection: { xs: "column", md: "row" },
+										gap: 2,
+										alignItems: "center",
+										justifyContent: { xs: "flex-start", md: "space-between" }
+									}}
+								>
+									{/* Start Date */}
+									<TextField
+										label="Start Date"
+										type="date"
+										value={startDate}
+										onChange={(e) => setStartDate(e.target.value)}
+										InputLabelProps={{ shrink: true }}
+										fullWidth
+										sx={{
+											"& .MuiOutlinedInput-root": {
+												backgroundColor: (theme) => theme.palette.background.paper,
+												borderRadius: 2
+											},
+											"&:hover .MuiOutlinedInput-notchedOutline": {
+												borderColor: (theme) => theme.palette.secondary.main
+											}
+										}}
+									/>
 
-						{/* Action Buttons */}
-						<Grid container spacing={2} justifyContent="center">
-							<Grid item xs={12} sm={6} md={3}>
-								<Button
-									onClick={applyFilters}
-									fullWidth
-									variant="contained"
-									color="primary"
-									sx={{
-										textTransform: "none",
-										fontWeight: "bold",
-										borderRadius: "25px",
-										boxShadow: 4,
-										transition: "all 0.3s ease",
-										"&:hover": {
-											boxShadow: 12,
-											transform: "scale(1.05)",
-											backgroundColor: (theme) => theme.palette.primary.dark
-										}
-									}}
-								>
-									Apply
-								</Button>
+									{/* End Date */}
+									<TextField
+										label="End Date"
+										type="date"
+										value={endDate}
+										onChange={(e) => setEndDate(e.target.value)}
+										InputLabelProps={{ shrink: true }}
+										fullWidth
+										sx={{
+											"& .MuiOutlinedInput-root": {
+												backgroundColor: (theme) => theme.palette.background.paper,
+												borderRadius: 2
+											},
+											"&:hover .MuiOutlinedInput-notchedOutline": {
+												borderColor: (theme) => theme.palette.secondary.main
+											}
+										}}
+									/>
+								</Card>
 							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<Button
-									fullWidth
-									variant="outlined"
-									color="secondary"
+
+							{/* Buttons Section */}
+							<Grid item xs={12} md={4}>
+								<Card
 									sx={{
-										textTransform: "none",
-										fontWeight: "bold",
-										borderRadius: "25px",
+										p: 3,
+										borderRadius: 4,
 										boxShadow: 4,
-										transition: "all 0.3s ease",
-										"&:hover": {
-											boxShadow: 12,
-											transform: "scale(1.05)",
-											backgroundColor: (theme) => theme.palette.secondary.dark
-										}
+										display: "flex",
+										flexDirection: "row",
+										justifyContent: "space-between",
+										alignItems: "center"
 									}}
-									onClick={resetFilters}
 								>
-									Reset
-								</Button>
+									{/* Apply Button */}
+									<Button
+										variant="contained"
+										color="primary"
+										onClick={applyFilters}
+										sx={{
+											textTransform: "none",
+											fontWeight: "bold",
+											borderRadius: "25px",
+											boxShadow: 4,
+											px: 3,
+											transition: "all 0.3s ease",
+											"&:hover": {
+												boxShadow: 12,
+												transform: "scale(1.05)"
+											}
+										}}
+									>
+										Apply
+									</Button>
+
+									{/* Reset Button */}
+									<Button
+										variant="outlined"
+										color="secondary"
+										onClick={resetFilters}
+										sx={{
+											textTransform: "none",
+											fontWeight: "bold",
+											borderRadius: "25px",
+											px: 3,
+											boxShadow: 4,
+											transition: "all 0.3s ease",
+											"&:hover": {
+												boxShadow: 12,
+												transform: "scale(1.05)"
+											}
+										}}
+									>
+										Reset
+									</Button>
+								</Card>
 							</Grid>
 						</Grid>
 					</Grid>
@@ -607,17 +664,20 @@ const OpenTelemetry = () => {
 									User Data
 								</Typography>
 								<DataGrid
-									rows={rows}
-									columns={columns}
+									rows={CountryRows}
+									columns={countryColumns}
+									pageSize={5}
+									rowsPerPageOptions={[5]}
+									components={{
+										Toolbar: GridToolbar
+									}}
 									getRowId={(row) => row.id}
 									autoHeight
 									pagination
-									pageSize={rowsPerPage}
 									rowCount={tableData.length}
 									paginationMode="server"
 									onPageChange={(newPage) => setPage(newPage + 1)}
 									onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
-									components={{ Toolbar: GridToolbar }}
 								/>
 							</Card>
 						</Grid>
@@ -627,17 +687,20 @@ const OpenTelemetry = () => {
 									Country data
 								</Typography>
 								<DataGrid
-									rows={CountryRows}
-									columns={countryColumns}
+									rows={rows}
+									columns={columns}
+									pageSize={5}
+									rowsPerPageOptions={[5]}
+									components={{
+										Toolbar: GridToolbar
+									}}
 									getRowId={(row) => row.id}
 									autoHeight
 									pagination
-									pageSize={rowsPerPage}
 									rowCount={tableData.length}
 									paginationMode="server"
 									onPageChange={(newPage) => setPage(newPage + 1)}
 									onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
-									components={{ Toolbar: GridToolbar }}
 								/>
 							</Card>
 						</Grid>
