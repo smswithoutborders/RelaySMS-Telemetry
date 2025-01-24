@@ -1,0 +1,135 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: "Poppins", sans-serif;
+}
+
+.sidebar-container {
+	position: fixed;
+	height: 100%;
+	width: 80px;
+	background-color: #1f1f2e;
+	color: #ffffff;
+	transition: width 0.3s ease-in-out;
+	overflow: hidden;
+}
+
+.sidebar-container.open {
+	width: 250px;
+}
+
+.sidebar-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 15px;
+	background-color: #29293d;
+}
+
+.logo {
+	display: flex;
+	align-items: center;
+}
+
+.logo-img {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+}
+
+.logo-text {
+	margin-left: 10px;
+	font-size: 18px;
+	font-weight: bold;
+	display: none;
+}
+
+.logo-text.show {
+	display: block;
+}
+
+.menu-icon {
+	font-size: 24px;
+	cursor: pointer;
+}
+
+.nav-list {
+	margin-top: 20px;
+	list-style: none;
+}
+
+.nav-item {
+	display: flex;
+	align-items: center;
+	padding: 15px 20px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.nav-item:hover {
+	background-color: #3a3a4f;
+}
+
+.nav-icon {
+	font-size: 22px;
+}
+
+.nav-text {
+	margin-left: 15px;
+	font-size: 16px;
+	display: none;
+}
+
+.nav-text.show {
+	display: block;
+}
+
+.profile-card {
+	position: absolute;
+	bottom: 20px;
+	width: 100%;
+	padding: 15px;
+	background-color: #29293d;
+	display: flex;
+	align-items: center;
+}
+
+.profile-icon {
+	font-size: 32px;
+	margin-right: 10px;
+}
+
+.profile-details {
+	display: none;
+	flex-direction: column;
+}
+
+.profile-details.show {
+	display: flex;
+}
+
+.profile-name {
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.profile-email {
+	font-size: 14px;
+	color: #bdbdbd;
+}
+
+.show {
+	opacity: 1;
+	transition: all 0.3s ease-in-out;
+}
+
+.hidden {
+	opacity: 0;
+	transition: all 0.3s ease-in-out;
+}
+@media (max-width: 768px) {
+	.sidebar-container {
+		display: none;
+	}
+}
