@@ -24,9 +24,10 @@ import {
 } from "react-icons/fa";
 import { ChevronRight } from "@mui/icons-material";
 
+// Define the drawer width
 const drawerWidth = 200;
 
-function Sidebar() {
+function Sidebar({ darkMode }) {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 
 	const handleToggle = () => {
@@ -84,7 +85,7 @@ function Sidebar() {
 							>
 								<Box
 									component="img"
-									src="/SWOB-Default.png"
+									src={darkMode ? "/SWOB-Dark Theme.png" : "/SWOB-Default.png"}
 									alt="Profile"
 									sx={{
 										width: 130,
@@ -104,8 +105,24 @@ function Sidebar() {
 					</Box>
 
 					{/* Menu Section */}
-					<Box sx={{ paddingBottom: 30 }}>
-						<Typography sx={{ paddingLeft: 2, color: "#000158" }}>Menus</Typography>
+					<Box
+						sx={{
+							paddingBottom: {
+								xs: 4,
+								sm: 8,
+								md: 10,
+								lg: 3
+							}
+						}}
+					>
+						<Typography
+							sx={{
+								paddingLeft: 2,
+								fontSize: "1.5rem"
+							}}
+						>
+							Menus
+						</Typography>
 						<List>
 							{menuItems.map((item, index) => (
 								<Tooltip title={isCollapsed ? item.text : ""} placement="right" key={index}>
@@ -122,8 +139,7 @@ function Sidebar() {
 											sx={{
 												minWidth: 0,
 												marginRight: isCollapsed ? 0 : 2,
-												justifyContent: "center",
-												color: "#000158"
+												justifyContent: "center"
 											}}
 										>
 											{item.icon}
@@ -134,7 +150,7 @@ function Sidebar() {
 							))}
 						</List>
 
-						<Typography sx={{ paddingLeft: 2, color: "#000158" }}>Contact</Typography>
+						<Typography sx={{ paddingLeft: 2, fontSize: "1.5rem" }}>Contact</Typography>
 						<List>
 							{serviceItems.map((item, index) => (
 								<Tooltip title={isCollapsed ? item.text : ""} placement="right" key={index}>
@@ -152,8 +168,7 @@ function Sidebar() {
 											sx={{
 												minWidth: 0,
 												marginRight: isCollapsed ? 0 : 2,
-												justifyContent: "center",
-												color: "#000158"
+												justifyContent: "center"
 											}}
 										>
 											{item.icon}
@@ -166,7 +181,7 @@ function Sidebar() {
 					</Box>
 
 					{/* Footer */}
-					<Box sx={{ paddingBottom: 10 }}>
+					<Box>
 						<ListItem
 							button
 							sx={{
@@ -180,7 +195,7 @@ function Sidebar() {
 						>
 							{!isCollapsed && !isMobileOrTablet && (
 								<>
-									<Typography variant="body2" sx={{ marginTop: 1, color: "#000158" }}>
+									<Typography variant="body2" sx={{ marginTop: 1 }}>
 										Check out RelaySMS blog posts
 									</Typography>
 									<Typography variant="caption" color="textSecondary">
@@ -190,12 +205,7 @@ function Sidebar() {
 											rel="noreferrer"
 											target="_blank"
 											variant="contained"
-											sx={{
-												mt: 2,
-												borderRadius: "50px",
-												textTransform: "none",
-												backgroundColor: "#000158"
-											}}
+											sx={{ mt: 2, borderRadius: "50px", textTransform: "none" }}
 										>
 											Read more <ChevronRight />
 										</Button>

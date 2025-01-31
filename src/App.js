@@ -13,6 +13,7 @@ import PageNotFound from "./Pages/404";
 import Reliability from "./Pages/Reliability";
 import Resilience from "./Pages/Resilience";
 import MobileNav from "./Components/MobileNav";
+import Nav from "./Components/Nav";
 import OpenTelemetry from "./Pages/OpenTelemetry";
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
 			<Router>
+				<Nav darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<MobileNav darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
