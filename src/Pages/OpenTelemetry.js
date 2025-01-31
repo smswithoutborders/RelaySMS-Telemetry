@@ -22,7 +22,7 @@ countries.registerLocale(require("i18n-iso-countries/langs/en.json"));
 const categories = [
 	{ key: "summary", label: "Summary" },
 	{ key: "signup", label: "Signup Users" },
-	{ key: "retained", label: "Retained Users" },
+	{ key: "retained", label: "Active Users" },
 	{ key: "Total_signups_from_bridges", label: "User with Bridges" }
 ];
 
@@ -56,8 +56,6 @@ const OpenTelemetry = () => {
 	const [total_retained_users_with_tokens, setTotal_retained_users_with_tokens] = useState(0);
 	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
 
-	// ==============
-
 	const filteredData = country
 		? tableData.filter((row) => countries.getName(row.country_code, "en") === country)
 		: tableData;
@@ -86,7 +84,7 @@ const OpenTelemetry = () => {
 			setData(apiData);
 			setError(null);
 
-			// Update stats based on category
+			//  stats based on category
 			if (category === "summary") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
 				setTotal_retained_users(apiData[category]?.total_retained_users ?? 0);
@@ -266,7 +264,7 @@ const OpenTelemetry = () => {
 						<div
 							style={{
 								display: "grid",
-								gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+								gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
 								gap: "1rem",
 								marginBottom: "2rem"
 							}}
@@ -275,17 +273,18 @@ const OpenTelemetry = () => {
 							<div
 								style={{
 									padding: "1rem",
-									backgroundColor: "#f9f9f9",
 									borderRadius: "10px",
-									boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
+									boxShadow: "0 2px 8px rgba(0, 0, 0, 1)",
+									"& .MuiOutlinedInput-root": {
+										backgroundColor: (theme) => theme.palette.background.paper,
+										borderRadius: 2
+									},
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: (theme) => theme.palette.secondary.main
+									}
 								}}
 							>
-								<span
-									className="material-symbols-outlined"
-									style={{ fontSize: "1.5rem", color: "#4caf50" }}
-								>
-									Signup Users
-								</span>
+								<span style={{ fontSize: "1.5rem" }}>Signup Users</span>
 								<div
 									style={{
 										display: "flex",
@@ -294,29 +293,31 @@ const OpenTelemetry = () => {
 										marginTop: "1rem"
 									}}
 								>
-									<div>
-										<h3>TOTAL</h3>
+									<div style={{ fontSize: "1.5rem" }}>
 										<h1>{totalUsers}</h1>
 									</div>
 								</div>
-								<small style={{ color: "#888" }}>People who have used RelaySMS</small>
+								<small style={{ color: "#51525C" }}>
+									Total number of People who have used RelaySMS
+								</small>
 							</div>
 
 							{/* ===============================Retained users =================== */}
 							<div
 								style={{
 									padding: "1rem",
-									backgroundColor: "#f9f9f9",
+									"& .MuiOutlinedInput-root": {
+										backgroundColor: (theme) => theme.palette.background.paper,
+										borderRadius: 2
+									},
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: (theme) => theme.palette.secondary.main
+									},
 									borderRadius: "10px",
-									boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
+									boxShadow: "2px 2px 8px rgba(0, 0, 0, 1)"
 								}}
 							>
-								<span
-									className="material-symbols-outlined"
-									style={{ fontSize: "1.5rem", color: "#f44336" }}
-								>
-									Retained Users
-								</span>
+								<span style={{ fontSize: "1.5rem" }}>Active Users</span>
 								<div
 									style={{
 										display: "flex",
@@ -325,29 +326,29 @@ const OpenTelemetry = () => {
 										marginTop: "1rem"
 									}}
 								>
-									<div>
-										<h3>TOTAL</h3>
+									<div style={{ fontSize: "1.5rem" }}>
 										<h1>{total_retained_users}</h1>
 									</div>
 								</div>
-								<small style={{ color: "#888" }}>Active user</small>
+								<small style={{ color: "#51525C" }}>Total number of Active user</small>
 							</div>
 
 							{/* ================== Signup Countries=================== */}
 							<div
 								style={{
 									padding: "1rem",
-									backgroundColor: "#f9f9f9",
+									"& .MuiOutlinedInput-root": {
+										backgroundColor: (theme) => theme.palette.background.paper,
+										borderRadius: 2
+									},
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: (theme) => theme.palette.secondary.main
+									},
 									borderRadius: "10px",
-									boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
+									boxShadow: "2px 2px 8px rgba(0, 0, 0, 1)"
 								}}
 							>
-								<span
-									className="material-symbols-outlined"
-									style={{ fontSize: "1.5rem", color: "#f44336" }}
-								>
-									Signup Countries
-								</span>
+								<span style={{ fontSize: "1.5rem" }}>Signup Countries</span>
 								<div
 									style={{
 										display: "flex",
@@ -356,29 +357,29 @@ const OpenTelemetry = () => {
 										marginTop: "1rem"
 									}}
 								>
-									<div>
-										<h3>TOTAL</h3>
+									<div style={{ fontSize: "1.5rem" }}>
 										<h1>{totalSignupCountries}</h1>
 									</div>
 								</div>
-								<small style={{ color: "#888" }}>No of countries using RelaySMS</small>
+								<small style={{ color: "#51525C" }}>Total Number of countries using RelaySMS</small>
 							</div>
 
 							{/* ============= Users with Tokens ============ */}
 							<div
 								style={{
 									padding: "1rem",
-									backgroundColor: "#f9f9f9",
+									"& .MuiOutlinedInput-root": {
+										backgroundColor: (theme) => theme.palette.background.paper,
+										borderRadius: 2
+									},
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: (theme) => theme.palette.secondary.main
+									},
 									borderRadius: "10px",
-									boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
+									boxShadow: "2px 2px 8px rgba(0, 0, 0, 1)"
 								}}
 							>
-								<span
-									className="material-symbols-outlined"
-									style={{ fontSize: "1.5rem", color: "#f44336" }}
-								>
-									Users with Tokens
-								</span>
+								<span style={{ fontSize: "1.5rem" }}>Users with Tokens</span>
 								<div
 									style={{
 										display: "flex",
@@ -387,29 +388,31 @@ const OpenTelemetry = () => {
 										marginTop: "1rem"
 									}}
 								>
-									<div>
-										<h3>TOTAL</h3>
+									<div style={{ fontSize: "1.5rem" }}>
 										<h1>{total_retained_users_with_tokens}</h1>
 									</div>
 								</div>
-								<small style={{ color: "#888" }}>People who have saved platforms</small>
+								<small style={{ color: "#51525C" }}>
+									Total Number of People who have saved platforms
+								</small>
 							</div>
 
 							{/* ============ Bridges ================= */}
 							<div
 								style={{
 									padding: "1rem",
-									backgroundColor: "#f9f9f9",
+									"& .MuiOutlinedInput-root": {
+										backgroundColor: (theme) => theme.palette.background.paper,
+										borderRadius: 2
+									},
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: (theme) => theme.palette.secondary.main
+									},
 									borderRadius: "10px",
-									boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
+									boxShadow: "2px 2px 8px rgba(0, 0, 0, 1)"
 								}}
 							>
-								<span
-									className="material-symbols-outlined"
-									style={{ fontSize: "1.5rem", color: "#f44336" }}
-								>
-									Bridges
-								</span>
+								<span style={{ fontSize: "1.5rem" }}>Bridges</span>
 								<div
 									style={{
 										display: "flex",
@@ -418,100 +421,99 @@ const OpenTelemetry = () => {
 										marginTop: "1rem"
 									}}
 								>
-									<div>
-										<h3>TOTAL</h3>
+									<div style={{ fontSize: "1.5rem" }}>
 										<h1>{total_signups_from_bridges}</h1>
 									</div>
 								</div>
-								<small style={{ color: "#888" }}>People using bridges</small>
+								<small style={{ color: "#51525C" }}>Total Number of People using bridges</small>
 							</div>
 						</div>
 					)}
 
 					{/* ================== Filter ======================== */}
 					{/* ================== Filter ======================== */}
-					{/* ================== Filter ======================== */}
-					{/* ================== Filter ======================== */}
-
 					<div
 						style={{
-							display: "grid",
-							gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", // Adjusted for better responsiveness
-							gap: "1rem",
+							display: "flex",
+							flexDirection: "column",
+							gap: "20px",
 							marginBottom: "2rem"
 						}}
 					>
 						{/* Filter Cards */}
-						{[
-							{ label: "Category", value: category, onChange: setCategory, options: categories },
-							{
-								label: "Granularity",
-								value: granularity,
-								onChange: setGranularity,
-								options: granularities
-							},
-							{ label: "Group By", value: group_by, onChange: setGroup_by, options: groupes },
-							{ label: "Country", value: country, onChange: setCountry, options: countryNames }
-						].map(({ label, value, onChange, options }) => (
-							<Grid key={label} item xs={12} sm={6} md={8}>
-								<FormControl fullWidth>
-									<InputLabel
-										sx={{
-											fontSize: 15,
-											fontWeight: 600
-										}}
-									>
-										{label}
-									</InputLabel>
-									<Select
-										value={value}
-										onChange={(e) => onChange(e.target.value)}
-										sx={{
-											mt: 1,
-											borderRadius: 2,
-											"& .MuiSelect-select": {
-												padding: "15px",
-												fontSize: 14,
-												fontWeight: 500
-											}
-										}}
-									>
-										{options.map((option) => (
-											<MenuItem
-												key={option.key || option.label}
-												value={option.key}
-												sx={{
-													fontSize: 14,
-													fontWeight: 500,
-													"&:hover": {
-														backgroundColor: (theme) => theme.palette.action.hover
-													}
-												}}
-											>
-												<ListItemText primary={option.label || option.name} />
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Grid>
-						))}
-
-						{/* ======================Date Filters Section =======================*/}
 						<Grid
 							container
+							spacing={3}
 							sx={{
-								mt: 4,
-								px: 4,
-								display: "flex",
-								flexDirection: "row",
-								justifyContent: "flex-start", // Align items to the start
-								alignItems: "center",
-								gap: "1rem",
-								flexWrap: "wrap"
+								mt: 2,
+								px: 2
+							}}
+						>
+							{[
+								{ label: "Category", value: category, onChange: setCategory, options: categories },
+								{
+									label: "Granularity",
+									value: granularity,
+									onChange: setGranularity,
+									options: granularities
+								},
+								{ label: "Group By", value: group_by, onChange: setGroup_by, options: groupes },
+								{ label: "Country", value: country, onChange: setCountry, options: countryNames }
+							].map(({ label, value, onChange, options }) => (
+								<Grid key={label} item xs={12} sm={6} md={3}>
+									<FormControl fullWidth>
+										<InputLabel
+											sx={{
+												fontSize: 15,
+												fontWeight: 600
+											}}
+										>
+											{label}
+										</InputLabel>
+										<Select
+											value={value}
+											onChange={(e) => onChange(e.target.value)}
+											sx={{
+												mt: 1,
+												borderRadius: 2,
+												"& .MuiSelect-select": {
+													padding: "15px",
+													fontSize: 14,
+													fontWeight: 500
+												}
+											}}
+										>
+											{options.map((option) => (
+												<MenuItem
+													key={option.key || option.label}
+													value={option.key}
+													sx={{
+														fontSize: 14,
+														fontWeight: 500
+													}}
+												>
+													<ListItemText primary={option.label || option.name} />
+												</MenuItem>
+											))}
+										</Select>
+									</FormControl>
+								</Grid>
+							))}
+						</Grid>
+
+						{/* Date Filters and Buttons */}
+						<Grid
+							container
+							spacing={3}
+							sx={{
+								mt: 2,
+								px: 2,
+								justifyContent: "flex-start",
+								alignItems: "center"
 							}}
 						>
 							{/* Start Date */}
-							<Grid item sm="auto">
+							<Grid item xs={12} sm={6} md="auto">
 								<TextField
 									label="Start Date"
 									type="date"
@@ -531,7 +533,7 @@ const OpenTelemetry = () => {
 							</Grid>
 
 							{/* End Date */}
-							<Grid item sm="auto">
+							<Grid item xs={12} sm={6} md="auto">
 								<TextField
 									label="End Date"
 									type="date"
@@ -551,7 +553,7 @@ const OpenTelemetry = () => {
 							</Grid>
 
 							{/* Apply Button */}
-							<Grid item sm="auto">
+							<Grid item xs={12} sm={6} md="auto">
 								<Button
 									variant="contained"
 									color="primary"
@@ -560,8 +562,8 @@ const OpenTelemetry = () => {
 										textTransform: "none",
 										fontWeight: "bold",
 										borderRadius: "25px",
-										boxShadow: 4,
 										px: 3,
+										boxShadow: 4,
 										transition: "all 0.3s ease",
 										"&:hover": {
 											boxShadow: 12,
@@ -574,7 +576,7 @@ const OpenTelemetry = () => {
 							</Grid>
 
 							{/* Reset Button */}
-							<Grid item sm="auto">
+							<Grid item xs={12} sm={6} md="auto">
 								<Button
 									variant="outlined"
 									color="secondary"
@@ -598,7 +600,6 @@ const OpenTelemetry = () => {
 						</Grid>
 					</div>
 
-					{/* ========================== TABLE SECTION ============================ */}
 					{/* ========================== TABLE SECTION ============================ */}
 					{/* ========================== TABLE SECTION ============================ */}
 					<Grid

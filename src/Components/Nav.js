@@ -34,7 +34,7 @@ function Sidebar() {
 	};
 
 	// Media query to detect mobile and tablet screens
-	const isMobileOrTablet = useMediaQuery((theme) => theme.breakpoints.down("md")); // For screens smaller than or equal to 'md' (900px)
+	const isMobileOrTablet = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
 	const menuItems = [
 		{ text: "Reliability", icon: <FaRegHandshake />, link: "/" },
@@ -53,10 +53,10 @@ function Sidebar() {
 			<Drawer
 				variant="permanent"
 				sx={{
-					width: isMobileOrTablet ? 0 : isCollapsed ? 40 : drawerWidth, // Hide on mobile and tablet
+					width: isMobileOrTablet ? 0 : isCollapsed ? 40 : drawerWidth,
 					flexShrink: 0,
 					"& .MuiDrawer-paper": {
-						width: isMobileOrTablet ? 0 : isCollapsed ? 60 : drawerWidth, // Hide on mobile and tablet
+						width: isMobileOrTablet ? 0 : isCollapsed ? 60 : drawerWidth,
 						boxSizing: "border-box",
 						transition: "width 0.3s",
 						backdropFilter: "blur(10px)",
@@ -84,32 +84,28 @@ function Sidebar() {
 							>
 								<Box
 									component="img"
-									src="/logo.png"
+									src="/SWOB-Default.png"
 									alt="Profile"
 									sx={{
-										width: 30,
-										height: 30,
-										borderRadius: "50%",
+										width: 130,
+										height: 40,
 										marginRight: 1
 									}}
 								/>
-								<Box>
-									<Typography variant="body2" sx={{ fontWeight: 600 }}>
-										RelaySMS
-									</Typography>
-								</Box>
 							</Box>
 						)}
 						<IconButton onClick={handleToggle}>
-							{isCollapsed ? <FaArrowRight /> : <FaArrowLeft />}
+							{isCollapsed ? (
+								<FaArrowRight sx={{ color: "#000158" }} />
+							) : (
+								<FaArrowLeft sx={{ color: "#000158" }} />
+							)}
 						</IconButton>
 					</Box>
 
 					{/* Menu Section */}
-					<Box>
-						<Typography variant="caption" sx={{ paddingLeft: 2, color: "gray" }}>
-							Menus
-						</Typography>
+					<Box sx={{ paddingBottom: 30 }}>
+						<Typography sx={{ paddingLeft: 2, color: "#000158" }}>Menus</Typography>
 						<List>
 							{menuItems.map((item, index) => (
 								<Tooltip title={isCollapsed ? item.text : ""} placement="right" key={index}>
@@ -126,7 +122,8 @@ function Sidebar() {
 											sx={{
 												minWidth: 0,
 												marginRight: isCollapsed ? 0 : 2,
-												justifyContent: "center"
+												justifyContent: "center",
+												color: "#000158"
 											}}
 										>
 											{item.icon}
@@ -137,9 +134,7 @@ function Sidebar() {
 							))}
 						</List>
 
-						<Typography variant="caption" sx={{ paddingLeft: 2, color: "gray" }}>
-							Contact
-						</Typography>
+						<Typography sx={{ paddingLeft: 2, color: "#000158" }}>Contact</Typography>
 						<List>
 							{serviceItems.map((item, index) => (
 								<Tooltip title={isCollapsed ? item.text : ""} placement="right" key={index}>
@@ -157,7 +152,8 @@ function Sidebar() {
 											sx={{
 												minWidth: 0,
 												marginRight: isCollapsed ? 0 : 2,
-												justifyContent: "center"
+												justifyContent: "center",
+												color: "#000158"
 											}}
 										>
 											{item.icon}
@@ -170,7 +166,7 @@ function Sidebar() {
 					</Box>
 
 					{/* Footer */}
-					<Box sx={{ padding: 2 }}>
+					<Box sx={{ paddingBottom: 10 }}>
 						<ListItem
 							button
 							sx={{
@@ -184,7 +180,7 @@ function Sidebar() {
 						>
 							{!isCollapsed && !isMobileOrTablet && (
 								<>
-									<Typography variant="body2" sx={{ marginTop: 1 }}>
+									<Typography variant="body2" sx={{ marginTop: 1, color: "#000158" }}>
 										Check out RelaySMS blog posts
 									</Typography>
 									<Typography variant="caption" color="textSecondary">
@@ -194,7 +190,12 @@ function Sidebar() {
 											rel="noreferrer"
 											target="_blank"
 											variant="contained"
-											sx={{ mt: 2, borderRadius: "50px", textTransform: "none" }}
+											sx={{
+												mt: 2,
+												borderRadius: "50px",
+												textTransform: "none",
+												backgroundColor: "#000158"
+											}}
 										>
 											Read more <ChevronRight />
 										</Button>
