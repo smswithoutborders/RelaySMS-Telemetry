@@ -1,6 +1,6 @@
 services:
-  homepage:
-    container_name: visibility-dashboard
+  relaysms-telemetry:
+    container_name: relaysms-telemetry
     build:
       context: .
       dockerfile: Dockerfile
