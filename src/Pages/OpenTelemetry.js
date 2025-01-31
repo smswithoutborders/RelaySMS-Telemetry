@@ -502,6 +502,11 @@ const OpenTelemetry = () => {
 						</Grid>
 
 						{/* Date Filters and Buttons */}
+						{error && (
+							<Typography color="error" sx={{ mb: 2 }}>
+								{error}
+							</Typography>
+						)}
 						<Grid
 							container
 							spacing={3}
