@@ -134,81 +134,77 @@
 	}
 }
 
-
 /* ============================================ */
-
-
-
 
 /* Improved Table Design */
 .recent-order {
-  margin-top: 2rem;
-  overflow-x: auto; /* Allow horizontal scrolling for smaller screens */
+	margin-top: 2rem;
+	overflow-x: auto; /* Allow horizontal scrolling for smaller screens */
 }
 
 .recent-order h1 {
-  color: var(--clr-dark);
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+	color: var(--clr-dark);
+	font-size: 1.75rem;
+	font-weight: 600;
+	margin-bottom: 1rem;
 }
 
 .recent-order table {
-  width: 100%;
-  background-color: var(--clr-white);
-  border-radius: var(--card-border-radius);
-  box-shadow: var(--box-shadow);
-  color: var(--clr-dark);
-  border-collapse: collapse;
+	width: 100%;
+	background-color: var(--clr-white);
+	border-radius: var(--card-border-radius);
+	box-shadow: var(--box-shadow);
+	color: var(--clr-dark);
+	border-collapse: collapse;
 }
 
 .recent-order table th,
 .recent-order table td {
-  padding: 1rem;
-  border: 1px solid #ddd; /* Light gray border */
-  text-align: center;
-  font-size: 1rem;
+	padding: 1rem;
+	border: 1px solid #ddd; /* Light gray border */
+	text-align: center;
+	font-size: 1rem;
 }
 
 .recent-order table th {
-  background-color: var(--clr-light);
-  color: var(--clr-dark);
-  font-weight: 600;
+	background-color: var(--clr-light);
+	color: var(--clr-dark);
+	font-weight: 600;
 }
 
 .recent-order table tr:nth-child(even) {
-  background-color: var(--clr-lightest); /* Striped rows */
+	background-color: var(--clr-lightest); /* Striped rows */
 }
 
 .recent-order table tr:hover {
-  background-color: var(--clr-hover);
-  cursor: pointer;
+	background-color: var(--clr-hover);
+	cursor: pointer;
 }
 
 .recent-order .primary {
-  color: var(--clr-primary);
-  text-decoration: none;
-  cursor: pointer;
+	color: var(--clr-primary);
+	text-decoration: none;
+	cursor: pointer;
 }
 
 .recent-order .primary:hover {
-  text-decoration: underline;
+	text-decoration: underline;
 }
 
 /* Button Style */
 .download-btn {
-  display: inline-block;
-  padding: 0.5rem 1.5rem;
-  margin-top: 1.5rem;
-  background-color: var(--clr-primary);
-  color: white;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  text-align: center;
-  transition: background-color 0.3s ease;
+	display: inline-block;
+	padding: 0.5rem 1.5rem;
+	margin-top: 1.5rem;
+	background-color: var(--clr-primary);
+	color: white;
+	font-size: 1rem;
+	border-radius: 5px;
+	cursor: pointer;
+	text-align: center;
+	transition: background-color 0.3s ease;
 }
 
 .download-btn:hover {
-  background-color: var(--clr-primary-dark);
+	background-color: var(--clr-primary-dark);
 }
