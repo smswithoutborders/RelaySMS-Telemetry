@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import ResponsiveDrawer from "./Components/Nav";
 import Footer from "./Components/Footer";
 import Toggle from "./Components/ThemeToggle";
 import Help from "./Pages/Help";
@@ -75,7 +74,6 @@ function App() {
 			<Router>
 				<Nav darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<MobileNav darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-				<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Routes>
 					<Route path="/" element={<Reliability />} />
