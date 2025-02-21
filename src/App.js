@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import ResponsiveDrawer from "./Components/Nav";
 import Footer from "./Components/Footer";
 import Toggle from "./Components/ThemeToggle";
 import Help from "./Pages/Help";
@@ -15,6 +14,7 @@ import Resilience from "./Pages/Resilience";
 import MobileNav from "./Components/MobileNav";
 import Nav from "./Components/Nav";
 import OpenTelemetry from "./Pages/OpenTelemetry";
+import Publication from "./Pages/Publication";
 
 function App() {
 	const [darkMode, setDarkMode] = useState(
@@ -75,11 +75,11 @@ function App() {
 			<Router>
 				<Nav darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<MobileNav darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-				<ResponsiveDrawer darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Routes>
 					<Route path="/" element={<Reliability />} />
 					<Route path="/resilience" element={<Resilience />} />
+					<Route path="/publication" element={<Publication />} />
 					<Route path="/help" element={<Help />} />
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/tests" element={<Data />} />

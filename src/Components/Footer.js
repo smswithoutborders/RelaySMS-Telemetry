@@ -10,8 +10,7 @@ export default function Footer() {
 			component="footer"
 			sx={{
 				px: { md: 3, sm: 3, xs: 2 },
-				pb: { md: 3, sm: 3, xs: 14 },
-				mt: "30px"
+				pb: { md: 3, sm: 3, xs: 14 }
 			}}
 		>
 			<Grid container sx={{ p: 2 }}>

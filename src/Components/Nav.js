@@ -1,223 +1,134 @@
 import React, { useState } from "react";
 import {
-	Box,
 	Drawer,
+	IconButton,
 	List,
 	ListItem,
-	ListItemIcon,
 	ListItemText,
-	IconButton,
+	Box,
 	Typography,
-	Tooltip,
-	Button,
-	useMediaQuery
+	useTheme,
+	Button
 } from "@mui/material";
-import { NavLink } from "react-router-dom";
-import {
-	FaArrowLeft,
-	FaArrowRight,
-	FaEnvelope,
-	FaRegHandshake,
-	FaShieldAlt,
-	FaBroadcastTower,
-	FaPhoneAlt
-} from "react-icons/fa";
+import MenuIcon from "@mui/icons-material/Menu";
+import { Link } from "react-router-dom";
+import { FaCircleQuestion, FaHeadphones, FaTable, FaTableCells } from "react-icons/fa6";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import { ChevronRight } from "@mui/icons-material";
 
-// Define the drawer width
-const drawerWidth = 200;
-
-function Sidebar({ darkMode }) {
-	const [isCollapsed, setIsCollapsed] = useState(false);
+const Navbar = ({ onToggle = () => {} }) => {
+	const [open, setOpen] = useState(false);
+	const theme = useTheme();
 
 	const handleToggle = () => {
-		setIsCollapsed(!isCollapsed);
+		setOpen(!open);
+		onToggle(!open);
 	};
 
-	// Media query to detect mobile and tablet screens
-	const isMobileOrTablet = useMediaQuery((theme) => theme.breakpoints.down("md"));
-
-	const menuItems = [
-		{ text: "Reliability", icon: <FaRegHandshake />, link: "/" },
-		{ text: "Resilience", icon: <FaShieldAlt />, link: "/resilience" },
-		{ text: "Open Telemetry", icon: <FaBroadcastTower />, link: "/OpenTelemetry" }
-	];
-
-	const serviceItems = [
-		{ text: "Help", icon: <FaEnvelope />, link: "/help" },
-		{ text: "Contact Us", icon: <FaPhoneAlt />, link: "/contact" }
-	];
-
 	return (
-		<Box sx={{ display: "flex" }}>
-			{/* Hide the Drawer on mobile and tablet */}
-			<Drawer
-				variant="permanent"
-				sx={{
-					width: isMobileOrTablet ? 0 : isCollapsed ? 40 : drawerWidth,
-					flexShrink: 0,
-					"& .MuiDrawer-paper": {
-						width: isMobileOrTablet ? 0 : isCollapsed ? 60 : drawerWidth,
-						boxSizing: "border-box",
-						transition: "width 0.3s",
-						backdropFilter: "blur(10px)",
-						borderRight: "1px solid rgba(255, 255, 255, 0.5)"
-					}
-				}}
+		<>
+			<IconButton
+				onClick={handleToggle}
+				sx={{ position: "absolute", top: 10, left: 10, color: "inherit" }}
 			>
-				<Box
-					sx={{
-						display: "flex",
-						flexDirection: "column",
-						height: "100%",
-						justifyContent: "space-between"
-					}}
-				>
-					{/* Header */}
-					<Box sx={{ padding: 2, display: "flex", alignItems: "center" }}>
-						{!isCollapsed && !isMobileOrTablet && (
-							<Box
-								sx={{
-									display: "flex",
-									alignItems: "center",
-									flexGrow: 1
-								}}
-							>
-								<Box
-									component="img"
-									src={darkMode ? "/SWOB-Dark Theme.png" : "/SWOB-Default.png"}
-									alt="Profile"
-									sx={{
-										width: 130,
-										height: 40,
-										marginRight: 1
-									}}
-								/>
-							</Box>
-						)}
-						<IconButton onClick={handleToggle}>
-							{isCollapsed ? (
-								<FaArrowRight sx={{ color: "#000158" }} />
-							) : (
-								<FaArrowLeft sx={{ color: "#000158" }} />
-							)}
-						</IconButton>
-					</Box>
+				<MenuIcon />
+			</IconButton>
 
-					{/* Menu Section */}
+			<Drawer anchor="left" open={open} onClose={handleToggle}>
+				<Box sx={{ width: 250, display: "flex", flexDirection: "column", height: "100%" }}>
 					<Box
 						sx={{
-							paddingBottom: {
-								xs: 4,
-								sm: 8,
-								md: 10,
-								lg: 3
-							}
+							padding: 4,
+							display: "flex",
+							justifyContent: "center",
+							alignItems: "center"
 						}}
+						onClick={handleToggle}
 					>
-						<Typography
-							sx={{
-								paddingLeft: 2,
-								fontSize: "1.5rem"
-							}}
-						>
-							Menus
+						<Typography variant="h6" component="div">
+							<Box
+								component="img"
+								src={theme.palette.mode === "dark" ? "/SWOB-Dark Theme.png" : "/SWOB-Default.png"}
+								sx={{ width: "70%" }}
+							/>
 						</Typography>
-						<List>
-							{menuItems.map((item, index) => (
-								<Tooltip title={isCollapsed ? item.text : ""} placement="right" key={index}>
-									<ListItem
-										button
-										component={NavLink}
-										to={item.link}
-										sx={{
-											padding: "10px",
-											justifyContent: isCollapsed ? "center" : "flex-start"
-										}}
-									>
-										<ListItemIcon
-											sx={{
-												minWidth: 0,
-												marginRight: isCollapsed ? 0 : 2,
-												justifyContent: "center"
-											}}
-										>
-											{item.icon}
-										</ListItemIcon>
-										{!isCollapsed && <ListItemText primary={item.text} />}
-									</ListItem>
-								</Tooltip>
-							))}
-						</List>
-
-						<Typography sx={{ paddingLeft: 2, fontSize: "1.5rem" }}>Contact</Typography>
-						<List>
-							{serviceItems.map((item, index) => (
-								<Tooltip title={isCollapsed ? item.text : ""} placement="right" key={index}>
-									<ListItem
-										button
-										component={NavLink}
-										to={item.link}
-										style={({ isActive }) => ({
-											padding: "10px",
-											justifyContent: isCollapsed ? "center" : "flex-start",
-											backgroundColor: isActive ? "rgba(0, 123, 255, 0.2)" : "transparent"
-										})}
-									>
-										<ListItemIcon
-											sx={{
-												minWidth: 0,
-												marginRight: isCollapsed ? 0 : 2,
-												justifyContent: "center"
-											}}
-										>
-											{item.icon}
-										</ListItemIcon>
-										{!isCollapsed && <ListItemText primary={item.text} />}
-									</ListItem>
-								</Tooltip>
-							))}
-						</List>
 					</Box>
 
-					{/* Footer */}
-					<Box>
-						<ListItem
-							button
-							sx={{
-								display: "flex",
-								flexDirection: "column",
-								alignItems: "center",
-								backgroundColor: "rgba(97, 112, 196, 0.1)",
-								borderRadius: 2,
-								boxShadow: "1px 1px 10px rgba(102, 99, 99, 0.1)"
-							}}
-						>
-							{!isCollapsed && !isMobileOrTablet && (
-								<>
-									<Typography variant="body2" sx={{ marginTop: 1 }}>
-										Check out RelaySMS blog posts
-									</Typography>
-									<Typography variant="caption" color="textSecondary">
-										<Button
-											component="a"
-											href="https://blog.smswithoutborders.com/"
-											rel="noreferrer"
-											target="_blank"
-											variant="contained"
-											sx={{ mt: 2, borderRadius: "50px", textTransform: "none" }}
-										>
-											Read more <ChevronRight />
-										</Button>
-									</Typography>
-								</>
-							)}
+					{/* Main Links */}
+					<List>
+						<ListItem button onClick={handleToggle}>
+							<ListItemButton component={Link} to="/OpenTelemetry">
+								<ListItemIcon>
+									<FaTableCells />
+								</ListItemIcon>
+								<ListItemText primary="Open Telemetry" />
+							</ListItemButton>
 						</ListItem>
+						<ListItem button onClick={handleToggle}>
+							<ListItemButton component={Link} to="/publication">
+								<ListItemIcon>
+									<FaTable />
+								</ListItemIcon>
+								<ListItemText primary="Publication" />
+							</ListItemButton>
+						</ListItem>
+
+						<ListItem button onClick={handleToggle}>
+							<ListItemButton component={Link} to="/">
+								<ListItemIcon>
+									<FaTableCells />
+								</ListItemIcon>
+								<ListItemText primary="Reliability" />
+							</ListItemButton>
+						</ListItem>
+						<ListItem button onClick={handleToggle}>
+							<ListItemButton component={Link} to="/resilience">
+								<ListItemIcon>
+									<FaTable />
+								</ListItemIcon>
+								<ListItemText primary="Resilience" />
+							</ListItemButton>
+						</ListItem>
+
+						<ListItem button onClick={handleToggle}>
+							<ListItemButton component={Link} to="/help">
+								<ListItemIcon>
+									<FaCircleQuestion />
+								</ListItemIcon>
+								<ListItemText primary="Support" />
+							</ListItemButton>
+						</ListItem>
+						<ListItem button onClick={handleToggle}>
+							<ListItemButton component={Link} to="/contact">
+								<ListItemIcon>
+									<FaHeadphones />
+								</ListItemIcon>
+								<ListItemText primary="Contact" />
+							</ListItemButton>
+						</ListItem>
+					</List>
+
+					{/* Blog Link at the bottom */}
+					<Box sx={{ marginTop: "auto", padding: 2 }}>
+						<ListItem button onClick={handleToggle}>
+							<ListItemText primary="Visit Our Blog" />
+						</ListItem>
+						<Button
+							component="a"
+							href="https://blog.smswithoutborders.com/"
+							rel="noreferrer"
+							target="_blank"
+							variant="contained"
+							sx={{ mt: 2, borderRadius: "50px", textTransform: "none" }}
+						>
+							Read more <ChevronRight />
+						</Button>
 					</Box>
 				</Box>
 			</Drawer>
-		</Box>
+		</>
 	);
-}
+};
 
-export default Sidebar;
+export default Navbar;

@@ -1,17 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=Unbounded:wght@200..900&family=Ubuntu:wght@300;400;500;700&display=swap");
+
 @font-face {
-	font-family: "Suravaram";
-	src:
-		url("/public/Suravaram/Suravaram-Regular.ttf") format("tff"),
-		url("/public/Suravaram/Suravaram-Regular.ttf") format("ttf");
+	font-family: "Unbounded";
+	src: url("https://github.com/github/mona-sans/raw/main/fonts/web/MonaSans-Regular.woff2")
+		format("woff2");
+	font-weight: normal;
+	font-style: normal;
 }
 
 * {
-	font-family: "Suravaram", sans-serif !important;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: "Unbounded", "Mona Sans";
 }
 
 a {
 	text-decoration: none;
 	color: inherit;
+	font-family: "Unbounded";
 }
 
 a:hover {
@@ -41,3 +48,4 @@ a:hover {
 		background-position: left;
 	}
 }
+/* ================================================ */
