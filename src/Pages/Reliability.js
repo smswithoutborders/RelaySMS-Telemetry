@@ -15,10 +15,10 @@ import OperatorSearch from "../Components/OperatorSearch";
 import CustomNoRowsOverlay from "../Components/CustomNoRowsOverlay";
 import DateSearch from "../Components/DateSearch";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../Components/Nav";
 
 const gs_url = process.env.REACT_APP_GATEWAY_SERVER_URL;
 const apiUrl = `${gs_url}/v3/clients`;
-const drawerWidth = 240;
 
 const formatDate = (dateString) =>
 	!dateString ? "" : new Date(dateString * 1000).toLocaleString();
@@ -93,11 +93,11 @@ const useClientData = (paginationModel, selectedCountry, selectedOperator, selec
 
 const Reliability = () => {
 	const navigate = useNavigate();
+	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [selectedCountry, setSelectedCountry] = useState(null);
 	const [selectedOperator, setSelectedOperator] = useState(null);
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-
 	const { data: countryData, loading: countryLoading } = useFetchData(`${apiUrl}/countries`);
 	const { data: operatorData, loading: operatorLoading } = useFetchData(
 		`${apiUrl}/${selectedCountry}/operators`
@@ -194,109 +194,108 @@ const Reliability = () => {
 
 	return (
 		<Box
-			className="bg"
-			component="main"
 			sx={{
-				px: { md: 3, sm: 3, xs: 2 },
-				pb: { md: 3, sm: 3, xs: 14 },
-				flexGrow: 1
+				display: "flex",
+				minHeight: "100vh"
 			}}
 		>
-			<Grid container sx={{ p: 2 }} justifyContent="center" alignItems="center" direction="row">
-				<Grid
-					item
-					lg={2}
-					md={3}
-					xs={0}
-					sm={3}
-					sx={{
-						display: { xs: "none", sm: "none", md: "block" },
-						"& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth }
-					}}
-				></Grid>
-				<Grid
-					mx="auto"
-					item
-					lg={10}
-					md={9}
-					xs={12}
-					sm={12}
-					sx={{
-						p: { md: 3, sm: 2, xs: 0 },
-						width: { sm: `calc(100% - ${drawerWidth}px)`, md: `calc(100% - ${drawerWidth}px)` }
-					}}
-				>
-					<Grid
-						container
-						columnSpacing={4}
-						rowSpacing={4}
-						alignItems="flex-end"
-						sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 2, sm: 2 } }}
-					>
-						<Grid item md={3} xs={6}>
-							<Card sx={{ p: 2 }}>
-								<Typography textAlign="center" variant="h3" sx={{ fontWeight: 600 }}>
-									{totalRows}
-								</Typography>
-								<Typography
-									textAlign="center"
-									variant="body1"
-									sx={{ fontWeight: 500, p: 1, fontSize: { md: 14, sm: 14, xs: 12 } }}
-								>
-									Total Gateway Clients
-								</Typography>
-							</Card>
-						</Grid>
-						<Grid item md={3} xs={6}>
-							<CountrySearch
-								countries={countryData}
-								onSelectCountry={handleCountrySelect}
-								loading={countryLoading}
-							/>
-							{selectedCountry && (
-								<OperatorSearch
-									operators={operatorData}
-									onSelectOperator={setSelectedOperator}
-									loading={operatorLoading}
-								/>
-							)}
-						</Grid>
-						<Grid item md={3} xs={6}>
-							<DateSearch onSelectDate={setSelectedDate} />
-						</Grid>
-					</Grid>
-					<Stack
-						spacing={1}
-						direction="row"
-						alignItems="center"
-						sx={{ mb: 1 }}
-						useFlexGap
-						flexWrap="wrap"
-					>
-						<Button variant="outlined" onClick={handleRefresh} disabled={clientDataLoading}>
-							Refetch data {clientDataLoading && <CircularProgress size={24} sx={{ ml: 2 }} />}
-						</Button>
-					</Stack>
-					<DataGrid
-						loading={clientDataLoading}
-						rows={data}
-						getRowId={(row) => row.msisdn}
-						onRowClick={handleRowClick}
-						rowCount={totalRows}
-						columns={columns}
-						pageSizeOptions={[10, 25, 50, 100]}
-						paginationModel={paginationModel}
-						paginationMode="server"
-						onPaginationModelChange={setPaginationModel}
-						slots={{
-							noRowsOverlay: CustomNoRowsOverlay,
-							loadingOverlay: LinearProgress,
-							toolbar: GridToolbar
+			<Navbar onToggle={setDrawerOpen} />
+			<Box
+				sx={{
+					flexGrow: 1,
+					padding: 3,
+					marginLeft: drawerOpen ? "250px" : "0px",
+					transition: "margin-left 0.3s ease-in-out"
+				}}
+			>
+				<Box sx={{ flexGrow: 1, padding: 3 }}>
+					<Box
+						className="hero"
+						sx={{
+							p: 2,
+							mb: 3,
+							boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
+							borderRadius: "8px",
+							position: "relative",
+							minHeight: "250px"
 						}}
-						sx={{ height: 550 }}
-					/>
-				</Grid>
-			</Grid>
+					>
+						<Box sx={{ flexGrow: 1, padding: 3 }}>
+							{/* ============================================= */}
+							<Grid
+								container
+								columnSpacing={4}
+								rowSpacing={4}
+								alignItems="flex-end"
+								sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 2, sm: 2 } }}
+							>
+								<Grid item md={3} xs={6}>
+									<Card sx={{ p: 2 }}>
+										<Typography textAlign="center" variant="h3" sx={{ fontWeight: 600 }}>
+											{totalRows}
+										</Typography>
+										<Typography
+											textAlign="center"
+											variant="body1"
+											sx={{ fontWeight: 500, p: 1, fontSize: { md: 14, sm: 14, xs: 12 } }}
+										>
+											Total Gateway Clients
+										</Typography>
+									</Card>
+								</Grid>
+								<Grid item md={3} xs={6}>
+									<CountrySearch
+										countries={countryData}
+										onSelectCountry={handleCountrySelect}
+										loading={countryLoading}
+									/>
+									{selectedCountry && (
+										<OperatorSearch
+											operators={operatorData}
+											onSelectOperator={setSelectedOperator}
+											loading={operatorLoading}
+										/>
+									)}
+								</Grid>
+								<Grid item md={3} xs={6}>
+									<DateSearch onSelectDate={setSelectedDate} />
+								</Grid>
+							</Grid>
+							<Stack
+								spacing={1}
+								direction="row"
+								alignItems="center"
+								sx={{ mb: 1 }}
+								useFlexGap
+								flexWrap="wrap"
+							>
+								<Button variant="outlined" onClick={handleRefresh} disabled={clientDataLoading}>
+									Refetch data {clientDataLoading && <CircularProgress size={24} sx={{ ml: 2 }} />}
+								</Button>
+							</Stack>
+							<DataGrid
+								loading={clientDataLoading}
+								rows={data}
+								getRowId={(row) => row.msisdn}
+								onRowClick={handleRowClick}
+								rowCount={totalRows}
+								columns={columns}
+								pageSizeOptions={[10, 25, 50, 100]}
+								paginationModel={paginationModel}
+								paginationMode="server"
+								onPaginationModelChange={setPaginationModel}
+								slots={{
+									noRowsOverlay: CustomNoRowsOverlay,
+									loadingOverlay: LinearProgress,
+									toolbar: GridToolbar
+								}}
+								sx={{ height: 550 }}
+							/>
+							{/* ======================================================= */}
+						</Box>
+					</Box>
+				</Box>
+			</Box>
 		</Box>
 	);
 };
