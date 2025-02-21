@@ -7,13 +7,15 @@ import {
 	ListItemText,
 	Box,
 	Typography,
-	useTheme
+	useTheme,
+	Button
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
 import { FaCircleQuestion, FaHeadphones, FaTable, FaTableCells } from "react-icons/fa6";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
+import { ChevronRight } from "@mui/icons-material";
 
 const Navbar = ({ onToggle = () => {} }) => {
 	const [open, setOpen] = useState(false);
@@ -63,6 +65,14 @@ const Navbar = ({ onToggle = () => {} }) => {
 								<ListItemText primary="Open Telemetry" />
 							</ListItemButton>
 						</ListItem>
+						<ListItem button onClick={handleToggle}>
+							<ListItemButton component={Link} to="/publication">
+								<ListItemIcon>
+									<FaTable />
+								</ListItemIcon>
+								<ListItemText primary="Publication" />
+							</ListItemButton>
+						</ListItem>
 
 						<ListItem button onClick={handleToggle}>
 							<ListItemButton component={Link} to="/">
@@ -80,6 +90,7 @@ const Navbar = ({ onToggle = () => {} }) => {
 								<ListItemText primary="Resilience" />
 							</ListItemButton>
 						</ListItem>
+
 						<ListItem button onClick={handleToggle}>
 							<ListItemButton component={Link} to="/help">
 								<ListItemIcon>
@@ -103,6 +114,16 @@ const Navbar = ({ onToggle = () => {} }) => {
 						<ListItem button onClick={handleToggle}>
 							<ListItemText primary="Visit Our Blog" />
 						</ListItem>
+						<Button
+							component="a"
+							href="https://blog.smswithoutborders.com/"
+							rel="noreferrer"
+							target="_blank"
+							variant="contained"
+							sx={{ mt: 2, borderRadius: "50px", textTransform: "none" }}
+						>
+							Read more <ChevronRight />
+						</Button>
 					</Box>
 				</Box>
 			</Drawer>

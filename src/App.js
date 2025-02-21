@@ -14,6 +14,7 @@ import Resilience from "./Pages/Resilience";
 import MobileNav from "./Components/MobileNav";
 import Nav from "./Components/Nav";
 import OpenTelemetry from "./Pages/OpenTelemetry";
+import Publication from "./Pages/Publication";
 
 function App() {
 	const [darkMode, setDarkMode] = useState(
@@ -78,6 +79,7 @@ function App() {
 				<Routes>
 					<Route path="/" element={<Reliability />} />
 					<Route path="/resilience" element={<Resilience />} />
+					<Route path="/publication" element={<Publication />} />
 					<Route path="/help" element={<Help />} />
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/tests" element={<Data />} />
