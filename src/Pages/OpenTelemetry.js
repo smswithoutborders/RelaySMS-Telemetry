@@ -17,7 +17,8 @@ import {
 	Paper,
 	Table,
 	TableHead,
-	TableBody
+	TableBody,
+	LinearProgress
 } from "@mui/material";
 import Navbar from "../Components/Nav";
 import dayjs from "dayjs";
@@ -30,10 +31,8 @@ const categories = [
 	{ key: "total_signups_from_bridges", label: "Users with Bridges" },
 	{ key: "total_retained_users_with_tokens", label: "Retained Users with Tokens" },
 	{ key: "total_signup_countries", label: "Signup Countries" },
-	{ key: "total_retained_countries", label: "Retained Countries" },
 	{ key: "total_publications", label: "Total Publications" },
-	{ key: "total_published_publications", label: "Published Publications" },
-	{ key: "total_failed_publications", label: "Failed Publications" }
+	{ key: "total_published_publications", label: "Published Publications" }
 ];
 
 const granularities = [
@@ -53,10 +52,8 @@ const Content = () => {
 	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
 	const [totalRetainedUsersWithTokens, setTotalRetainedUsersWithTokens] = useState(0);
 	const [totalSignupsFromBridges, setTotalSignupsFromBridges] = useState(0);
-	const [totalRetainedCountries, setTotalRetainedCountries] = useState(0);
 	const [totalPublications, setTotalPublications] = useState(0);
 	const [totalPublishedPublications, setTotalPublishedPublications] = useState(0);
-	const [totalFailedPublications, setTotalFailedPublications] = useState(0);
 	const [category, setCategory] = useState("summary");
 	const [granularity, setGranularity] = useState("month");
 	const [groupBy, setGroupBy] = useState("country");
@@ -141,10 +138,8 @@ const Content = () => {
 					total_signup_countries,
 					total_retained_users_with_tokens,
 					total_signups_from_bridges,
-					total_retained_countries,
 					total_publications,
-					total_published_publications,
-					total_failed_publications
+					total_published_publications
 				} = data.summary;
 
 				setTotalUsers(total_signup_users);
@@ -152,10 +147,8 @@ const Content = () => {
 				setTotalSignupCountries(total_signup_countries);
 				setTotalRetainedUsersWithTokens(total_retained_users_with_tokens);
 				setTotalSignupsFromBridges(total_signups_from_bridges);
-				setTotalRetainedCountries(total_retained_countries);
 				setTotalPublications(total_publications);
 				setTotalPublishedPublications(total_published_publications);
-				setTotalFailedPublications(total_failed_publications);
 			} else {
 				throw new Error("Invalid data structure received.");
 			}
@@ -175,12 +168,13 @@ const Content = () => {
 		setStartDate("");
 		setEndDate("");
 		setCategory("summary");
-		fetchSummaryData();
+		fetchSummaryData("summary");
 	};
 
 	return (
 		<Box
 			sx={{
+				p: 2,
 				display: "flex",
 				minHeight: "100vh",
 				backgroundColor: theme.palette.background.default
@@ -195,206 +189,213 @@ const Content = () => {
 					transition: "margin-left 0.3s ease-in-out"
 				}}
 			>
-				<Box sx={{ flexGrow: 1, padding: 3, transition: "margin-left 0.3s ease-in-out" }}>
+				{/*===================== First Row (3 Summary Cards with Circle Charts) */}
+				<Grid container spacing={3} justifyContent="center">
 					{/* =================================================================================================== */}
+
+					{loading && (
+						<Box
+							sx={{
+								position: "absolute",
+								top: 0,
+								left: 0,
+								width: "100%",
+								height: "100%",
+								display: "flex",
+								justifyContent: "center",
+								alignItems: "center",
+								backgroundColor: "rgba(255, 255, 255, 0.7)",
+								borderRadius: "8px",
+								zIndex: 10
+							}}
+						>
+							<CircularProgress size={60} />
+						</Box>
+					)}
+
+					{error ? (
+						<Typography color="error" variant="h6" align="center">
+							{error}
+						</Typography>
+					) : (
+						<Grid container sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "white" }} spacing={2}>
+							{[
+								{
+									title: "Users",
+									value: totalUsers,
+									color: "#1F4FFF", // Indigo
+									max: 100
+								},
+								{
+									title: "Active Users",
+									value: totalRetainedUsers,
+									color: "#FF9E43", // Orange
+									max: 100
+								},
+								{
+									title: "Signup Countries",
+									value: totalSignupCountries,
+									color: "#2ED3B7", // Teal
+									max: 100
+								},
+								{
+									title: "Active Users with Tokens",
+									value: totalRetainedUsersWithTokens,
+									color: "#E66F00", // Orange
+									max: 100
+								},
+								{
+									title: "Signups from Bridges",
+									value: totalSignupsFromBridges,
+									color: "#577BFF", // Indigo (lighter)
+									max: 100
+								},
+								{
+									title: "Publications",
+									value: totalPublications,
+									color: "#26272B", // Gray (dark)
+									max: 100
+								},
+								{
+									title: "Published Publications",
+									value: totalPublishedPublications,
+									color: "#FFBD80", // Orange (muted)
+									max: 100
+								}
+							].map((item, index) => {
+								const percentage = item.value && item.max ? (item.value / item.max) * 100 : 0;
+								const displayPercentage = isNaN(percentage) ? 0 : percentage;
+
+								return (
+									<Grid item xs={12} sm={4} md={3} key={index}>
+										<Paper
+											elevation={3}
+											sx={{
+												p: 2,
+												borderRadius: 2,
+												bgcolor: "white",
+												textAlign: "center",
+												display: "flex",
+												flexDirection: "column",
+												alignItems: "center"
+											}}
+										>
+											<Typography variant="h6" sx={{ mb: 2 }}>
+												{item.title}
+											</Typography>
+
+											{/* Process Chart as LinearProgress */}
+											<Box sx={{ width: "100%", mt: 2 }}>
+												<LinearProgress
+													variant="determinate"
+													value={displayPercentage}
+													sx={{
+														height: 10,
+														borderRadius: 5,
+														backgroundColor: "#e0e0e0", // light gray background
+														"& .MuiLinearProgress-bar": {
+															backgroundColor: item.color // custom color for the progress bar
+														}
+													}}
+												/>
+											</Box>
+
+											<Box
+												sx={{
+													mt: 2,
+													display: "flex",
+													flexDirection: "column",
+													alignItems: "center"
+												}}
+											>
+												<Typography variant="h5" sx={{ fontWeight: "bold", mb: 1 }}>
+													{item.value}
+												</Typography>
+												<Typography variant="body2" sx={{ fontWeight: "bold" }}>
+													({displayPercentage.toFixed(1)}%)
+												</Typography>
+											</Box>
+										</Paper>
+									</Grid>
+								);
+							})}
+						</Grid>
+					)}
+				</Grid>
+
+				{/* Second Row (4 Columns with Tables) */}
+				<Paper elevation={3} sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "#EEF2FF" }}>
 					<Box
-						className="hero"
 						sx={{
-							backgroundColor: theme.palette.primary.main,
-							p: 2,
-							mb: 3,
-							boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-							borderRadius: "8px",
-							position: "relative",
-							minHeight: "250px"
+							flexGrow: 1,
+							padding: 3,
+							marginLeft: drawerOpen ? "250px" : "0px",
+							transition: "margin-left 0.3s ease-in-out"
 						}}
 					>
-						{loading && (
-							<Box
-								sx={{
-									position: "absolute",
-									top: 0,
-									left: 0,
-									width: "100%",
-									height: "100%",
-									display: "flex",
-									justifyContent: "center",
-									alignItems: "center",
-									backgroundColor: "rgba(255, 255, 255, 0.7)",
-									borderRadius: "8px",
-									zIndex: 10
-								}}
-							>
-								<CircularProgress size={60} />
-							</Box>
-						)}
-
-						{error ? (
-							<Typography color="error" variant="h6" align="center">
-								{error}
-							</Typography>
-						) : (
-							<Grid container spacing={3} sx={{ opacity: loading ? 0 : 1 }}>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Users"
-										value={totalUsers}
-										subtitle="Total number of people who have used RelaySMS"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Retained Users"
-										value={totalRetainedUsers}
-										subtitle="Total number of active users"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Signup Countries"
-										value={totalSignupCountries}
-										subtitle="Total countries using RelaySMS"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Retained Users with Tokens"
-										value={totalRetainedUsersWithTokens}
-										subtitle="People who have saved platforms"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Signups from Bridges"
-										value={totalSignupsFromBridges}
-										subtitle="Users who signed up via bridges"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Retained Countries"
-										value={totalRetainedCountries}
-										subtitle="Countries with retained users"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Publications"
-										value={totalPublications}
-										subtitle="Total number of published articles"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Published Publications"
-										value={totalPublishedPublications}
-										subtitle="Successfully published articles"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Failed Publications"
-										value={totalFailedPublications}
-										subtitle="Publications that failed"
-									/>
-								</Grid>
-							</Grid>
-						)}
-					</Box>
-
-					{/* ================================Main Content Blocks =============================================*/}
-					<Grid container spacing={3}>
-						<Grid container item spacing={3}>
-							<Grid item xs={12} md={6}>
-								<Box
-									className="content-block"
-									sx={{
-										backgroundColor: "#fff",
-										boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-										borderRadius: "8px",
-										p: 2
-									}}
-								>
-									<Grid container spacing={2}>
-										{/* Category Filter */}
-										<Grid item xs={12} sm={6} md={4}>
-											<FormControl fullWidth>
-												<InputLabel id="category-label">Category</InputLabel>
-												<Select
-													labelId="category-label"
-													value={category}
-													onChange={(e) => setCategory(e.target.value)}
-												>
-													{categories.map((cat) => (
-														<MenuItem key={cat.key} value={cat.key}>
-															{cat.label}
-														</MenuItem>
-													))}
-												</Select>
-											</FormControl>
-										</Grid>
-
-										{/* Granularity Filter */}
-										<Grid item xs={12} sm={6} md={4}>
-											<FormControl fullWidth>
-												<InputLabel id="granularity-label">Granularity</InputLabel>
-												<Select
-													labelId="granularity-label"
-													value={granularity}
-													onChange={(e) => setGranularity(e.target.value)}
-												>
-													{granularities.map((gran) => (
-														<MenuItem key={gran.key} value={gran.key}>
-															{gran.label}
-														</MenuItem>
-													))}
-												</Select>
-											</FormControl>
-										</Grid>
-
-										{/* Group By Filter */}
-										<Grid item xs={12} sm={6} md={4}>
-											<FormControl fullWidth>
-												<InputLabel id="groupby-label">Group By</InputLabel>
-												<Select
-													labelId="groupby-label"
-													value={groupBy}
-													onChange={(e) => setGroupBy(e.target.value)}
-												>
-													{groupes.map((group) => (
-														<MenuItem key={group.key} value={group.key}>
-															{group.label}
-														</MenuItem>
-													))}
-												</Select>
-											</FormControl>
-										</Grid>
-
-										{/* Publication Link */}
-										<Grid item xs={12}>
-											<Link
-												to="/publication"
-												style={{ textDecoration: "none", fontWeight: "bold" }}
-											>
-												Publication
-											</Link>
-										</Grid>
-									</Grid>
-								</Box>
+						<Grid container spacing={3} justifyContent="center">
+							{/* Publication Link */}
+							<Grid item xs={12}>
+								<Link to="/publication" style={{ textDecoration: "none", fontWeight: "bold" }}>
+									Publication
+								</Link>
 							</Grid>
 
-							{/* ================================================= */}
-							<Grid item xs={12} md={6}>
-								<Box
-									className="content-block"
-									sx={{
-										backgroundColor: "#fff",
-										boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-										borderRadius: "8px",
-										p: 2
-									}}
-								>
-									{/* Date Filters */}
+							<Grid item xs={12} sm={6} md={4}>
+								<FormControl fullWidth>
+									<InputLabel id="category-label">Category</InputLabel>
+									<Select
+										labelId="category-label"
+										value={category}
+										onChange={(e) => setCategory(e.target.value)}
+									>
+										{categories.map((cat) => (
+											<MenuItem key={cat.key} value={cat.key}>
+												{cat.label}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+
+							{/* Granularity Filter */}
+							<Grid item xs={12} sm={6} md={4}>
+								<FormControl fullWidth>
+									<InputLabel id="granularity-label">Granularity</InputLabel>
+									<Select
+										labelId="granularity-label"
+										value={granularity}
+										onChange={(e) => setGranularity(e.target.value)}
+									>
+										{granularities.map((gran) => (
+											<MenuItem key={gran.key} value={gran.key}>
+												{gran.label}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+
+							{/* Group By Filter */}
+							<Grid item xs={12} sm={6} md={4}>
+								<FormControl fullWidth>
+									<InputLabel id="groupby-label">Group By</InputLabel>
+									<Select
+										labelId="groupby-label"
+										value={groupBy}
+										onChange={(e) => setGroupBy(e.target.value)}
+									>
+										{groupes.map((group) => (
+											<MenuItem key={group.key} value={group.key}>
+												{group.label}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+
+							<Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }}>
+								<Grid item xs={12} md={6}>
 									<Grid container spacing={2}>
 										<Grid item xs={12} sm={6} md={6}>
 											<TextField
@@ -420,7 +421,7 @@ const Content = () => {
 
 									{/* Apply and Reset Buttons */}
 									<Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
-										<Grid item xs={12} sm={6} md="auto">
+										<Grid item xs={12} sm={4} md="auto">
 											<Button
 												variant="contained"
 												color="primary"
@@ -443,7 +444,7 @@ const Content = () => {
 										</Grid>
 
 										{/* Reset Button */}
-										<Grid item xs={12} sm={6} md="auto">
+										<Grid item xs={12} sm={4} md="auto">
 											<Button
 												variant="outlined"
 												color="secondary"
@@ -465,184 +466,119 @@ const Content = () => {
 											</Button>
 										</Grid>
 									</Box>
-								</Box>
+								</Grid>
 							</Grid>
 						</Grid>
+					</Box>
+				</Paper>
 
-						<Grid container item spacing={3}>
-							{/* ================== table one for summary data ========================= */}
-							<Grid item xs={12} md={12}>
-								<Box
-									className="content-block"
-									sx={{
-										backgroundColor: "#fff",
-										boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-										borderRadius: "8px",
-										// Set the height to 'auto' so the box expands based on table content
-										height: "auto",
-										p: 2 // Padding to give some space
-									}}
-								>
-									{loading ? (
-										<Box
+				<Grid container spacing={2}>
+					{/* ==================================== table =================================== */}
+					<Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }}>
+						<Grid item xs={12} md={12}>
+							<Paper elevation={3} sx={{ p: 3, borderRadius: 2, bgcolor: "white" }}>
+								{loading ? (
+									<Box
+										sx={{
+											display: "flex",
+											justifyContent: "center",
+											alignItems: "center",
+											height: "50vh"
+										}}
+									>
+										<CircularProgress size={60} />
+									</Box>
+								) : error ? (
+									<Typography color="error" variant="h6" align="center">
+										{error}
+									</Typography>
+								) : (
+									data &&
+									data[category] && (
+										<TableContainer
+											component={Paper}
 											sx={{
-												display: "flex",
-												justifyContent: "center",
-												alignItems: "center",
-												height: "50vh"
+												borderRadius: "8px",
+												boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+												overflowX: "auto"
 											}}
 										>
-											<CircularProgress size={60} />
-										</Box>
-									) : error ? (
-										<Typography color="error" variant="h6" align="center">
-											{error}
-										</Typography>
-									) : (
-										data &&
-										data[category] && (
-											<TableContainer
-												component={Paper}
-												sx={{
-													borderRadius: "8px",
-													boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
-													overflowX: "auto"
-												}}
-											>
-												<Table sx={{ minWidth: 750, border: "1px solid #ddd" }}>
-													<TableHead>
-														<TableRow
-															sx={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ddd" }}
+											<Table sx={{ minWidth: 750, border: "1px solid #ddd" }}>
+												<TableHead>
+													<TableRow
+														sx={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ddd" }}
+													>
+														<TableCell
+															sx={{
+																fontWeight: "bold",
+																color: "#333",
+																borderRight: "1px solid #ddd"
+															}}
 														>
+															<strong>Metric</strong>
+														</TableCell>
+														{[
+															"Total Signups",
+															"Total Retained Users",
+															"Total Retained Users with Tokens",
+															"Total Signups from Bridges",
+															"Total Signup Countries",
+															"Signup Countries"
+														].map((metric, index) => (
 															<TableCell
+																key={index}
 																sx={{
 																	fontWeight: "bold",
 																	color: "#333",
+																	textAlign: "center",
 																	borderRight: "1px solid #ddd"
 																}}
 															>
-																<strong>Metric</strong>
+																<strong>{metric}</strong>
 															</TableCell>
-															{[
-																"Total Signups",
-																"Total Retained Users",
-																"Total Retained Users with Tokens",
-																"Total Signups from Bridges",
-																"Total Signup Countries",
-																"Total Retained Countries",
-																"Signup Countries",
-																"Retained Countries"
-															].map((metric, index) => (
-																<TableCell
-																	key={index}
-																	sx={{
-																		fontWeight: "bold",
-																		color: "#333",
-																		textAlign: "center",
-																		borderRight: "1px solid #ddd"
-																	}}
-																>
-																	<strong>{metric}</strong>
-																</TableCell>
-															))}
-														</TableRow>
-													</TableHead>
-													<TableBody>
-														<TableRow
-															sx={{
-																"&:nth-of-type(odd)": { backgroundColor: "#fafafa" },
-																"&:hover": { backgroundColor: "#f0f0f0" }
-															}}
-														>
-															<TableCell sx={{ fontWeight: "bold", borderRight: "1px solid #ddd" }}>
-																Values
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_signup_users || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_retained_users || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_retained_users_with_tokens || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_signups_from_bridges || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_signup_countries || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_retained_countries || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.signup_countries?.join(", ") || "N/A"}
-															</TableCell>
-															<TableCell sx={{ textAlign: "center" }}>
-																{data[category]?.retained_countries?.join(", ") || "N/A"}
-															</TableCell>
-														</TableRow>
-													</TableBody>
-												</Table>
-											</TableContainer>
-										)
-									)}
-								</Box>
-							</Grid>
+														))}
+													</TableRow>
+												</TableHead>
+												<TableBody>
+													<TableRow
+														sx={{
+															"&:nth-of-type(odd)": { backgroundColor: "#fafafa" },
+															"&:hover": { backgroundColor: "#f0f0f0" }
+														}}
+													>
+														<TableCell sx={{ fontWeight: "bold", borderRight: "1px solid #ddd" }}>
+															Values
+														</TableCell>
+														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+															{data[category]?.total_signup_users || "N/A"}
+														</TableCell>
+														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+															{data[category]?.total_retained_users || "N/A"}
+														</TableCell>
+														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+															{data[category]?.total_retained_users_with_tokens || "N/A"}
+														</TableCell>
+														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+															{data[category]?.total_signups_from_bridges || "N/A"}
+														</TableCell>
+														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+															{data[category]?.total_signup_countries || "N/A"}
+														</TableCell>
+														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+															{data[category]?.signup_countries?.join(", ") || "N/A"}
+														</TableCell>
+													</TableRow>
+												</TableBody>
+											</Table>
+										</TableContainer>
+									)
+								)}
+							</Paper>
 						</Grid>
-
-						{/* ===========================================end of table========================================================== */}
 					</Grid>
-				</Box>
-				{/* <Box
-					className="hero"
-					sx={{
-						backgroundColor: theme.palette.primary.main,
-						p: 2,
-						mb: 3,
-						boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-						borderRadius: "8px"
-					}}
-				></Box> */}
-				{/* ============================================ */}
+					{/* ===========================================end of table========================================================== */}
+				</Grid>
 			</Box>
-		</Box>
-	);
-};
-
-const StatCard = ({ title, value }) => {
-	const theme = useTheme();
-	return (
-		<Box
-			sx={{
-				padding: 2,
-				borderRadius: "10px",
-				boxShadow:
-					theme.palette.mode === "dark"
-						? "0 2px 8px rgba(255, 255, 255, 0.2)"
-						: "0 2px 8px rgba(0, 0, 0, 0.2)",
-				backgroundColor: theme.palette.background.paper,
-				color: theme.palette.text.primary
-			}}
-		>
-			<Typography variant="h6">{title}</Typography>
-			<Typography variant="h5" sx={{ fontWeight: "bold" }}>
-				{value}
-			</Typography>
 		</Box>
 	);
 };
