@@ -18,21 +18,18 @@ import {
 	Table,
 	TableHead,
 	TableBody,
-	LinearProgress
+	Skeleton,
+	TablePagination
 } from "@mui/material";
 import Navbar from "../Components/Nav";
 import dayjs from "dayjs";
-import { Link } from "react-router-dom";
+import { PersonAdd, People, Group, AutoGraph, Message, Public } from "@mui/icons-material";
 
 const categories = [
 	{ key: "summary", label: "Summary" },
 	{ key: "signup", label: "Signup Users" },
-	{ key: "retained", label: "Active Users" },
-	{ key: "total_signups_from_bridges", label: "Users with Bridges" },
-	{ key: "total_retained_users_with_tokens", label: "Retained Users with Tokens" },
-	{ key: "total_signup_countries", label: "Signup Countries" },
-	{ key: "total_publications", label: "Total Publications" },
-	{ key: "total_published_publications", label: "Published Publications" }
+	{ key: "retained", label: "Users" },
+	{ key: "total_publications", label: "Publications" }
 ];
 
 const granularities = [
@@ -53,7 +50,6 @@ const Content = () => {
 	const [totalRetainedUsersWithTokens, setTotalRetainedUsersWithTokens] = useState(0);
 	const [totalSignupsFromBridges, setTotalSignupsFromBridges] = useState(0);
 	const [totalPublications, setTotalPublications] = useState(0);
-	const [totalPublishedPublications, setTotalPublishedPublications] = useState(0);
 	const [category, setCategory] = useState("summary");
 	const [granularity, setGranularity] = useState("month");
 	const [groupBy, setGroupBy] = useState("country");
@@ -63,6 +59,17 @@ const Content = () => {
 	const [error, setError] = useState(null);
 	const [data, setData] = useState(null);
 	const theme = useTheme();
+	const [page, setPage] = useState(0);
+	const [rowsPerPage, setRowsPerPage] = useState(10);
+
+	const handleChangePage = (event, newPage) => {
+		setPage(newPage);
+	};
+
+	const handleChangeRowsPerPage = (event) => {
+		setRowsPerPage(parseInt(event.target.value, 10));
+		setPage(0);
+	};
 
 	// ======================== fatch data when apply filter is used ====================================
 	const applyFilters = async () => {
@@ -109,6 +116,12 @@ const Content = () => {
 				setTotalSignupCountries(0);
 				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
 				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
+			} else if (category === "") {
+				setTotalRetainedUsersWithTokens(apiData[category]?.Total_retained_users_with_tokens ?? 0);
+				setTotalUsers(0);
+				setTotalSignupCountries(0);
+				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
+				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
@@ -138,8 +151,7 @@ const Content = () => {
 					total_signup_countries,
 					total_retained_users_with_tokens,
 					total_signups_from_bridges,
-					total_publications,
-					total_published_publications
+					total_publications
 				} = data.summary;
 
 				setTotalUsers(total_signup_users);
@@ -148,7 +160,6 @@ const Content = () => {
 				setTotalRetainedUsersWithTokens(total_retained_users_with_tokens);
 				setTotalSignupsFromBridges(total_signups_from_bridges);
 				setTotalPublications(total_publications);
-				setTotalPublishedPublications(total_published_publications);
 			} else {
 				throw new Error("Invalid data structure received.");
 			}
@@ -189,133 +200,133 @@ const Content = () => {
 					transition: "margin-left 0.3s ease-in-out"
 				}}
 			>
-				{/*===================== First Row (3 Summary Cards with Circle Charts) */}
-				<Grid container spacing={3} justifyContent="center">
-					{/* =================================================================================================== */}
-
-					{loading && (
-						<Box
-							sx={{
-								position: "absolute",
-								top: 0,
-								left: 0,
-								width: "100%",
-								height: "100%",
-								display: "flex",
-								justifyContent: "center",
-								alignItems: "center",
-								backgroundColor: "rgba(255, 255, 255, 0.7)",
-								borderRadius: "8px",
-								zIndex: 10
-							}}
-						>
-							<CircularProgress size={60} />
-						</Box>
-					)}
-
-					{error ? (
+				{/*======================================= Total section ===============================================*/}
+				{/* =================================================================================================== */}
+				<Grid container spacing={3}>
+					{loading ? (
+						<Grid container spacing={2} sx={{ p: 3 }}>
+							{[...Array(6)].map((_, index) => (
+								<Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+									<Box height="100%">
+										<Paper
+											elevation={4}
+											sx={{
+												p: 3,
+												borderRadius: 3,
+												display: "flex",
+												flexDirection: "column",
+												alignItems: "center",
+												justifyContent: "space-between",
+												width: "100%",
+												minHeight: 220,
+												height: "100%"
+											}}
+										>
+											<Skeleton variant="circular" width={40} height={40} />
+											<Skeleton variant="text" width="60%" height={24} sx={{ mt: 2 }} />
+											<Skeleton variant="text" width="80%" height={20} sx={{ mt: 1 }} />
+											<Skeleton variant="rectangular" width="100%" height={8} sx={{ mt: 2 }} />
+										</Paper>
+									</Box>
+								</Grid>
+							))}
+						</Grid>
+					) : error ? (
 						<Typography color="error" variant="h6" align="center">
 							{error}
 						</Typography>
 					) : (
-						<Grid container sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "white" }} spacing={2}>
+						<Grid container sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "white" }} spacing={3}>
 							{[
 								{
-									title: "Users",
+									title: "Sign-up Users",
 									value: totalUsers,
-									color: "#1F4FFF", // Indigo
-									max: 100
+									icon: <PersonAdd fontSize="large" />,
+									color: "#000158",
+									description: "Number of Signups",
+									max: 5000
+								},
+								{
+									title: "Users",
+									value: totalRetainedUsers,
+									icon: <People fontSize="large" />,
+									color: "#B85900",
+									description: "Number of current users",
+									max: 5000
 								},
 								{
 									title: "Active Users",
-									value: totalRetainedUsers,
-									color: "#FF9E43", // Orange
-									max: 100
-								},
-								{
-									title: "Signup Countries",
-									value: totalSignupCountries,
-									color: "#2ED3B7", // Teal
-									max: 100
-								},
-								{
-									title: "Active Users with Tokens",
 									value: totalRetainedUsersWithTokens,
-									color: "#E66F00", // Orange
-									max: 100
+									icon: <Group fontSize="large" />,
+									color: "#2196F3",
+									description: "Number of users with >1 accounts stored",
+									max: 5000
 								},
 								{
-									title: "Signups from Bridges",
+									title: "Bridges First Users",
 									value: totalSignupsFromBridges,
-									color: "#577BFF", // Indigo (lighter)
-									max: 100
+									icon: <AutoGraph fontSize="large" />,
+									color: "#5FE9D0",
+									description: "Number of users via bridges",
+									max: 5000
 								},
 								{
 									title: "Publications",
 									value: totalPublications,
-									color: "#26272B", // Gray (dark)
-									max: 100
+									icon: <Message fontSize="large" />,
+									color: "#FF9E43",
+									description: "Total number of messages published",
+									max: 5000
 								},
 								{
-									title: "Published Publications",
-									value: totalPublishedPublications,
-									color: "#FFBD80", // Orange (muted)
-									max: 100
+									title: "Countries",
+									value: totalSignupCountries,
+									icon: <Public fontSize="large" />,
+									color: "#107569",
+									description: "Available Countries with Users",
+									max: 200
 								}
 							].map((item, index) => {
-								const percentage = item.value && item.max ? (item.value / item.max) * 100 : 0;
-								const displayPercentage = isNaN(percentage) ? 0 : percentage;
+								const percentage =
+									item.value && item.max ? Math.min((item.value / item.max) * 100, 100) : 0;
 
 								return (
-									<Grid item xs={12} sm={4} md={3} key={index}>
-										<Paper
-											elevation={3}
-											sx={{
-												p: 2,
-												borderRadius: 2,
-												bgcolor: "white",
-												textAlign: "center",
-												display: "flex",
-												flexDirection: "column",
-												alignItems: "center"
-											}}
-										>
-											<Typography variant="h6" sx={{ mb: 2 }}>
-												{item.title}
-											</Typography>
-
-											{/* Process Chart as LinearProgress */}
-											<Box sx={{ width: "100%", mt: 2 }}>
-												<LinearProgress
-													variant="determinate"
-													value={displayPercentage}
-													sx={{
-														height: 10,
-														borderRadius: 5,
-														backgroundColor: "#e0e0e0", // light gray background
-														"& .MuiLinearProgress-bar": {
-															backgroundColor: item.color // custom color for the progress bar
-														}
-													}}
-												/>
-											</Box>
-
-											<Box
+									<Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+										<Box height="100%">
+											<Paper
+												elevation={4}
 												sx={{
-													mt: 2,
+													p: 3,
+													borderRadius: 3,
 													display: "flex",
 													flexDirection: "column",
-													alignItems: "center"
+													alignItems: "center",
+													justifyContent: "space-between",
+													bgcolor: "#f9f9f9",
+													textAlign: "center",
+													boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+													width: "100%",
+													minHeight: 220,
+													height: "100%"
 												}}
 											>
-												<Typography variant="h5" sx={{ fontWeight: "bold", mb: 1 }}>
+												<Typography variant="h6" sx={{ fontWeight: "bold" }}>
+													<Typography sx={{ color: item.color }}>{item.icon}</Typography>{" "}
+													{item.title}
+												</Typography>
+
+												<Typography variant="h5" sx={{ fontWeight: "bold", mt: 2 }}>
 													{item.value}
 												</Typography>
-												<Typography variant="body2" sx={{ fontWeight: "bold" }}>
-													({displayPercentage.toFixed(1)}%)
+												<Typography variant="body2" sx={{ color: "gray", mb: 1 }}>
+													({percentage.toFixed(1)}%)
 												</Typography>
-											</Box>
-										</Paper>
+
+												<Typography variant="body2" sx={{ color: "gray" }}>
+													{item.description}
+												</Typography>
+											</Paper>
+										</Box>
 									</Grid>
 								);
 							})}
@@ -323,8 +334,9 @@ const Content = () => {
 					)}
 				</Grid>
 
-				{/* Second Row (4 Columns with Tables) */}
-				<Paper elevation={3} sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "#EEF2FF" }}>
+				{/* ============================= filters section =============================================== */}
+
+				<Paper elevation={3} sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "#F4F4F5" }}>
 					<Box
 						sx={{
 							flexGrow: 1,
@@ -334,13 +346,7 @@ const Content = () => {
 						}}
 					>
 						<Grid container spacing={3} justifyContent="center">
-							{/* Publication Link */}
-							<Grid item xs={12}>
-								<Link to="/publication" style={{ textDecoration: "none", fontWeight: "bold" }}>
-									Publication
-								</Link>
-							</Grid>
-
+							{/* Category Select */}
 							<Grid item xs={12} sm={6} md={4}>
 								<FormControl fullWidth>
 									<InputLabel id="category-label">Category</InputLabel>
@@ -358,7 +364,7 @@ const Content = () => {
 								</FormControl>
 							</Grid>
 
-							{/* Granularity Filter */}
+							{/* Granularity Select */}
 							<Grid item xs={12} sm={6} md={4}>
 								<FormControl fullWidth>
 									<InputLabel id="granularity-label">Granularity</InputLabel>
@@ -376,7 +382,7 @@ const Content = () => {
 								</FormControl>
 							</Grid>
 
-							{/* Group By Filter */}
+							{/* Group By Select */}
 							<Grid item xs={12} sm={6} md={4}>
 								<FormControl fullWidth>
 									<InputLabel id="groupby-label">Group By</InputLabel>
@@ -394,9 +400,11 @@ const Content = () => {
 								</FormControl>
 							</Grid>
 
+							{/* Date Filters and Buttons */}
 							<Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }}>
 								<Grid item xs={12} md={6}>
 									<Grid container spacing={2}>
+										{/* Start Date */}
 										<Grid item xs={12} sm={6} md={6}>
 											<TextField
 												label="Start Date"
@@ -407,6 +415,8 @@ const Content = () => {
 												onChange={(e) => setStartDate(e.target.value)}
 											/>
 										</Grid>
+
+										{/* End Date */}
 										<Grid item xs={12} sm={6} md={6}>
 											<TextField
 												label="End Date"
@@ -443,7 +453,6 @@ const Content = () => {
 											</Button>
 										</Grid>
 
-										{/* Reset Button */}
 										<Grid item xs={12} sm={4} md="auto">
 											<Button
 												variant="outlined"
@@ -472,112 +481,132 @@ const Content = () => {
 					</Box>
 				</Paper>
 
-				<Grid container spacing={2}>
-					{/* ==================================== table =================================== */}
-					<Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }}>
-						<Grid item xs={12} md={12}>
-							<Paper elevation={3} sx={{ p: 3, borderRadius: 2, bgcolor: "white" }}>
-								{loading ? (
-									<Box
+				{/* ==================================== Table section =================================== */}
+				<Paper elevation={3} sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "#F4F4F5" }}>
+					<Grid item xs={12} md={12}>
+						<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+							<Typography color="gray" variant="h5">
+								Overview Presentation
+							</Typography>
+						</Box>
+
+						{loading ? (
+							<Box
+								sx={{
+									display: "flex",
+									justifyContent: "center",
+									alignItems: "center",
+									height: "50vh"
+								}}
+							>
+								<CircularProgress size={60} />
+							</Box>
+						) : error ? (
+							<Typography color="error" variant="h6" align="center">
+								{error}
+							</Typography>
+						) : (
+							data &&
+							data[category] && (
+								<>
+									<TableContainer
+										component={Paper}
 										sx={{
-											display: "flex",
-											justifyContent: "center",
-											alignItems: "center",
-											height: "50vh"
+											borderRadius: "8px",
+											boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+											overflowX: "auto"
 										}}
 									>
-										<CircularProgress size={60} />
-									</Box>
-								) : error ? (
-									<Typography color="error" variant="h6" align="center">
-										{error}
-									</Typography>
-								) : (
-									data &&
-									data[category] && (
-										<TableContainer
-											component={Paper}
-											sx={{
-												borderRadius: "8px",
-												boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
-												overflowX: "auto"
-											}}
-										>
-											<Table sx={{ minWidth: 750, border: "1px solid #ddd" }}>
-												<TableHead>
-													<TableRow
-														sx={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ddd" }}
+										<Table sx={{ minWidth: 750, border: "1px solid #ddd" }}>
+											<TableHead>
+												<TableRow
+													sx={{
+														backgroundColor: "#f5f5f5",
+														borderBottom: "2px solid #ddd"
+													}}
+												>
+													<TableCell
+														sx={{
+															fontWeight: "bold",
+															color: "#333",
+															borderRight: "1px solid #ddd"
+														}}
 													>
+														<strong>Metric</strong>
+													</TableCell>
+													{[
+														"Total Signups",
+														"Total Retained Users",
+														"Total Retained Users with Tokens",
+														"Total Signups from Bridges",
+														"Total Signup Countries",
+														"Total Published Publications",
+														"Signup Countries"
+													].map((metric, index) => (
 														<TableCell
+															key={index}
 															sx={{
 																fontWeight: "bold",
 																color: "#333",
+																textAlign: "center",
 																borderRight: "1px solid #ddd"
 															}}
 														>
-															<strong>Metric</strong>
+															<strong>{metric}</strong>
 														</TableCell>
-														{[
-															"Total Signups",
-															"Total Retained Users",
-															"Total Retained Users with Tokens",
-															"Total Signups from Bridges",
-															"Total Signup Countries",
-															"Signup Countries"
-														].map((metric, index) => (
-															<TableCell
-																key={index}
-																sx={{
-																	fontWeight: "bold",
-																	color: "#333",
-																	textAlign: "center",
-																	borderRight: "1px solid #ddd"
-																}}
-															>
-																<strong>{metric}</strong>
-															</TableCell>
-														))}
-													</TableRow>
-												</TableHead>
-												<TableBody>
-													<TableRow
-														sx={{
-															"&:nth-of-type(odd)": { backgroundColor: "#fafafa" },
-															"&:hover": { backgroundColor: "#f0f0f0" }
-														}}
-													>
-														<TableCell sx={{ fontWeight: "bold", borderRight: "1px solid #ddd" }}>
-															Values
-														</TableCell>
-														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-															{data[category]?.total_signup_users || "N/A"}
-														</TableCell>
-														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-															{data[category]?.total_retained_users || "N/A"}
-														</TableCell>
-														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-															{data[category]?.total_retained_users_with_tokens || "N/A"}
-														</TableCell>
-														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-															{data[category]?.total_signups_from_bridges || "N/A"}
-														</TableCell>
-														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-															{data[category]?.total_signup_countries || "N/A"}
-														</TableCell>
-														<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-															{data[category]?.signup_countries?.join(", ") || "N/A"}
-														</TableCell>
-													</TableRow>
-												</TableBody>
-											</Table>
-										</TableContainer>
-									)
-								)}
-							</Paper>
-						</Grid>
+													))}
+												</TableRow>
+											</TableHead>
+											<TableBody>
+												<TableRow
+													sx={{
+														"&:nth-of-type(odd)": { backgroundColor: "#fafafa" },
+														"&:hover": { backgroundColor: "#f0f0f0" }
+													}}
+												>
+													<TableCell sx={{ fontWeight: "bold", borderRight: "1px solid #ddd" }}>
+														Values
+													</TableCell>
+													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+														{data[category]?.total_signup_users || "N/A"}
+													</TableCell>
+													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+														{data[category]?.total_retained_users || "N/A"}
+													</TableCell>
+													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+														{data[category]?.total_retained_users_with_tokens || "N/A"}
+													</TableCell>
+													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+														{data[category]?.total_signups_from_bridges || "N/A"}
+													</TableCell>
+													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+														{data[category]?.total_signup_countries || "N/A"}
+													</TableCell>
+													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+														{data[category]?.total_publications || "N/A"}
+													</TableCell>
+													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
+														{data[category]?.signup_countries?.join(", ") || "N/A"}
+													</TableCell>
+												</TableRow>
+											</TableBody>
+										</Table>
+									</TableContainer>
+									<TablePagination
+										rowsPerPageOptions={[5, 10, 25]}
+										component="div"
+										count={data.totalCount || 0}
+										rowsPerPage={rowsPerPage}
+										page={page}
+										onPageChange={handleChangePage}
+										onRowsPerPageChange={handleChangeRowsPerPage}
+									/>
+								</>
+							)
+						)}
 					</Grid>
 					{/* ===========================================end of table========================================================== */}
-				</Grid>
+				</Paper>
 			</Box>
 		</Box>
 	);
