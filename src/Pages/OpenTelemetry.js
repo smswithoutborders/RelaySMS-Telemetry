@@ -24,6 +24,8 @@ import {
 import Navbar from "../Components/Nav";
 import dayjs from "dayjs";
 import { PersonAdd, People, Group, AutoGraph, Message, Public } from "@mui/icons-material";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import { getName } from "country-list";
 
 const categories = [
 	{ key: "summary", label: "Summary" },
@@ -61,6 +63,7 @@ const Content = () => {
 	const theme = useTheme();
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const isDarkMode = theme.palette.mode === "dark";
 
 	const handleChangePage = (event, newPage) => {
 		setPage(newPage);
@@ -195,13 +198,46 @@ const Content = () => {
 			<Box
 				sx={{
 					flexGrow: 1,
-					padding: 3,
+					padding: 12,
 					marginLeft: drawerOpen ? "250px" : "0px",
 					transition: "margin-left 0.3s ease-in-out"
 				}}
 			>
+				{/* Header */}
+				<Box
+					sx={{
+						textAlign: "start",
+						mb: 2,
+						p: 2,
+						borderRadius: 3,
+						color: isDarkMode ? "white" : "#000158"
+					}}
+				>
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+							letterSpacing: "1px",
+							textShadow: isDarkMode
+								? "0 3px 6px rgba(255, 255, 255, 0.3)"
+								: "0 3px 6px rgba(0, 0, 0, 0.3)"
+						}}
+					>
+						<TimelineIcon sx={{ mr: 2, fontSize: "3.5rem" }} /> Open Telemetry
+					</Typography>
+					<Typography
+						variant="h6"
+						sx={{
+							fontSize: "1.2rem",
+							mt: 1,
+							opacity: 0.9
+						}}
+					>
+						Usage Tracker for RelaySMS
+					</Typography>
+				</Box>
+
 				{/*======================================= Total section ===============================================*/}
-				{/* =================================================================================================== */}
 				<Grid container spacing={3}>
 					{loading ? (
 						<Grid container spacing={2} sx={{ p: 3 }}>
@@ -219,7 +255,8 @@ const Content = () => {
 												justifyContent: "space-between",
 												width: "100%",
 												minHeight: 220,
-												height: "100%"
+												height: "100%",
+												bgcolor: isDarkMode ? "rgba(255, 255, 255, 0.1)" : "white"
 											}}
 										>
 											<Skeleton variant="circular" width={40} height={40} />
@@ -236,13 +273,20 @@ const Content = () => {
 							{error}
 						</Typography>
 					) : (
-						<Grid container sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "white" }} spacing={3}>
+						<Grid
+							container
+							sx={{
+								p: 3,
+								mt: 4,
+								borderRadius: 2
+							}}
+							spacing={3}
+						>
 							{[
 								{
 									title: "Sign-up Users",
 									value: totalUsers,
 									icon: <PersonAdd fontSize="large" />,
-									color: "#000158",
 									description: "Number of Signups",
 									max: 5000
 								},
@@ -250,7 +294,6 @@ const Content = () => {
 									title: "Users",
 									value: totalRetainedUsers,
 									icon: <People fontSize="large" />,
-									color: "#B85900",
 									description: "Number of current users",
 									max: 5000
 								},
@@ -258,7 +301,6 @@ const Content = () => {
 									title: "Active Users",
 									value: totalRetainedUsersWithTokens,
 									icon: <Group fontSize="large" />,
-									color: "#2196F3",
 									description: "Number of users with >1 accounts stored",
 									max: 5000
 								},
@@ -266,7 +308,6 @@ const Content = () => {
 									title: "Bridges First Users",
 									value: totalSignupsFromBridges,
 									icon: <AutoGraph fontSize="large" />,
-									color: "#5FE9D0",
 									description: "Number of users via bridges",
 									max: 5000
 								},
@@ -274,7 +315,6 @@ const Content = () => {
 									title: "Publications",
 									value: totalPublications,
 									icon: <Message fontSize="large" />,
-									color: "#FF9E43",
 									description: "Total number of messages published",
 									max: 5000
 								},
@@ -282,7 +322,6 @@ const Content = () => {
 									title: "Countries",
 									value: totalSignupCountries,
 									icon: <Public fontSize="large" />,
-									color: "#107569",
 									description: "Available Countries with Users",
 									max: 200
 								}
@@ -302,27 +341,77 @@ const Content = () => {
 													flexDirection: "column",
 													alignItems: "center",
 													justifyContent: "space-between",
-													bgcolor: "#f9f9f9",
+													bgcolor: isDarkMode ? "#1e1e1e" : "#EEF2FF",
 													textAlign: "center",
-													boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
 													width: "100%",
 													minHeight: 220,
 													height: "100%"
 												}}
 											>
-												<Typography variant="h6" sx={{ fontWeight: "bold" }}>
-													<Typography sx={{ color: item.color }}>{item.icon}</Typography>{" "}
-													{item.title}
-												</Typography>
+												<Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+													{/* Title */}
+													<Typography
+														variant="body2"
+														sx={{
+															color: isDarkMode ? "white" : "#000158",
+															opacity: 0.8,
+															fontSize: "1rem",
+															mr: 3,
+															fontWeight: "bold"
+														}}
+													>
+														{item.title}
+													</Typography>
 
-												<Typography variant="h5" sx={{ fontWeight: "bold", mt: 2 }}>
-													{item.value}
-												</Typography>
-												<Typography variant="body2" sx={{ color: "gray", mb: 1 }}>
-													({percentage.toFixed(1)}%)
-												</Typography>
+													{/* Icon */}
+													<Typography
+														variant="h5"
+														sx={{
+															color: isDarkMode ? "white" : "#000158",
+															fontSize: "3rem"
+														}}
+													>
+														{item.icon}
+													</Typography>
+												</Box>
 
-												<Typography variant="body2" sx={{ color: "gray" }}>
+												{/* Value and Percentage */}
+												<Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+													{/* Value */}
+													<Typography
+														variant="h5"
+														sx={{
+															fontWeight: "bold",
+															color: isDarkMode ? "white" : "black",
+															fontSize: "3rem"
+														}}
+													>
+														{item.value}
+													</Typography>
+
+													{/* Percentage */}
+													<Typography
+														variant="body2"
+														sx={{
+															color: isDarkMode ? "white" : "black",
+															opacity: 0.8,
+															fontSize: "1rem",
+															ml: 1
+														}}
+													>
+														({percentage.toFixed(1)}%)
+													</Typography>
+												</Box>
+
+												{/* Description */}
+												<Typography
+													variant="body2"
+													sx={{
+														color: isDarkMode ? "rgba(255, 255, 255, 0.7)" : "gray",
+														textAlign: "center",
+														mt: 1
+													}}
+												>
 													{item.description}
 												</Typography>
 											</Paper>
@@ -333,159 +422,160 @@ const Content = () => {
 						</Grid>
 					)}
 				</Grid>
-
 				{/* ============================= filters section =============================================== */}
-
-				<Paper elevation={3} sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "#F4F4F5" }}>
+				<Paper
+					elevation={8}
+					sx={{
+						p: 5,
+						mt: 4,
+						borderRadius: 4,
+						bgcolor: isDarkMode ? "#1e1e1e" : "#FAFAFA",
+						boxShadow: isDarkMode ? "0 4px 12px rgb(5, 5, 6)" : "0 4px 12px rgb(202, 203, 206)"
+					}}
+				>
 					<Box
 						sx={{
 							flexGrow: 1,
-							padding: 3,
-							marginLeft: drawerOpen ? "250px" : "0px",
+							padding: 4,
+							marginLeft: drawerOpen ? "260px" : "0px",
 							transition: "margin-left 0.3s ease-in-out"
 						}}
 					>
-						<Grid container spacing={3} justifyContent="center">
-							{/* Category Select */}
-							<Grid item xs={12} sm={6} md={4}>
-								<FormControl fullWidth>
-									<InputLabel id="category-label">Category</InputLabel>
-									<Select
-										labelId="category-label"
-										value={category}
-										onChange={(e) => setCategory(e.target.value)}
-									>
-										{categories.map((cat) => (
-											<MenuItem key={cat.key} value={cat.key}>
-												{cat.label}
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Granularity Select */}
-							<Grid item xs={12} sm={6} md={4}>
-								<FormControl fullWidth>
-									<InputLabel id="granularity-label">Granularity</InputLabel>
-									<Select
-										labelId="granularity-label"
-										value={granularity}
-										onChange={(e) => setGranularity(e.target.value)}
-									>
-										{granularities.map((gran) => (
-											<MenuItem key={gran.key} value={gran.key}>
-												{gran.label}
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Group By Select */}
-							<Grid item xs={12} sm={6} md={4}>
-								<FormControl fullWidth>
-									<InputLabel id="groupby-label">Group By</InputLabel>
-									<Select
-										labelId="groupby-label"
-										value={groupBy}
-										onChange={(e) => setGroupBy(e.target.value)}
-									>
-										{groupes.map((group) => (
-											<MenuItem key={group.key} value={group.key}>
-												{group.label}
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Grid>
-
-							{/* Date Filters and Buttons */}
-							<Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }}>
-								<Grid item xs={12} md={6}>
-									<Grid container spacing={2}>
-										{/* Start Date */}
-										<Grid item xs={12} sm={6} md={6}>
-											<TextField
-												label="Start Date"
-												type="date"
-												fullWidth
-												InputLabelProps={{ shrink: true }}
-												value={startDate}
-												onChange={(e) => setStartDate(e.target.value)}
-											/>
-										</Grid>
-
-										{/* End Date */}
-										<Grid item xs={12} sm={6} md={6}>
-											<TextField
-												label="End Date"
-												type="date"
-												fullWidth
-												InputLabelProps={{ shrink: true }}
-												value={endDate}
-												onChange={(e) => setEndDate(e.target.value)}
-											/>
-										</Grid>
-									</Grid>
-
-									{/* Apply and Reset Buttons */}
-									<Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
-										<Grid item xs={12} sm={4} md="auto">
-											<Button
-												variant="contained"
-												color="primary"
-												onClick={applyFilters}
-												sx={{
-													textTransform: "none",
-													fontWeight: "bold",
-													borderRadius: "25px",
-													px: 3,
-													boxShadow: 4,
-													transition: "all 0.3s ease",
-													"&:hover": {
-														boxShadow: 12,
-														transform: "scale(1.05)"
-													}
-												}}
-											>
-												Apply
-											</Button>
-										</Grid>
-
-										<Grid item xs={12} sm={4} md="auto">
-											<Button
-												variant="outlined"
-												color="secondary"
-												onClick={resetFilters}
-												sx={{
-													textTransform: "none",
-													fontWeight: "bold",
-													borderRadius: "25px",
-													px: 3,
-													boxShadow: 4,
-													transition: "all 0.3s ease",
-													"&:hover": {
-														boxShadow: 12,
-														transform: "scale(1.05)"
-													}
-												}}
-											>
-												Reset
-											</Button>
-										</Grid>
-									</Box>
+						<Grid container spacing={4} justifyContent="center">
+							{[
+								{ label: "Category", value: category, setValue: setCategory, options: categories },
+								{
+									label: "Granularity",
+									value: granularity,
+									setValue: setGranularity,
+									options: granularities
+								},
+								{ label: "Group By", value: groupBy, setValue: setGroupBy, options: groupes }
+							].map((field, index) => (
+								<Grid item xs={12} sm={4} key={index}>
+									<FormControl fullWidth variant="outlined">
+										<InputLabel
+											sx={{ color: isDarkMode ? "#90CAF9" : "#000158", fontWeight: "bold" }}
+										>
+											{field.label}
+										</InputLabel>
+										<Select
+											value={field.value}
+											onChange={(e) => field.setValue(e.target.value)}
+											label={field.label}
+											sx={{
+												background: "transparent",
+												borderRadius: "10px",
+												borderColor: isDarkMode ? "#90CAF9" : "#4B6EFD",
+												transition: "all 0.3s ease",
+												"& .MuiSelect-icon": { color: isDarkMode ? "#90CAF9" : "#000158" },
+												"& .MuiOutlinedInput-root": {
+													padding: "10px 15px",
+													"&:hover": { borderColor: isDarkMode ? "#64B5F6" : "#3C5DFF" }
+												},
+												"& .MuiMenuItem-root": { padding: "10px 15px" }
+											}}
+										>
+											{field.options.map((option) => (
+												<MenuItem key={option.key} value={option.key}>
+													{option.label}
+												</MenuItem>
+											))}
+										</Select>
+									</FormControl>
 								</Grid>
+							))}
+						</Grid>
+
+						<Grid container spacing={4} justifyContent="center" sx={{ mt: 5 }}>
+							<Grid item xs={12} md={6}>
+								<Grid container spacing={3}>
+									{[
+										{ label: "Start Date", value: startDate, setValue: setStartDate },
+										{ label: "End Date", value: endDate, setValue: setEndDate }
+									].map((dateField, index) => (
+										<Grid item xs={6} key={index}>
+											<TextField
+												label={dateField.label}
+												type="date"
+												fullWidth
+												variant="outlined"
+												InputLabelProps={{
+													shrink: true,
+													sx: {
+														color: isDarkMode ? "#90CAF9" : "#000158",
+														fontWeight: "bold"
+													}
+												}}
+												value={dateField.value}
+												onChange={(e) => dateField.setValue(e.target.value)}
+											/>
+										</Grid>
+									))}
+								</Grid>
+
+								<Box sx={{ mt: 4, display: "flex", justifyContent: "center", gap: 3 }}>
+									<Button
+										variant="contained"
+										onClick={applyFilters}
+										sx={{
+											borderRadius: 4,
+											px: 5,
+											py: 1.5,
+											fontWeight: "bold",
+											textTransform: "none",
+											transition: "all 0.3s",
+											backgroundColor: isDarkMode ? "#1565C0" : "#1976D2",
+											boxShadow: isDarkMode
+												? "0px 4px 10px rgba(144, 202, 249, 0.3)"
+												: "0px 4px 10px rgba(25, 118, 210, 0.3)",
+											"&:hover": {
+												backgroundColor: isDarkMode ? "#0D47A1" : "#1565C0",
+												transform: "scale(1.05)"
+											}
+										}}
+									>
+										Apply
+									</Button>
+									<Button
+										variant="outlined"
+										onClick={resetFilters}
+										sx={{
+											borderRadius: 4,
+											px: 5,
+											py: 1.5,
+											fontWeight: "bold",
+											textTransform: "none",
+											borderColor: isDarkMode ? "#B0BEC5" : "#757575",
+											color: isDarkMode ? "#ECEFF1" : "#424242",
+											transition: "all 0.3s",
+											"&:hover": {
+												borderColor: isDarkMode ? "#CFD8DC" : "#424242",
+												transform: "scale(1.05)"
+											}
+										}}
+									>
+										Reset
+									</Button>
+								</Box>
 							</Grid>
 						</Grid>
 					</Box>
 				</Paper>
-
 				{/* ==================================== Table section =================================== */}
-				<Paper elevation={3} sx={{ p: 3, mt: 4, borderRadius: 2, bgcolor: "#F4F4F5" }}>
+				<Paper
+					elevation={8}
+					sx={{
+						p: 5,
+						mt: 4,
+						borderRadius: 4,
+						bgcolor: isDarkMode ? "#1e1e1e" : "#FAFAFA",
+						boxShadow: isDarkMode ? "0 4px 12px rgb(5, 5, 6)" : "0 4px 12px rgb(202, 203, 206)"
+					}}
+				>
 					<Grid item xs={12} md={12}>
 						<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-							<Typography color="gray" variant="h5">
+							<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h5">
 								Overview Presentation
 							</Typography>
 						</Box>
@@ -503,109 +593,145 @@ const Content = () => {
 							</Box>
 						) : error ? (
 							<Typography color="error" variant="h6" align="center">
-								{error}
+								{error.includes("Network") ? "Check your network and try again." : error}
+							</Typography>
+						) : !data || !data[category] || Object.keys(data[category]).length === 0 ? (
+							<Typography color="textSecondary" variant="h6" align="center">
+								Apply filter to see data on table
 							</Typography>
 						) : (
-							data &&
-							data[category] && (
-								<>
-									<TableContainer
-										component={Paper}
+							<>
+								<TableContainer
+									component={Paper}
+									sx={{
+										borderRadius: "8px",
+										boxShadow: isDarkMode
+											? "0px 5px 10px rgba(255, 255, 255, 0.1)"
+											: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+										overflowX: "auto",
+										bgcolor: isDarkMode ? "#2C2C2C" : "#FFFFFF"
+									}}
+								>
+									<Table
 										sx={{
-											borderRadius: "8px",
-											boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
-											overflowX: "auto"
+											minWidth: 750,
+											border: isDarkMode ? "1px solid #555" : "1px solid #ddd",
+											borderRadius: 2,
+											overflow: "hidden"
 										}}
 									>
-										<Table sx={{ minWidth: 750, border: "1px solid #ddd" }}>
-											<TableHead>
-												<TableRow
+										<TableHead>
+											<TableRow
+												sx={{
+													backgroundColor: isDarkMode ? "#424242" : "#f5f5f5",
+													borderBottom: "2px solid #ddd"
+												}}
+											>
+												<TableCell
 													sx={{
-														backgroundColor: "#f5f5f5",
-														borderBottom: "2px solid #ddd"
+														fontWeight: "bold",
+														color: isDarkMode ? "#E0E0E0" : "#333",
+														borderRight: "1px solid #ddd",
+														px: 2
 													}}
 												>
+													<strong>Metric</strong>
+												</TableCell>
+												{[
+													"Total Signups",
+													"Total Retained Users",
+													"Total Retained Users with Tokens",
+													"Total Signups from Bridges",
+													"Total Signup Countries",
+													"Total Published Publications",
+													"Signup Countries"
+												].map((metric, index) => (
 													<TableCell
+														key={index}
 														sx={{
 															fontWeight: "bold",
-															color: "#333",
-															borderRight: "1px solid #ddd"
+															color: isDarkMode ? "#E0E0E0" : "#333",
+															textAlign: "center",
+															borderRight: "1px solid #ddd",
+															px: 2
 														}}
 													>
-														<strong>Metric</strong>
+														<strong>{metric}</strong>
 													</TableCell>
-													{[
-														"Total Signups",
-														"Total Retained Users",
-														"Total Retained Users with Tokens",
-														"Total Signups from Bridges",
-														"Total Signup Countries",
-														"Total Published Publications",
-														"Signup Countries"
-													].map((metric, index) => (
-														<TableCell
-															key={index}
-															sx={{
-																fontWeight: "bold",
-																color: "#333",
-																textAlign: "center",
-																borderRight: "1px solid #ddd"
-															}}
-														>
-															<strong>{metric}</strong>
-														</TableCell>
-													))}
-												</TableRow>
-											</TableHead>
-											<TableBody>
-												<TableRow
+												))}
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											<TableRow
+												sx={{
+													"&:nth-of-type(odd)": {
+														backgroundColor: isDarkMode ? "#383838" : "#fafafa"
+													},
+													"&:hover": { backgroundColor: isDarkMode ? "#4A4A4A" : "#f0f0f0" }
+												}}
+											>
+												<TableCell
 													sx={{
-														"&:nth-of-type(odd)": { backgroundColor: "#fafafa" },
-														"&:hover": { backgroundColor: "#f0f0f0" }
+														fontWeight: "bold",
+														borderRight: "1px solid #ddd",
+														px: 2
 													}}
 												>
-													<TableCell sx={{ fontWeight: "bold", borderRight: "1px solid #ddd" }}>
-														Values
-													</TableCell>
-													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-														{data[category]?.total_signup_users || "N/A"}
-													</TableCell>
-													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-														{data[category]?.total_retained_users || "N/A"}
-													</TableCell>
-													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-														{data[category]?.total_retained_users_with_tokens || "N/A"}
-													</TableCell>
-													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-														{data[category]?.total_signups_from_bridges || "N/A"}
-													</TableCell>
-													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-														{data[category]?.total_signup_countries || "N/A"}
-													</TableCell>
-													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-														{data[category]?.total_publications || "N/A"}
-													</TableCell>
-													<TableCell sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}>
-														{data[category]?.signup_countries?.join(", ") || "N/A"}
-													</TableCell>
-												</TableRow>
-											</TableBody>
-										</Table>
-									</TableContainer>
-									<TablePagination
-										rowsPerPageOptions={[5, 10, 25]}
-										component="div"
-										count={data.totalCount || 0}
-										rowsPerPage={rowsPerPage}
-										page={page}
-										onPageChange={handleChangePage}
-										onRowsPerPageChange={handleChangeRowsPerPage}
-									/>
-								</>
-							)
+													Values
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_signup_users || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_retained_users || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_retained_users_with_tokens || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_signups_from_bridges || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_signup_countries || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_publications || "N/A"}
+												</TableCell>
+												<TableCell sx={{ textAlign: "center", px: 2 }}>
+													{data[category]?.signup_countries?.length
+														? data[category].signup_countries
+																.map((code) => getName(code) || code)
+																.join(", ")
+														: "N/A"}
+												</TableCell>
+											</TableRow>
+										</TableBody>
+									</Table>
+								</TableContainer>
+								<TablePagination
+									rowsPerPageOptions={[5, 10, 25]}
+									component="div"
+									count={data.totalCount || 0}
+									rowsPerPage={rowsPerPage}
+									page={page}
+									onPageChange={handleChangePage}
+									onRowsPerPageChange={handleChangeRowsPerPage}
+								/>
+							</>
 						)}
 					</Grid>
-					{/* ===========================================end of table========================================================== */}
 				</Paper>
 			</Box>
 		</Box>

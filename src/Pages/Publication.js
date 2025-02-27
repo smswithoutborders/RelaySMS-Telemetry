@@ -30,6 +30,7 @@ const Publication = () => {
 	const [platformFilter, setPlatformFilter] = useState("all");
 	const [totalRecords, setTotalRecords] = useState(0);
 	const [statusFilter, setStatusFilter] = useState("all");
+	const isDarkMode = theme.palette.mode === "dark";
 	const [totals, setTotals] = useState({
 		total_publications: 0,
 		total_published: 0,
@@ -198,13 +199,10 @@ const Publication = () => {
 				{/* Header */}
 				<Box
 					sx={{
-						textAlign: "center",
-						mb: 4,
+						textAlign: "start",
+						mb: 2,
 						p: 2,
-						borderRadius: 3,
-						background: "linear-gradient(135deg, #000158, #577BFF)",
-						color: "white",
-						boxShadow: "0px 10px 30px rgba(75, 110, 253, 0.2)"
+						borderRadius: 3
 					}}
 				>
 					<Typography
@@ -212,7 +210,10 @@ const Publication = () => {
 						sx={{
 							fontWeight: "bold",
 							letterSpacing: "1px",
-							textShadow: "0 3px 6px rgba(0, 0, 0, 0.3)"
+							textShadow: (theme) =>
+								theme.palette.mode === "dark"
+									? "0 3px 6px rgba(255, 255, 255, 0.3)"
+									: "0 3px 6px rgba(0, 0, 0, 0.3)"
 						}}
 					>
 						📢 Publication
@@ -222,14 +223,14 @@ const Publication = () => {
 						sx={{
 							fontSize: "1.2rem",
 							mt: 1,
-							opacity: 0.9
+							opacity: 0.9,
+							color: (theme) => (theme.palette.mode === "dark" ? "#ffffff" : "#000000")
 						}}
 					>
 						Message Tracker for RelaySMS
 					</Typography>
 				</Box>
-
-				{/* Totals Section */}
+				{/*=============================== Totals Section=========================== */}
 				<Box gap={3}>
 					{loading ? (
 						<Grid container spacing={2} sx={{ p: 3 }}>
@@ -270,7 +271,7 @@ const Publication = () => {
 									title: "Published Messages",
 									value: totals.total_publications,
 									icon: <Group fontSize="large" />,
-									color: "#2196F3",
+									color: "#000158",
 									description: "Total Number of Messages Sent"
 								},
 								{
@@ -284,12 +285,14 @@ const Publication = () => {
 									title: "Failed Publications",
 									value: totals.total_failed,
 									icon: <People fontSize="large" />,
-									color: "#B85900",
+									color: "#000158",
 									description: "Number of Messages that Failed"
 								}
 							].map((item, index) => {
 								const percentage =
 									item.value && item.max ? Math.min((item.value / item.max) * 100, 100) : 0;
+
+								const theme = useTheme();
 
 								return (
 									<Grid item xs={12} sm={6} md={6} lg={4} key={index}>
@@ -306,45 +309,47 @@ const Publication = () => {
 													width: "80%",
 													minHeight: 220,
 													height: "90%",
-													bgcolor: "#f4f6f8",
-													boxShadow: "0 6px 20px rgba(40, 5, 122, 0.12)",
+													bgcolor: theme.palette.mode === "dark" ? "#424242" : "#f4f6f8",
+													boxShadow:
+														theme.palette.mode === "dark"
+															? "0 6px 20px rgba(255, 255, 255, 0.1)"
+															: "0 6px 20px rgba(40, 5, 122, 0.12)",
 													transition: "transform 0.3s ease, box-shadow 0.3s ease",
 													"&:hover": {
 														transform: "translateY(-5px)",
-														boxShadow: "0 12px 30px rgba(3, 15, 75, 0.15)"
+														boxShadow:
+															theme.palette.mode === "dark"
+																? "0 12px 30px rgba(255, 255, 255, 0.2)"
+																: "0 12px 30px rgba(3, 15, 75, 0.15)"
 													}
 												}}
 											>
-												{/* Icon */}
-												<Box
-													sx={{
-														width: 60,
-														height: 60,
-														display: "flex",
-														alignItems: "center",
-														justifyContent: "center",
-														color: item.color
-													}}
-												>
-													{item.icon}
-												</Box>
+												<Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+													{/* Title */}
+													<Typography
+														variant="body2"
+														sx={{
+															color: isDarkMode ? "white" : "#000158",
+															opacity: 0.8,
+															fontSize: "1rem",
+															mr: 3,
+															fontWeight: "bold"
+														}}
+													>
+														{item.title}
+													</Typography>
 
-												{/* Title */}
-												<Typography
-													variant="h6"
-													sx={{
-														fontWeight: "bold",
-														color: "#000158",
-														textAlign: "center",
-														mt: 1,
-														fontSize: "1.4rem",
-														letterSpacing: "1px",
-														textTransform: "uppercase",
-														textShadow: "0 2px 4px rgba(129, 115, 235, 0.5)"
-													}}
-												>
-													{item.title}
-												</Typography>
+													{/* Icon */}
+													<Typography
+														variant="h5"
+														sx={{
+															color: isDarkMode ? "white" : "#000158",
+															fontSize: "3rem"
+														}}
+													>
+														{item.icon}
+													</Typography>
+												</Box>
 
 												{/* Value and Percentage */}
 												<Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
@@ -353,7 +358,7 @@ const Publication = () => {
 														variant="h5"
 														sx={{
 															fontWeight: "bold",
-															color: item.color,
+															color: theme.palette.mode === "dark" ? "white" : item.color,
 															fontSize: "3rem",
 															textShadow: "0 0 15px rgba(9, 95, 66, 0.5)"
 														}}
@@ -365,7 +370,7 @@ const Publication = () => {
 													<Typography
 														variant="body2"
 														sx={{
-															color: item.color,
+															color: theme.palette.mode === "dark" ? "white" : item.color,
 															opacity: 0.8,
 															fontSize: "1rem",
 															ml: 1
@@ -379,7 +384,7 @@ const Publication = () => {
 												<Typography
 													variant="body2"
 													sx={{
-														color: "gray",
+														color: theme.palette.mode === "dark" ? "white" : "gray",
 														textAlign: "center",
 														mt: 1
 													}}
@@ -394,7 +399,6 @@ const Publication = () => {
 						</Grid>
 					)}
 				</Box>
-
 				{/* ==================================Filters Section====================================== */}
 				<Grid container spacing={4} sx={{ p: 4 }}>
 					{/* Platform Filter */}
@@ -402,12 +406,19 @@ const Publication = () => {
 						<FormControl
 							fullWidth
 							sx={{
-								backgroundColor: "#F3F4F6",
+								backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#424242" : "#F3F4F6"),
 								borderRadius: "12px",
-								boxShadow: "0 8px 15px rgba(0, 0, 0, 0.1)"
+								boxShadow: (theme) =>
+									theme.palette.mode === "dark"
+										? "0 8px 15px rgba(0, 0, 0, 0.3)"
+										: "0 8px 15px rgba(0, 0, 0, 0.1)"
 							}}
 						>
-							<InputLabel sx={{ color: "#4B6EFD" }}>Platforms</InputLabel>
+							<InputLabel
+								sx={{ color: theme.palette.mode === "dark" ? "rgb(192, 216, 236)" : "#000158" }}
+							>
+								Platforms
+							</InputLabel>
 							<Select
 								value={platformFilter}
 								label="Platforms"
@@ -444,12 +455,19 @@ const Publication = () => {
 						<FormControl
 							fullWidth
 							sx={{
-								backgroundColor: "#F3F4F6",
+								backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#424242" : "#F3F4F6"),
 								borderRadius: "12px",
-								boxShadow: "0 8px 15px rgba(0, 0, 0, 0.1)"
+								boxShadow: (theme) =>
+									theme.palette.mode === "dark"
+										? "0 8px 15px rgba(0, 0, 0, 0.3)"
+										: "0 8px 15px rgba(0, 0, 0, 0.1)"
 							}}
 						>
-							<InputLabel sx={{ color: "#FF7D00" }}>Status</InputLabel>
+							<InputLabel
+								sx={{ color: theme.palette.mode === "dark" ? "rgb(192, 216, 236)" : "#000158" }}
+							>
+								Status
+							</InputLabel>
 							<Select
 								value={statusFilter}
 								label="Status"
@@ -486,18 +504,25 @@ const Publication = () => {
 							onClick={applyFilters}
 							variant="contained"
 							sx={{
-								background: "#2196F3",
+								background: (theme) =>
+									theme.palette.mode === "dark" ? "0 10px 30px  #2196F3" : "#000158",
 								color: "white",
 								borderRadius: "30px",
 								padding: "12px 40px",
 								fontWeight: "bold",
-								boxShadow: "0 8px 25px rgba(0, 0, 0, 0.1)",
+								boxShadow: (theme) =>
+									theme.palette.mode === "dark"
+										? "0 8px 25px rgba(0, 0, 0, 0.3)"
+										: "0 8px 25px rgba(0, 0, 0, 0.1)",
 								textTransform: "none",
 								transition: "all 0.3s ease",
 								"&:hover": {
-									background: "#8A4300",
+									background: "#2196F3",
 									transform: "scale(1.05)",
-									boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)"
+									boxShadow: (theme) =>
+										theme.palette.mode === "dark"
+											? "0 10px 30px rgba(0, 0, 0, 0.15)"
+											: "0 10px 30px rgba(0, 0, 0, 0.2)"
 								},
 								"&:active": {
 									transform: "scale(0.98)"
@@ -533,9 +558,7 @@ const Publication = () => {
 						</Button>
 					</Grid>
 				</Grid>
-
 				{/*================================= Data Table================================ */}
-
 				{loading ? (
 					<Box
 						display="flex"
@@ -543,10 +566,16 @@ const Publication = () => {
 						alignItems="center"
 						minHeight="50vh"
 						sx={{
-							background: "linear-gradient(45deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2))",
+							background: (theme) =>
+								theme.palette.mode === "dark"
+									? "linear-gradient(45deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4))"
+									: "linear-gradient(45deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2))",
 							borderRadius: "15px",
 							padding: "30px",
-							boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)"
+							boxShadow: (theme) =>
+								theme.palette.mode === "dark"
+									? "0 4px 15px rgba(0, 0, 0, 0.3)"
+									: "0 4px 15px rgba(0, 0, 0, 0.1)"
 						}}
 					>
 						<CircularProgress size={80} sx={{ color: "#4B6EFD", animationDuration: "1.5s" }} />
@@ -558,10 +587,16 @@ const Publication = () => {
 						alignItems="center"
 						minHeight="50vh"
 						sx={{
-							background: "linear-gradient(45deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.3))",
+							background: (theme) =>
+								theme.palette.mode === "dark"
+									? "linear-gradient(45deg, rgba(255, 0, 0, 0.3), rgba(255, 0, 0, 0.5))"
+									: "linear-gradient(45deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.3))",
 							borderRadius: "15px",
 							padding: "30px",
-							boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)"
+							boxShadow: (theme) =>
+								theme.palette.mode === "dark"
+									? "0 4px 15px rgba(0, 0, 0, 0.3)"
+									: "0 4px 15px rgba(0, 0, 0, 0.1)"
 						}}
 					>
 						<Typography variant="h6" color="error" sx={{ fontWeight: "bold", textAlign: "center" }}>
@@ -585,8 +620,11 @@ const Publication = () => {
 								sx={{
 									height: 550,
 									borderRadius: "15px",
-									boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
-									background: "#FFFFFF",
+									boxShadow: (theme) =>
+										theme.palette.mode === "dark"
+											? "0 4px 15px rgba(255, 255, 255, 0.1)"
+											: "0 4px 15px rgba(0, 0, 0, 0.1)",
+									background: (theme) => (theme.palette.mode === "dark" ? "#424242" : "#FFFFFF"),
 									"& .MuiDataGrid-root": {
 										borderRadius: "15px",
 										boxShadow: "none"
@@ -594,7 +632,10 @@ const Publication = () => {
 									"& .MuiDataGrid-cell": {
 										transition: "all 0.3s ease",
 										"&:hover": {
-											backgroundColor: "rgba(0, 0, 0, 0.05)"
+											backgroundColor:
+												theme.palette.mode === "dark"
+													? "rgba(255, 255, 255, 0.1)"
+													: "rgba(0, 0, 0, 0.05)"
 										}
 									}
 								}}
