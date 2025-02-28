@@ -17,23 +17,21 @@ import {
 	Paper,
 	Table,
 	TableHead,
-	TableBody
+	TableBody,
+	Skeleton,
+	TablePagination
 } from "@mui/material";
 import Navbar from "../Components/Nav";
 import dayjs from "dayjs";
-import { Link } from "react-router-dom";
+import { PersonAdd, People, Group, AutoGraph, Message, Public } from "@mui/icons-material";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import { getName } from "country-list";
 
 const categories = [
 	{ key: "summary", label: "Summary" },
 	{ key: "signup", label: "Signup Users" },
-	{ key: "retained", label: "Active Users" },
-	{ key: "total_signups_from_bridges", label: "Users with Bridges" },
-	{ key: "total_retained_users_with_tokens", label: "Retained Users with Tokens" },
-	{ key: "total_signup_countries", label: "Signup Countries" },
-	{ key: "total_retained_countries", label: "Retained Countries" },
-	{ key: "total_publications", label: "Total Publications" },
-	{ key: "total_published_publications", label: "Published Publications" },
-	{ key: "total_failed_publications", label: "Failed Publications" }
+	{ key: "retained", label: "Users" },
+	{ key: "total_publications", label: "Publications" }
 ];
 
 const granularities = [
@@ -53,10 +51,7 @@ const Content = () => {
 	const [totalSignupCountries, setTotalSignupCountries] = useState(0);
 	const [totalRetainedUsersWithTokens, setTotalRetainedUsersWithTokens] = useState(0);
 	const [totalSignupsFromBridges, setTotalSignupsFromBridges] = useState(0);
-	const [totalRetainedCountries, setTotalRetainedCountries] = useState(0);
 	const [totalPublications, setTotalPublications] = useState(0);
-	const [totalPublishedPublications, setTotalPublishedPublications] = useState(0);
-	const [totalFailedPublications, setTotalFailedPublications] = useState(0);
 	const [category, setCategory] = useState("summary");
 	const [granularity, setGranularity] = useState("month");
 	const [groupBy, setGroupBy] = useState("country");
@@ -66,6 +61,18 @@ const Content = () => {
 	const [error, setError] = useState(null);
 	const [data, setData] = useState(null);
 	const theme = useTheme();
+	const [page, setPage] = useState(0);
+	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const isDarkMode = theme.palette.mode === "dark";
+
+	const handleChangePage = (event, newPage) => {
+		setPage(newPage);
+	};
+
+	const handleChangeRowsPerPage = (event) => {
+		setRowsPerPage(parseInt(event.target.value, 10));
+		setPage(0);
+	};
 
 	// ======================== fatch data when apply filter is used ====================================
 	const applyFilters = async () => {
@@ -112,6 +119,12 @@ const Content = () => {
 				setTotalSignupCountries(0);
 				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
 				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
+			} else if (category === "") {
+				setTotalRetainedUsersWithTokens(apiData[category]?.Total_retained_users_with_tokens ?? 0);
+				setTotalUsers(0);
+				setTotalSignupCountries(0);
+				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
+				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
@@ -141,10 +154,7 @@ const Content = () => {
 					total_signup_countries,
 					total_retained_users_with_tokens,
 					total_signups_from_bridges,
-					total_retained_countries,
-					total_publications,
-					total_published_publications,
-					total_failed_publications
+					total_publications
 				} = data.summary;
 
 				setTotalUsers(total_signup_users);
@@ -152,10 +162,7 @@ const Content = () => {
 				setTotalSignupCountries(total_signup_countries);
 				setTotalRetainedUsersWithTokens(total_retained_users_with_tokens);
 				setTotalSignupsFromBridges(total_signups_from_bridges);
-				setTotalRetainedCountries(total_retained_countries);
 				setTotalPublications(total_publications);
-				setTotalPublishedPublications(total_published_publications);
-				setTotalFailedPublications(total_failed_publications);
 			} else {
 				throw new Error("Invalid data structure received.");
 			}
@@ -175,12 +182,13 @@ const Content = () => {
 		setStartDate("");
 		setEndDate("");
 		setCategory("summary");
-		fetchSummaryData();
+		fetchSummaryData("summary");
 	};
 
 	return (
 		<Box
 			sx={{
+				p: 2,
 				display: "flex",
 				minHeight: "100vh",
 				backgroundColor: theme.palette.background.default
@@ -190,459 +198,542 @@ const Content = () => {
 			<Box
 				sx={{
 					flexGrow: 1,
-					padding: 3,
+					padding: 12,
 					marginLeft: drawerOpen ? "250px" : "0px",
 					transition: "margin-left 0.3s ease-in-out"
 				}}
 			>
-				<Box sx={{ flexGrow: 1, padding: 3, transition: "margin-left 0.3s ease-in-out" }}>
-					{/* =================================================================================================== */}
-					<Box
-						className="hero"
+				{/* Header */}
+				<Box
+					sx={{
+						textAlign: "start",
+						mb: 2,
+						p: 2,
+						borderRadius: 3,
+						color: isDarkMode ? "white" : "#000158"
+					}}
+				>
+					<Typography
+						variant="h3"
 						sx={{
-							backgroundColor: theme.palette.primary.main,
-							p: 2,
-							mb: 3,
-							boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-							borderRadius: "8px",
-							position: "relative",
-							minHeight: "250px"
+							fontWeight: "bold",
+							letterSpacing: "1px",
+							textShadow: isDarkMode
+								? "0 3px 6px rgba(255, 255, 255, 0.3)"
+								: "0 3px 6px rgba(0, 0, 0, 0.3)"
 						}}
 					>
-						{loading && (
+						<TimelineIcon sx={{ mr: 2, fontSize: "3.5rem" }} /> Open Telemetry
+					</Typography>
+					<Typography
+						variant="h6"
+						sx={{
+							fontSize: "1.2rem",
+							mt: 1,
+							opacity: 0.9
+						}}
+					>
+						Usage Tracker for RelaySMS
+					</Typography>
+				</Box>
+
+				{/*======================================= Total section ===============================================*/}
+				<Grid container spacing={3}>
+					{loading ? (
+						<Grid container spacing={2} sx={{ p: 3 }}>
+							{[...Array(6)].map((_, index) => (
+								<Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+									<Box height="100%">
+										<Paper
+											elevation={4}
+											sx={{
+												p: 3,
+												borderRadius: 3,
+												display: "flex",
+												flexDirection: "column",
+												alignItems: "center",
+												justifyContent: "space-between",
+												width: "100%",
+												minHeight: 220,
+												height: "100%",
+												bgcolor: isDarkMode ? "rgba(255, 255, 255, 0.1)" : "white"
+											}}
+										>
+											<Skeleton variant="circular" width={40} height={40} />
+											<Skeleton variant="text" width="60%" height={24} sx={{ mt: 2 }} />
+											<Skeleton variant="text" width="80%" height={20} sx={{ mt: 1 }} />
+											<Skeleton variant="rectangular" width="100%" height={8} sx={{ mt: 2 }} />
+										</Paper>
+									</Box>
+								</Grid>
+							))}
+						</Grid>
+					) : error ? (
+						<Typography color="error" variant="h6" align="center">
+							{error}
+						</Typography>
+					) : (
+						<Grid
+							container
+							sx={{
+								p: 3,
+								mt: 4,
+								borderRadius: 2
+							}}
+							spacing={3}
+						>
+							{[
+								{
+									title: "Sign-up Users",
+									value: totalUsers,
+									icon: <PersonAdd fontSize="large" />,
+									description: "Number of Signups",
+									max: 5000
+								},
+								{
+									title: "Users",
+									value: totalRetainedUsers,
+									icon: <People fontSize="large" />,
+									description: "Number of current users",
+									max: 5000
+								},
+								{
+									title: "Active Users",
+									value: totalRetainedUsersWithTokens,
+									icon: <Group fontSize="large" />,
+									description: "Number of users with >1 accounts stored",
+									max: 5000
+								},
+								{
+									title: "Bridges First Users",
+									value: totalSignupsFromBridges,
+									icon: <AutoGraph fontSize="large" />,
+									description: "Number of users via bridges",
+									max: 5000
+								},
+								{
+									title: "Publications",
+									value: totalPublications,
+									icon: <Message fontSize="large" />,
+									description: "Total number of messages published",
+									max: 5000
+								},
+								{
+									title: "Countries",
+									value: totalSignupCountries,
+									icon: <Public fontSize="large" />,
+									description: "Available Countries with Users",
+									max: 200
+								}
+							].map((item, index) => {
+								const percentage =
+									item.value && item.max ? Math.min((item.value / item.max) * 100, 100) : 0;
+
+								return (
+									<Grid item xs={12} sm={6} md={4} lg={2} key={index}>
+										<Box height="100%">
+											<Paper
+												elevation={4}
+												sx={{
+													p: 3,
+													borderRadius: 3,
+													display: "flex",
+													flexDirection: "column",
+													alignItems: "center",
+													justifyContent: "space-between",
+													bgcolor: isDarkMode ? "#1e1e1e" : "#EEF2FF",
+													textAlign: "center",
+													width: "100%",
+													minHeight: 220,
+													height: "100%"
+												}}
+											>
+												<Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+													{/* Title */}
+													<Typography
+														variant="body2"
+														sx={{
+															color: isDarkMode ? "white" : "#000158",
+															opacity: 0.8,
+															fontSize: "1rem",
+															mr: 3,
+															fontWeight: "bold"
+														}}
+													>
+														{item.title}
+													</Typography>
+
+													{/* Icon */}
+													<Typography
+														variant="h5"
+														sx={{
+															color: isDarkMode ? "white" : "#000158",
+															fontSize: "3rem"
+														}}
+													>
+														{item.icon}
+													</Typography>
+												</Box>
+
+												{/* Value and Percentage */}
+												<Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+													{/* Value */}
+													<Typography
+														variant="h5"
+														sx={{
+															fontWeight: "bold",
+															color: isDarkMode ? "white" : "black",
+															fontSize: "3rem"
+														}}
+													>
+														{item.value}
+													</Typography>
+
+													{/* Percentage */}
+													<Typography
+														variant="body2"
+														sx={{
+															color: isDarkMode ? "white" : "black",
+															opacity: 0.8,
+															fontSize: "1rem",
+															ml: 1
+														}}
+													>
+														({percentage.toFixed(1)}%)
+													</Typography>
+												</Box>
+
+												{/* Description */}
+												<Typography
+													variant="body2"
+													sx={{
+														color: isDarkMode ? "rgba(255, 255, 255, 0.7)" : "gray",
+														textAlign: "center",
+														mt: 1
+													}}
+												>
+													{item.description}
+												</Typography>
+											</Paper>
+										</Box>
+									</Grid>
+								);
+							})}
+						</Grid>
+					)}
+				</Grid>
+				{/* ============================= filters section =============================================== */}
+				<Paper
+					elevation={8}
+					sx={{
+						p: 5,
+						mt: 4,
+						borderRadius: 4,
+						bgcolor: isDarkMode ? "#1e1e1e" : "#FAFAFA",
+						boxShadow: isDarkMode ? "0 4px 12px rgb(5, 5, 6)" : "0 4px 12px rgb(202, 203, 206)"
+					}}
+				>
+					<Box
+						sx={{
+							flexGrow: 1,
+							padding: 4,
+							marginLeft: drawerOpen ? "260px" : "0px",
+							transition: "margin-left 0.3s ease-in-out"
+						}}
+					>
+						<Grid container spacing={4} justifyContent="center">
+							{[
+								{ label: "Category", value: category, setValue: setCategory, options: categories },
+								{
+									label: "Granularity",
+									value: granularity,
+									setValue: setGranularity,
+									options: granularities
+								},
+								{ label: "Group By", value: groupBy, setValue: setGroupBy, options: groupes }
+							].map((field, index) => (
+								<Grid item xs={12} sm={4} key={index}>
+									<FormControl fullWidth variant="outlined">
+										<InputLabel
+											sx={{ color: isDarkMode ? "#90CAF9" : "#000158", fontWeight: "bold" }}
+										>
+											{field.label}
+										</InputLabel>
+										<Select
+											value={field.value}
+											onChange={(e) => field.setValue(e.target.value)}
+											label={field.label}
+											sx={{
+												background: "transparent",
+												borderRadius: "10px",
+												borderColor: isDarkMode ? "#90CAF9" : "#4B6EFD",
+												transition: "all 0.3s ease",
+												"& .MuiSelect-icon": { color: isDarkMode ? "#90CAF9" : "#000158" },
+												"& .MuiOutlinedInput-root": {
+													padding: "10px 15px",
+													"&:hover": { borderColor: isDarkMode ? "#64B5F6" : "#3C5DFF" }
+												},
+												"& .MuiMenuItem-root": { padding: "10px 15px" }
+											}}
+										>
+											{field.options.map((option) => (
+												<MenuItem key={option.key} value={option.key}>
+													{option.label}
+												</MenuItem>
+											))}
+										</Select>
+									</FormControl>
+								</Grid>
+							))}
+						</Grid>
+
+						<Grid container spacing={4} justifyContent="center" sx={{ mt: 5 }}>
+							<Grid item xs={12} md={6}>
+								<Grid container spacing={3}>
+									{[
+										{ label: "Start Date", value: startDate, setValue: setStartDate },
+										{ label: "End Date", value: endDate, setValue: setEndDate }
+									].map((dateField, index) => (
+										<Grid item xs={6} key={index}>
+											<TextField
+												label={dateField.label}
+												type="date"
+												fullWidth
+												variant="outlined"
+												InputLabelProps={{
+													shrink: true,
+													sx: {
+														color: isDarkMode ? "#90CAF9" : "#000158",
+														fontWeight: "bold"
+													}
+												}}
+												value={dateField.value}
+												onChange={(e) => dateField.setValue(e.target.value)}
+											/>
+										</Grid>
+									))}
+								</Grid>
+
+								<Box sx={{ mt: 4, display: "flex", justifyContent: "center", gap: 3 }}>
+									<Button
+										variant="contained"
+										onClick={applyFilters}
+										sx={{
+											borderRadius: 4,
+											px: 5,
+											py: 1.5,
+											fontWeight: "bold",
+											textTransform: "none",
+											transition: "all 0.3s",
+											backgroundColor: isDarkMode ? "#1565C0" : "#1976D2",
+											boxShadow: isDarkMode
+												? "0px 4px 10px rgba(144, 202, 249, 0.3)"
+												: "0px 4px 10px rgba(25, 118, 210, 0.3)",
+											"&:hover": {
+												backgroundColor: isDarkMode ? "#0D47A1" : "#1565C0",
+												transform: "scale(1.05)"
+											}
+										}}
+									>
+										Apply
+									</Button>
+									<Button
+										variant="outlined"
+										onClick={resetFilters}
+										sx={{
+											borderRadius: 4,
+											px: 5,
+											py: 1.5,
+											fontWeight: "bold",
+											textTransform: "none",
+											borderColor: isDarkMode ? "#B0BEC5" : "#757575",
+											color: isDarkMode ? "#ECEFF1" : "#424242",
+											transition: "all 0.3s",
+											"&:hover": {
+												borderColor: isDarkMode ? "#CFD8DC" : "#424242",
+												transform: "scale(1.05)"
+											}
+										}}
+									>
+										Reset
+									</Button>
+								</Box>
+							</Grid>
+						</Grid>
+					</Box>
+				</Paper>
+				{/* ==================================== Table section =================================== */}
+				<Paper
+					elevation={8}
+					sx={{
+						p: 5,
+						mt: 4,
+						borderRadius: 4,
+						bgcolor: isDarkMode ? "#1e1e1e" : "#FAFAFA",
+						boxShadow: isDarkMode ? "0 4px 12px rgb(5, 5, 6)" : "0 4px 12px rgb(202, 203, 206)"
+					}}
+				>
+					<Grid item xs={12} md={12}>
+						<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+							<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h5">
+								Overview Presentation
+							</Typography>
+						</Box>
+
+						{loading ? (
 							<Box
 								sx={{
-									position: "absolute",
-									top: 0,
-									left: 0,
-									width: "100%",
-									height: "100%",
 									display: "flex",
 									justifyContent: "center",
 									alignItems: "center",
-									backgroundColor: "rgba(255, 255, 255, 0.7)",
-									borderRadius: "8px",
-									zIndex: 10
+									height: "50vh"
 								}}
 							>
 								<CircularProgress size={60} />
 							</Box>
-						)}
-
-						{error ? (
+						) : error ? (
 							<Typography color="error" variant="h6" align="center">
-								{error}
+								{error.includes("Network") ? "Check your network and try again." : error}
+							</Typography>
+						) : !data || !data[category] || Object.keys(data[category]).length === 0 ? (
+							<Typography color="textSecondary" variant="h6" align="center">
+								Apply filter to see data on table
 							</Typography>
 						) : (
-							<Grid container spacing={3} sx={{ opacity: loading ? 0 : 1 }}>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Users"
-										value={totalUsers}
-										subtitle="Total number of people who have used RelaySMS"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Retained Users"
-										value={totalRetainedUsers}
-										subtitle="Total number of active users"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Signup Countries"
-										value={totalSignupCountries}
-										subtitle="Total countries using RelaySMS"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Retained Users with Tokens"
-										value={totalRetainedUsersWithTokens}
-										subtitle="People who have saved platforms"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Signups from Bridges"
-										value={totalSignupsFromBridges}
-										subtitle="Users who signed up via bridges"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Retained Countries"
-										value={totalRetainedCountries}
-										subtitle="Countries with retained users"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Publications"
-										value={totalPublications}
-										subtitle="Total number of published articles"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Published Publications"
-										value={totalPublishedPublications}
-										subtitle="Successfully published articles"
-									/>
-								</Grid>
-								<Grid item xs={12} sm={6} md={4} lg={4}>
-									<StatCard
-										title="Total Failed Publications"
-										value={totalFailedPublications}
-										subtitle="Publications that failed"
-									/>
-								</Grid>
-							</Grid>
+							<>
+								<TableContainer
+									component={Paper}
+									sx={{
+										borderRadius: "8px",
+										boxShadow: isDarkMode
+											? "0px 5px 10px rgba(255, 255, 255, 0.1)"
+											: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+										overflowX: "auto",
+										bgcolor: isDarkMode ? "#2C2C2C" : "#FFFFFF"
+									}}
+								>
+									<Table
+										sx={{
+											minWidth: 750,
+											border: isDarkMode ? "1px solid #555" : "1px solid #ddd",
+											borderRadius: 2,
+											overflow: "hidden"
+										}}
+									>
+										<TableHead>
+											<TableRow
+												sx={{
+													backgroundColor: isDarkMode ? "#424242" : "#f5f5f5",
+													borderBottom: "2px solid #ddd"
+												}}
+											>
+												<TableCell
+													sx={{
+														fontWeight: "bold",
+														color: isDarkMode ? "#E0E0E0" : "#333",
+														borderRight: "1px solid #ddd",
+														px: 2
+													}}
+												>
+													<strong>Metric</strong>
+												</TableCell>
+												{[
+													"Total Signups",
+													"Total Retained Users",
+													"Total Retained Users with Tokens",
+													"Total Signups from Bridges",
+													"Total Signup Countries",
+													"Total Published Publications",
+													"Signup Countries"
+												].map((metric, index) => (
+													<TableCell
+														key={index}
+														sx={{
+															fontWeight: "bold",
+															color: isDarkMode ? "#E0E0E0" : "#333",
+															textAlign: "center",
+															borderRight: "1px solid #ddd",
+															px: 2
+														}}
+													>
+														<strong>{metric}</strong>
+													</TableCell>
+												))}
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											<TableRow
+												sx={{
+													"&:nth-of-type(odd)": {
+														backgroundColor: isDarkMode ? "#383838" : "#fafafa"
+													},
+													"&:hover": { backgroundColor: isDarkMode ? "#4A4A4A" : "#f0f0f0" }
+												}}
+											>
+												<TableCell
+													sx={{
+														fontWeight: "bold",
+														borderRight: "1px solid #ddd",
+														px: 2
+													}}
+												>
+													Values
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_signup_users || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_retained_users || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_retained_users_with_tokens || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_signups_from_bridges || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_signup_countries || "N/A"}
+												</TableCell>
+												<TableCell
+													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
+												>
+													{data[category]?.total_publications || "N/A"}
+												</TableCell>
+												<TableCell sx={{ textAlign: "center", px: 2 }}>
+													{data[category]?.signup_countries?.length
+														? data[category].signup_countries
+																.map((code) => getName(code) || code)
+																.join(", ")
+														: "N/A"}
+												</TableCell>
+											</TableRow>
+										</TableBody>
+									</Table>
+								</TableContainer>
+								<TablePagination
+									rowsPerPageOptions={[5, 10, 25]}
+									component="div"
+									count={data.totalCount || 0}
+									rowsPerPage={rowsPerPage}
+									page={page}
+									onPageChange={handleChangePage}
+									onRowsPerPageChange={handleChangeRowsPerPage}
+								/>
+							</>
 						)}
-					</Box>
-
-					{/* ================================Main Content Blocks =============================================*/}
-					<Grid container spacing={3}>
-						<Grid container item spacing={3}>
-							<Grid item xs={12} md={6}>
-								<Box
-									className="content-block"
-									sx={{
-										backgroundColor: "#fff",
-										boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-										borderRadius: "8px",
-										p: 2
-									}}
-								>
-									<Grid container spacing={2}>
-										{/* Category Filter */}
-										<Grid item xs={12} sm={6} md={4}>
-											<FormControl fullWidth>
-												<InputLabel id="category-label">Category</InputLabel>
-												<Select
-													labelId="category-label"
-													value={category}
-													onChange={(e) => setCategory(e.target.value)}
-												>
-													{categories.map((cat) => (
-														<MenuItem key={cat.key} value={cat.key}>
-															{cat.label}
-														</MenuItem>
-													))}
-												</Select>
-											</FormControl>
-										</Grid>
-
-										{/* Granularity Filter */}
-										<Grid item xs={12} sm={6} md={4}>
-											<FormControl fullWidth>
-												<InputLabel id="granularity-label">Granularity</InputLabel>
-												<Select
-													labelId="granularity-label"
-													value={granularity}
-													onChange={(e) => setGranularity(e.target.value)}
-												>
-													{granularities.map((gran) => (
-														<MenuItem key={gran.key} value={gran.key}>
-															{gran.label}
-														</MenuItem>
-													))}
-												</Select>
-											</FormControl>
-										</Grid>
-
-										{/* Group By Filter */}
-										<Grid item xs={12} sm={6} md={4}>
-											<FormControl fullWidth>
-												<InputLabel id="groupby-label">Group By</InputLabel>
-												<Select
-													labelId="groupby-label"
-													value={groupBy}
-													onChange={(e) => setGroupBy(e.target.value)}
-												>
-													{groupes.map((group) => (
-														<MenuItem key={group.key} value={group.key}>
-															{group.label}
-														</MenuItem>
-													))}
-												</Select>
-											</FormControl>
-										</Grid>
-
-										{/* Publication Link */}
-										<Grid item xs={12}>
-											<Link
-												to="/publication"
-												style={{ textDecoration: "none", fontWeight: "bold" }}
-											>
-												Publication
-											</Link>
-										</Grid>
-									</Grid>
-								</Box>
-							</Grid>
-
-							{/* ================================================= */}
-							<Grid item xs={12} md={6}>
-								<Box
-									className="content-block"
-									sx={{
-										backgroundColor: "#fff",
-										boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-										borderRadius: "8px",
-										p: 2
-									}}
-								>
-									{/* Date Filters */}
-									<Grid container spacing={2}>
-										<Grid item xs={12} sm={6} md={6}>
-											<TextField
-												label="Start Date"
-												type="date"
-												fullWidth
-												InputLabelProps={{ shrink: true }}
-												value={startDate}
-												onChange={(e) => setStartDate(e.target.value)}
-											/>
-										</Grid>
-										<Grid item xs={12} sm={6} md={6}>
-											<TextField
-												label="End Date"
-												type="date"
-												fullWidth
-												InputLabelProps={{ shrink: true }}
-												value={endDate}
-												onChange={(e) => setEndDate(e.target.value)}
-											/>
-										</Grid>
-									</Grid>
-
-									{/* Apply and Reset Buttons */}
-									<Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
-										<Grid item xs={12} sm={6} md="auto">
-											<Button
-												variant="contained"
-												color="primary"
-												onClick={applyFilters}
-												sx={{
-													textTransform: "none",
-													fontWeight: "bold",
-													borderRadius: "25px",
-													px: 3,
-													boxShadow: 4,
-													transition: "all 0.3s ease",
-													"&:hover": {
-														boxShadow: 12,
-														transform: "scale(1.05)"
-													}
-												}}
-											>
-												Apply
-											</Button>
-										</Grid>
-
-										{/* Reset Button */}
-										<Grid item xs={12} sm={6} md="auto">
-											<Button
-												variant="outlined"
-												color="secondary"
-												onClick={resetFilters}
-												sx={{
-													textTransform: "none",
-													fontWeight: "bold",
-													borderRadius: "25px",
-													px: 3,
-													boxShadow: 4,
-													transition: "all 0.3s ease",
-													"&:hover": {
-														boxShadow: 12,
-														transform: "scale(1.05)"
-													}
-												}}
-											>
-												Reset
-											</Button>
-										</Grid>
-									</Box>
-								</Box>
-							</Grid>
-						</Grid>
-
-						<Grid container item spacing={3}>
-							{/* ================== table one for summary data ========================= */}
-							<Grid item xs={12} md={12}>
-								<Box
-									className="content-block"
-									sx={{
-										backgroundColor: "#fff",
-										boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-										borderRadius: "8px",
-										// Set the height to 'auto' so the box expands based on table content
-										height: "auto",
-										p: 2 // Padding to give some space
-									}}
-								>
-									{loading ? (
-										<Box
-											sx={{
-												display: "flex",
-												justifyContent: "center",
-												alignItems: "center",
-												height: "50vh"
-											}}
-										>
-											<CircularProgress size={60} />
-										</Box>
-									) : error ? (
-										<Typography color="error" variant="h6" align="center">
-											{error}
-										</Typography>
-									) : (
-										data &&
-										data[category] && (
-											<TableContainer
-												component={Paper}
-												sx={{
-													borderRadius: "8px",
-													boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
-													overflowX: "auto"
-												}}
-											>
-												<Table sx={{ minWidth: 750, border: "1px solid #ddd" }}>
-													<TableHead>
-														<TableRow
-															sx={{ backgroundColor: "#f5f5f5", borderBottom: "2px solid #ddd" }}
-														>
-															<TableCell
-																sx={{
-																	fontWeight: "bold",
-																	color: "#333",
-																	borderRight: "1px solid #ddd"
-																}}
-															>
-																<strong>Metric</strong>
-															</TableCell>
-															{[
-																"Total Signups",
-																"Total Retained Users",
-																"Total Retained Users with Tokens",
-																"Total Signups from Bridges",
-																"Total Signup Countries",
-																"Total Retained Countries",
-																"Signup Countries",
-																"Retained Countries"
-															].map((metric, index) => (
-																<TableCell
-																	key={index}
-																	sx={{
-																		fontWeight: "bold",
-																		color: "#333",
-																		textAlign: "center",
-																		borderRight: "1px solid #ddd"
-																	}}
-																>
-																	<strong>{metric}</strong>
-																</TableCell>
-															))}
-														</TableRow>
-													</TableHead>
-													<TableBody>
-														<TableRow
-															sx={{
-																"&:nth-of-type(odd)": { backgroundColor: "#fafafa" },
-																"&:hover": { backgroundColor: "#f0f0f0" }
-															}}
-														>
-															<TableCell sx={{ fontWeight: "bold", borderRight: "1px solid #ddd" }}>
-																Values
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_signup_users || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_retained_users || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_retained_users_with_tokens || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_signups_from_bridges || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_signup_countries || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.total_retained_countries || "N/A"}
-															</TableCell>
-															<TableCell
-																sx={{ textAlign: "center", borderRight: "1px solid #ddd" }}
-															>
-																{data[category]?.signup_countries?.join(", ") || "N/A"}
-															</TableCell>
-															<TableCell sx={{ textAlign: "center" }}>
-																{data[category]?.retained_countries?.join(", ") || "N/A"}
-															</TableCell>
-														</TableRow>
-													</TableBody>
-												</Table>
-											</TableContainer>
-										)
-									)}
-								</Box>
-							</Grid>
-						</Grid>
-
-						{/* ===========================================end of table========================================================== */}
 					</Grid>
-				</Box>
-				{/* <Box
-					className="hero"
-					sx={{
-						backgroundColor: theme.palette.primary.main,
-						p: 2,
-						mb: 3,
-						boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-						borderRadius: "8px"
-					}}
-				></Box> */}
-				{/* ============================================ */}
+				</Paper>
 			</Box>
-		</Box>
-	);
-};
-
-const StatCard = ({ title, value }) => {
-	const theme = useTheme();
-	return (
-		<Box
-			sx={{
-				padding: 2,
-				borderRadius: "10px",
-				boxShadow:
-					theme.palette.mode === "dark"
-						? "0 2px 8px rgba(255, 255, 255, 0.2)"
-						: "0 2px 8px rgba(0, 0, 0, 0.2)",
-				backgroundColor: theme.palette.background.paper,
-				color: theme.palette.text.primary
-			}}
-		>
-			<Typography variant="h6">{title}</Typography>
-			<Typography variant="h5" sx={{ fontWeight: "bold" }}>
-				{value}
-			</Typography>
 		</Box>
 	);
 };

@@ -30,7 +30,16 @@ const Navbar = ({ onToggle = () => {} }) => {
 		<>
 			<IconButton
 				onClick={handleToggle}
-				sx={{ position: "absolute", top: 10, left: 10, color: "inherit" }}
+				sx={{
+					position: "fixed",
+					top: 10,
+					left: 10,
+					color: "inherit",
+					zIndex: 1200,
+					["@media (max-width: 600px)"]: {
+						display: "none"
+					}
+				}}
 			>
 				<MenuIcon />
 			</IconButton>
