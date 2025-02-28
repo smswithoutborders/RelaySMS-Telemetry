@@ -32,10 +32,16 @@ export default function Footer() {
 							sx={{ width: "50px", height: "50px" }}
 						/>
 						<Box textAlign={{ xs: "center", md: "left" }}>
-							<Typography variant="h6" sx={{ fontWeight: "bold", color: "#000158" }}>
+							<Typography
+								variant="h6"
+								sx={{ fontWeight: "bold", color: isDarkMode ? "#f5f5f5" : "#000158" }}
+							>
 								SMSWithoutBorders
 							</Typography>
-							<Typography variant="body2" sx={{ opacity: 0.7, color: "#000158" }}>
+							<Typography
+								variant="body2"
+								sx={{ opacity: 0.7, color: isDarkMode ? "#f5f5f5" : "#000158" }}
+							>
 								Connecting the world, one message at a time.
 							</Typography>
 						</Box>
