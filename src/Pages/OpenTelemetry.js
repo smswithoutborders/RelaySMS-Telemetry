@@ -88,7 +88,7 @@ const Content = () => {
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.staging.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=1&page_size=100`
+				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=1&page_size=100`
 			);
 
 			if (!response.ok) {
@@ -141,7 +141,7 @@ const Content = () => {
 			const formattedToday = today.toISOString().split("T")[0];
 
 			const response = await fetch(
-				`https://api.telemetry.staging.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=1&page_size=100`
+				`https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=1&page_size=100`
 			);
 
 			const data = await response.json();
@@ -287,43 +287,37 @@ const Content = () => {
 									title: "Sign-up Users",
 									value: totalUsers,
 									icon: <PersonAdd fontSize="large" />,
-									description: "Number of Signups",
-									max: 5000
+									description: "Number of Signups"
 								},
 								{
 									title: "Users",
 									value: totalRetainedUsers,
 									icon: <People fontSize="large" />,
-									description: "Number of current users",
-									max: 5000
+									description: "Number of current users"
 								},
 								{
 									title: "Active Users",
 									value: totalRetainedUsersWithTokens,
 									icon: <Group fontSize="large" />,
-									description: "Number of users with >1 accounts stored",
-									max: 5000
+									description: "Number of users with >1 accounts stored"
 								},
 								{
 									title: "Bridges First Users",
 									value: totalSignupsFromBridges,
 									icon: <AutoGraph fontSize="large" />,
-									description: "Number of users via bridges",
-									max: 5000
+									description: "Number of users via bridges"
 								},
 								{
 									title: "Publications",
 									value: totalPublications,
 									icon: <Message fontSize="large" />,
-									description: "Total number of messages published",
-									max: 5000
+									description: "Total number of messages published"
 								},
 								{
 									title: "Countries",
 									value: totalSignupCountries,
 									icon: <Public fontSize="large" />,
-									description: "Available Countries with Users",
-									max: 200
+									description: "Available Countries with Users"
 								}
 							].map((item, index) => {
 								const percentage =
@@ -383,7 +377,7 @@ const Content = () => {
 														sx={{
 															fontWeight: "bold",
 															color: isDarkMode ? "white" : "black",
-															fontSize: "3rem"
+															fontSize: "1.5rem"
 														}}
 													>
 														{item.value}

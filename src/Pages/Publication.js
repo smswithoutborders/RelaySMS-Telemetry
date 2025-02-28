@@ -55,7 +55,7 @@ const Publication = () => {
 
 		console.log("API Request with query:", query);
 
-		fetch(`https://api.telemetry.staging.smswithoutborders.com/v1/publications?${query}`)
+		fetch(`https://api.telemetry.smswithoutborders.com/v1/publications?${query}`)
 			.then((response) => response.json())
 			.then((result) => {
 				if (result.publications) {
