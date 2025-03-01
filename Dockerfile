@@ -1,10 +1,12 @@
-FROM node:18-alpine as build
+FROM node:20-slim AS build
 WORKDIR /app
 
 COPY package.json ./
 COPY scripts ./scripts
 
-RUN yarn install --no-lockfile
+RUN corepack enable
+RUN yarn set version stable
+RUN yarn install
 
 COPY . .
 
