@@ -58,14 +58,7 @@
 		"start": "react-scripts start",
 		"build": "react-scripts build",
 		"test": "react-scripts test",
-		"eject": "react-scripts eject",
-		"prepare": "husky"
-	},
-	"eslintConfig": {
-		"extends": [
-			"react-app",
-			"react-app/jest"
-		]
+		"eject": "react-scripts eject"
 	},
 	"browserslist": {
 		"production": [
@@ -82,20 +75,8 @@
 	"devDependencies": {
 		"@babel/plugin-proposal-private-property-in-object": "^7.0.0",
 		"@typescript-eslint/parser": "^5.0.1",
-		"eslint": "^9.21.0",
-		"eslint-config-prettier": "^10.0.2",
-		"eslint-formatter-summary": "^1.1.0",
-		"eslint-plugin-json": "^3.1.0",
-		"eslint-plugin-prettier": "^5.2.3",
-		"eslint-plugin-react": "^7.34.1",
-		"husky": "^9.1.0",
-		"lint-staged": "^15.2.2",
 		"prettier": "^3.5.2",
-		"prettier-eslint": "^16.1.2",
 		"typescript": "^4.4.4"
 	},
-	"lint-staged": {
-		"*.{js,jsx}": "eslint --cache --fix",
-		"*.{js,jsx,json,css,md}": "prettier --cache -w"
-	}
+	"packageManager": "yarn@4.6.0"
 }
