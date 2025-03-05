@@ -89,7 +89,7 @@ const Publication = () => {
 	useEffect(() => {
 		const today = dayjs().format("YYYY-MM-DD");
 		fetch(
-			`https://api.telemetry.smswithoutborders.com/v1/publications?start_date=2020-01-01&end_date=${today}&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
+			`https://api.telemetry.staging.smswithoutborders.com/v1/publications?start_date=2020-01-01&end_date=${today}&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 		)
 			.then((response) => response.json())
 			.then((result) => {
