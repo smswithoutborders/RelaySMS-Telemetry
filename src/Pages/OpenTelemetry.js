@@ -19,13 +19,19 @@ import {
 	TableHead,
 	TableBody,
 	Skeleton,
-	TablePagination
+	TablePagination,
+	LinearProgress
 } from "@mui/material";
 import Navbar from "../Components/Nav";
 import dayjs from "dayjs";
-import { PersonAdd, People, Group, AutoGraph, Message, Public } from "@mui/icons-material";
+import { HowToReg, GroupAdd, Groups, AutoGraph, Message, Public } from "@mui/icons-material";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import { getName } from "country-list";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import countries from "i18n-iso-countries";
+import CustomNoRowsOverlay from "../Components/CustomNoRowsOverlay";
+
+countries.registerLocale(require("i18n-iso-countries/langs/en.json"));
 
 const categories = [
 	{ key: "summary", label: "Summary" },
@@ -44,7 +50,7 @@ const groupes = [
 	{ key: "country", label: "country" }
 ];
 
-const Content = () => {
+const OpenTelemetry = () => {
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [totalUsers, setTotalUsers] = useState(0);
 	const [totalRetainedUsers, setTotalRetainedUsers] = useState(0);
@@ -62,8 +68,19 @@ const Content = () => {
 	const [data, setData] = useState(null);
 	const theme = useTheme();
 	const [page, setPage] = useState(0);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [rowsPerPage, setRowsPerPage] = useState(100);
 	const isDarkMode = theme.palette.mode === "dark";
+	const tableData = data?.[category]?.data || [];
+	const [country, setCountry] = useState("");
+	const [paginationModel, setPaginationModel] = useState({
+		page: 0,
+		pageSize: 100
+	});
+	const [totalRecords, setTotalRecords] = useState(0);
+
+	const filteredData = country
+		? tableData.filter((row) => countries.getName(row.country_code, "en") === country)
+		: tableData;
 
 	const handleChangePage = (event, newPage) => {
 		setPage(newPage);
@@ -88,7 +105,7 @@ const Content = () => {
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=1&page_size=100`
+				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 			);
 
 			if (!response.ok) {
@@ -141,8 +158,12 @@ const Content = () => {
 			const formattedToday = today.toISOString().split("T")[0];
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=1&page_size=100`
+				`https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 			);
+
+			if (!response.ok) {
+				throw new Error(`Error fetching data: ${response.statusText}`);
+			}
 
 			const data = await response.json();
 			console.log("data", data);
@@ -157,6 +178,7 @@ const Content = () => {
 					total_publications
 				} = data.summary;
 
+				// Update state with the fetched data
 				setTotalUsers(total_signup_users);
 				setTotalRetainedUsers(total_retained_users);
 				setTotalSignupCountries(total_signup_countries);
@@ -176,14 +198,40 @@ const Content = () => {
 
 	useEffect(() => {
 		fetchSummaryData();
-	}, []);
+	}, [paginationModel]);
 
 	const resetFilters = () => {
 		setStartDate("");
 		setEndDate("");
 		setCategory("summary");
+		setCountry("");
 		fetchSummaryData("summary");
+		setPaginationModel({ page: 0, pageSize: 10 });
 	};
+
+	// ============== second table section ======================
+	const countryColumns = [
+		{ field: "country_code", headerName: "Country", flex: 1 },
+		{
+			field: "Countries",
+			headerName: category === "signup" ? "Sign-up Users" : "Users",
+			flex: 1,
+			valueGetter: (params) =>
+				category === "signup" ? params.row.signup_users : params.row.retained_users
+		}
+	];
+
+	const startIdx = page * rowsPerPage;
+	const endIdx = startIdx + rowsPerPage;
+
+	const paginatedData = filteredData.slice(startIdx, endIdx);
+
+	const CountryRows = paginatedData.map((row, index) => ({
+		id: startIdx + index + 1,
+		country_code: countries.getName(row.country_code, "en") || "Unknown",
+		signup_users: row.signup_users,
+		retained_users: row.retained_users
+	}));
 
 	return (
 		<Box
@@ -286,38 +334,46 @@ const Content = () => {
 								{
 									title: "Sign-up Users",
 									value: totalUsers,
-									icon: <PersonAdd fontSize="large" />,
-									description: "Number of Signups"
+									icon: <GroupAdd fontSize="large" />,
+									description: "Number of Signups",
+									max: 5000
 								},
 								{
+									// retained use are active users
 									title: "Users",
 									value: totalRetainedUsers,
-									icon: <People fontSize="large" />,
-									description: "Number of current users"
+									icon: <Groups fontSize="large" />,
+									description: "Number of current users",
+									max: 5000
 								},
 								{
+									// active user with tokens
 									title: "Active Users",
 									value: totalRetainedUsersWithTokens,
-									icon: <Group fontSize="large" />,
-									description: "Number of users with >1 accounts stored"
+									icon: <HowToReg fontSize="large" />,
+									description: "Number of users with >1 accounts stored",
+									max: 5000
 								},
 								{
 									title: "Bridges First Users",
 									value: totalSignupsFromBridges,
 									icon: <AutoGraph fontSize="large" />,
-									description: "Number of users via bridges"
+									description: "Number of users via bridges",
+									max: 5000
 								},
 								{
 									title: "Publications",
 									value: totalPublications,
 									icon: <Message fontSize="large" />,
-									description: "Total number of messages published"
+									description: "Total number of messages published",
+									max: 5000
 								},
 								{
 									title: "Countries",
 									value: totalSignupCountries,
 									icon: <Public fontSize="large" />,
-									description: "Available Countries with Users"
+									description: "Available Countries with Users",
+									max: 5000
 								}
 							].map((item, index) => {
 								const percentage =
@@ -637,8 +693,7 @@ const Content = () => {
 													"Total Retained Users with Tokens",
 													"Total Signups from Bridges",
 													"Total Signup Countries",
-													"Total Published Publications",
-													"Signup Countries"
+													"Total Published Publications"
 												].map((metric, index) => (
 													<TableCell
 														key={index}
@@ -676,39 +731,32 @@ const Content = () => {
 												<TableCell
 													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
 												>
-													{data[category]?.total_signup_users || "N/A"}
+													{data[category]?.total_signup_users || 0}
 												</TableCell>
 												<TableCell
 													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
 												>
-													{data[category]?.total_retained_users || "N/A"}
+													{data[category]?.total_retained_users || 0}
 												</TableCell>
 												<TableCell
 													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
 												>
-													{data[category]?.total_retained_users_with_tokens || "N/A"}
+													{data[category]?.total_retained_users_with_tokens || 0}
 												</TableCell>
 												<TableCell
 													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
 												>
-													{data[category]?.total_signups_from_bridges || "N/A"}
+													{data[category]?.total_signups_from_bridges || 0}
 												</TableCell>
 												<TableCell
 													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
 												>
-													{data[category]?.total_signup_countries || "N/A"}
+													{data[category]?.total_signup_countries || 0}
 												</TableCell>
 												<TableCell
 													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
 												>
-													{data[category]?.total_publications || "N/A"}
-												</TableCell>
-												<TableCell sx={{ textAlign: "center", px: 2 }}>
-													{data[category]?.signup_countries?.length
-														? data[category].signup_countries
-																.map((code) => getName(code) || code)
-																.join(", ")
-														: "N/A"}
+													{data[category]?.total_publications || 0}
 												</TableCell>
 											</TableRow>
 										</TableBody>
@@ -727,9 +775,105 @@ const Content = () => {
 						)}
 					</Grid>
 				</Paper>
+				{/* =================================================================== */}
+				<Grid item xs={12} md={6}>
+					<Paper
+						elevation={8}
+						sx={{
+							p: 5,
+							mt: 4,
+							borderRadius: 4,
+							bgcolor: isDarkMode ? "#1e1e1e" : "#FAFAFA",
+							boxShadow: isDarkMode ? "0 4px 12px rgb(5, 5, 6)" : "0 4px 12px rgb(202, 203, 206)"
+						}}
+					>
+						<Grid item xs={12} md={12}>
+							<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+								<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h6">
+									Country Data
+								</Typography>
+							</Box>
+
+							{loading ? (
+								<Box
+									sx={{
+										display: "flex",
+										justifyContent: "center",
+										alignItems: "center",
+										height: "50vh"
+									}}
+								>
+									<CircularProgress size={60} />
+								</Box>
+							) : error ? (
+								<Typography color="error" variant="h6" align="center">
+									{error.includes("Network") ? "Check your network and try again." : error}
+								</Typography>
+							) : (
+								<>
+									<div style={{ width: "100%" }}>
+										<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
+											{category === "signup" ? "Sign-up Users by Country" : "Users by Country"}
+										</Typography>
+
+										{loading ? (
+											<CircularProgress sx={{ margin: "auto" }} />
+										) : (
+											<DataGrid
+												rows={CountryRows}
+												columns={countryColumns}
+												getRowId={(row) => row.id}
+												pageSize={paginationModel.pageSize}
+												pageSizeOptions={[10, 25, 50, 100]}
+												paginationModel={paginationModel}
+												paginationMode="server"
+												rowCount={totalRecords}
+												sx={{
+													height: 550,
+													borderRadius: "15px",
+													boxShadow: (theme) =>
+														theme.palette.mode === "dark"
+															? "0 4px 15px rgba(255, 255, 255, 0.1)"
+															: "0 4px 15px rgba(0, 0, 0, 0.1)",
+													background: (theme) =>
+														theme.palette.mode === "dark" ? "#424242" : "#FFFFFF",
+													"& .MuiDataGrid-root": {
+														borderRadius: "15px",
+														boxShadow: "none"
+													},
+													"& .MuiDataGrid-cell": {
+														transition: "all 0.3s ease",
+														"&:hover": {
+															backgroundColor:
+																theme.palette.mode === "dark"
+																	? "rgba(255, 255, 255, 0.1)"
+																	: "rgba(0, 0, 0, 0.05)"
+														}
+													}
+												}}
+												slots={{
+													noRowsOverlay: CustomNoRowsOverlay,
+													loadingOverlay: LinearProgress,
+													toolbar: GridToolbar
+												}}
+												// ===================
+												pagination
+												onPaginationModelChange={(model) => {
+													setPaginationModel(model);
+													setPage(model.page);
+													setRowsPerPage(model.pageSize);
+												}}
+											/>
+										)}
+									</div>
+								</>
+							)}
+						</Grid>
+					</Paper>
+				</Grid>
 			</Box>
 		</Box>
 	);
 };
 
-export default Content;
+export default OpenTelemetry;
