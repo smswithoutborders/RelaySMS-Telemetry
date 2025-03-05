@@ -37,7 +37,7 @@ const categories = [
 	{ key: "summary", label: "Summary" },
 	{ key: "signup", label: "Signup Users" },
 	{ key: "retained", label: "Users" },
-	{ key: "total_publications", label: "Publications", url: "/publication" }
+	{ key: "total_publications", label: "Publications" }
 ];
 
 const granularities = [
@@ -123,24 +123,25 @@ const OpenTelemetry = () => {
 				setTotalSignupCountries(apiData[category]?.total_signup_countries ?? 0);
 				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
 				setTotalSignupCountries(apiData[category]?.total_signup_countries ?? 0);
+				setTotalPublications(apiData[category]?.total_publications ?? 0);
 			} else if (category === "signup") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
 				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
 				setTotalRetainedUsersWithTokens(0);
-				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
+				setTotalPublications(0);
 				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
 				setTotalRetainedUsers(0);
 			} else if (category === "retained") {
-				setTotalRetainedUsersWithTokens(apiData[category]?.Total_retained_users_with_tokens ?? 0);
 				setTotalUsers(0);
-				setTotalSignupCountries(0);
+				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
 				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
 				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
-			} else if (category === "") {
-				setTotalRetainedUsersWithTokens(apiData[category]?.Total_retained_users_with_tokens ?? 0);
+				setTotalPublications(apiData[category]?.total_publications ?? 0);
+			} else if (category === "publications") {
+				setTotalPublications(apiData[category]?.total_publications ?? 0);
 				setTotalUsers(0);
-				setTotalSignupCountries(0);
-				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
+				setTotalRetainedUsers(0);
+				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
 				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
 			}
 		} catch (error) {
@@ -526,22 +527,11 @@ const OpenTelemetry = () => {
 												"& .MuiMenuItem-root": { padding: "10px 15px" }
 											}}
 										>
-											{field.options.map((option) =>
-												option.url ? (
-													<MenuItem
-														key={option.key}
-														component="a"
-														href={option.url}
-														rel="noopener noreferrer"
-													>
-														{option.label}
-													</MenuItem>
-												) : (
-													<MenuItem key={option.key} value={option.key}>
-														{option.label}
-													</MenuItem>
-												)
-											)}
+											{field.options.map((option) => (
+												<MenuItem key={option.key} value={option.key}>
+													{option.label}
+												</MenuItem>
+											))}
 										</Select>
 									</FormControl>
 								</Grid>
