@@ -19,7 +19,7 @@ import { getName } from "country-list";
 import dayjs from "dayjs";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import CustomNoRowsOverlay from "../Components/CustomNoRowsOverlay";
-import { PersonAdd, People, Group, ErrorOutline } from "@mui/icons-material";
+import { MailOutline, CheckCircle, Error, ErrorOutline } from "@mui/icons-material";
 
 const Publication = () => {
 	const [drawerOpen, setDrawerOpen] = useState(false);
@@ -38,10 +38,11 @@ const Publication = () => {
 	});
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
-		pageSize: 10
+		pageSize: 100
 	});
 
 	// ======================= Apply filter =======================
+
 	const applyFilters = () => {
 		let query = `start_date=2020-01-01&end_date=${today}&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`;
 
@@ -55,12 +56,22 @@ const Publication = () => {
 
 		console.log("API Request with query:", query);
 
-		fetch(`https://api.telemetry.smswithoutborders.com/v1/publications?${query}`)
+		setLoading(true);
+
+		// Fetch the filtered data from the API
+		fetch(`https://api.telemetry.staging.smswithoutborders.com/v1/publications?${query}`)
 			.then((response) => response.json())
 			.then((result) => {
 				if (result.publications) {
-					setFilteredData(result.publications.data);
+					const filteredData = result.publications.data;
+					setFilteredData(filteredData);
 					setTotalRecords(result.publications.pagination.total_records);
+
+					setTotals({
+						total_publications: filteredData.length,
+						total_published: filteredData.filter((item) => item.status === "published").length,
+						total_failed: filteredData.filter((item) => item.status === "failed").length
+					});
 				} else {
 					setError("No data found");
 				}
@@ -268,25 +279,28 @@ const Publication = () => {
 						<Grid container spacing={2} sx={{ p: 3 }}>
 							{[
 								{
-									title: "Published Messages",
+									title: "Total Messages Sent",
 									value: totals.total_publications,
-									icon: <Group fontSize="large" />,
+									icon: <MailOutline fontSize="large" />,
 									color: "#000158",
-									description: "Total Number of Messages Sent"
+									description: "Total Number of Messages Sent",
+									max: 5000
 								},
 								{
-									title: "Published Publications",
+									title: "Published Messages",
 									value: totals.total_published,
-									icon: <PersonAdd fontSize="large" />,
+									icon: <CheckCircle fontSize="large" />,
 									color: "#000158",
-									description: "Number of Successfully Published Messages"
+									description: "Number of Successfully Published Messages",
+									max: 5000
 								},
 								{
-									title: "Failed Publications",
+									title: "Failed Messages",
 									value: totals.total_failed,
-									icon: <People fontSize="large" />,
+									icon: <Error fontSize="large" />,
 									color: "#000158",
-									description: "Number of Messages that Failed"
+									description: "Number of Messages that Failed",
+									max: 5000
 								}
 							].map((item, index) => {
 								const percentage =
