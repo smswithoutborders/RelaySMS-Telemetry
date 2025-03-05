@@ -229,18 +229,20 @@ const OpenTelemetry = () => {
 	return (
 		<Box
 			sx={{
-				p: 2,
 				display: "flex",
 				minHeight: "100vh",
-				backgroundColor: theme.palette.background.default
+				backgroundColor: theme.palette.background.default,
+				overflowX: "hidden",
+				width: "100vw"
 			}}
 		>
 			<Navbar onToggle={setDrawerOpen} />
+
 			<Box
 				sx={{
 					flexGrow: 1,
-					padding: 12,
-					marginLeft: drawerOpen ? "250px" : "0px",
+					padding: { xs: 2, sm: 4, md: 8, lg: 12 },
+					marginLeft: { xs: "0px", sm: drawerOpen ? "250px" : "0px" },
 					transition: "margin-left 0.3s ease-in-out"
 				}}
 			>
@@ -261,15 +263,19 @@ const OpenTelemetry = () => {
 							letterSpacing: "1px",
 							textShadow: isDarkMode
 								? "0 3px 6px rgba(255, 255, 255, 0.3)"
-								: "0 3px 6px rgba(0, 0, 0, 0.3)"
+								: "0 3px 6px rgba(0, 0, 0, 0.3)",
+							maxWidth: "100%",
+							wordWrap: "break-word",
+							mt: 4
 						}}
 					>
 						<TimelineIcon sx={{ mr: 2, fontSize: "3.5rem" }} /> Open Telemetry
 					</Typography>
+
 					<Typography
 						variant="h6"
 						sx={{
-							fontSize: "1.2rem",
+							fontSize: "1.5rem",
 							mt: 1,
 							opacity: 0.9
 						}}
