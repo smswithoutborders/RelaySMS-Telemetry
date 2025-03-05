@@ -195,15 +195,18 @@ const Publication = () => {
 			sx={{
 				display: "flex",
 				minHeight: "100vh",
-				backgroundColor: theme.palette.background.default
+				backgroundColor: theme.palette.background.default,
+				overflowX: "hidden",
+				width: "100vw"
 			}}
 		>
 			<Navbar onToggle={setDrawerOpen} />
+
 			<Box
 				sx={{
 					flexGrow: 1,
-					padding: 12,
-					marginLeft: drawerOpen ? "250px" : "0px",
+					padding: { xs: 2, sm: 4, md: 8, lg: 12 },
+					marginLeft: { xs: "0px", sm: drawerOpen ? "250px" : "0px" },
 					transition: "margin-left 0.3s ease-in-out"
 				}}
 			>
@@ -217,25 +220,42 @@ const Publication = () => {
 					}}
 				>
 					<Typography
+						variant="h6"
+						sx={{
+							fontSize: "1.2rem",
+							opacity: 0.9,
+							color: theme.palette.mode === "dark" ? "#ffffff" : "#000000",
+							maxWidth: "100%"
+						}}
+					>
+						Message Tracker for RelaySMS
+					</Typography>
+
+					<Typography
 						variant="h3"
 						sx={{
 							fontWeight: "bold",
 							letterSpacing: "1px",
-							textShadow: (theme) =>
+							textShadow:
 								theme.palette.mode === "dark"
 									? "0 3px 6px rgba(255, 255, 255, 0.3)"
-									: "0 3px 6px rgba(0, 0, 0, 0.3)"
+									: "0 3px 6px rgba(0, 0, 0, 0.3)",
+							maxWidth: "100%",
+							wordWrap: "break-word",
+							mt: 4
 						}}
 					>
 						📢 Publication
 					</Typography>
+
 					<Typography
 						variant="h6"
 						sx={{
 							fontSize: "1.2rem",
 							mt: 1,
 							opacity: 0.9,
-							color: (theme) => (theme.palette.mode === "dark" ? "#ffffff" : "#000000")
+							color: theme.palette.mode === "dark" ? "#ffffff" : "#000000",
+							maxWidth: "100%"
 						}}
 					>
 						Message Tracker for RelaySMS
