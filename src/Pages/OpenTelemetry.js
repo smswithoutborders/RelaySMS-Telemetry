@@ -107,7 +107,7 @@ const OpenTelemetry = () => {
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
+				`https://api.telemetry.staging.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 			);
 
 			if (!response.ok) {
@@ -151,7 +151,7 @@ const OpenTelemetry = () => {
 			const today = new Date().toISOString().split("T")[0];
 
 			const response = await fetch(
-				`https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${today}&granularity=day&group_by=date&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
+				`https://api.telemetry.staging.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${today}&granularity=day&group_by=date&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 			);
 
 			if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
