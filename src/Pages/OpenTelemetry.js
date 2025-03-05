@@ -26,7 +26,6 @@ import Navbar from "../Components/Nav";
 import dayjs from "dayjs";
 import { HowToReg, GroupAdd, Groups, AutoGraph, Message, Public } from "@mui/icons-material";
 import TimelineIcon from "@mui/icons-material/Timeline";
-import { getName } from "country-list";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import countries from "i18n-iso-countries";
 import CustomNoRowsOverlay from "../Components/CustomNoRowsOverlay";
@@ -37,7 +36,7 @@ const categories = [
 	{ key: "summary", label: "Summary" },
 	{ key: "signup", label: "Signup Users" },
 	{ key: "retained", label: "Users" },
-	{ key: "total_publications", label: "Publications" }
+	{ key: "total_publications", label: "Publications", url: "/publication" }
 ];
 
 const granularities = [
@@ -67,16 +66,17 @@ const OpenTelemetry = () => {
 	const [error, setError] = useState(null);
 	const [data, setData] = useState(null);
 	const theme = useTheme();
+	const isDarkMode = theme.palette.mode === "dark";
+	const [country, setCountry] = useState("");
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(100);
-	const isDarkMode = theme.palette.mode === "dark";
+	const [totalRecords, setTotalRecords] = useState(0);
 	const tableData = data?.[category]?.data || [];
-	const [country, setCountry] = useState("");
+
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
 		pageSize: 100
 	});
-	const [totalRecords, setTotalRecords] = useState(0);
 
 	const filteredData = country
 		? tableData.filter((row) => countries.getName(row.country_code, "en") === country)
@@ -84,14 +84,16 @@ const OpenTelemetry = () => {
 
 	const handleChangePage = (event, newPage) => {
 		setPage(newPage);
+		setPaginationModel((prev) => ({ ...prev, page: newPage }));
 	};
 
 	const handleChangeRowsPerPage = (event) => {
-		setRowsPerPage(parseInt(event.target.value, 10));
+		const newSize = parseInt(event.target.value, 10);
+		setRowsPerPage(newSize);
 		setPage(0);
+		setPaginationModel({ page: 0, pageSize: newSize });
 	};
-
-	// ======================== fatch data when apply filter is used ====================================
+	// ======================== apply filter ====================================
 	const applyFilters = async () => {
 		if (!startDate || !endDate) {
 			setError("Please select both start and end dates.");
@@ -116,32 +118,23 @@ const OpenTelemetry = () => {
 			setData(apiData);
 			setError(null);
 
-			//  stats based on category
+			setTotalRecords(apiData.totalRecords || 0);
+
 			if (category === "summary") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
 				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
 				setTotalSignupCountries(apiData[category]?.total_signup_countries ?? 0);
 				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
-				setTotalSignupCountries(apiData[category]?.total_signup_countries ?? 0);
 			} else if (category === "signup") {
 				setTotalUsers(apiData[category]?.total_signup_users ?? 0);
-				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
-				setTotalRetainedUsersWithTokens(0);
 				setTotalSignupCountries(apiData[category]?.total_countries ?? 0);
 				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
 				setTotalRetainedUsers(0);
 			} else if (category === "retained") {
-				setTotalRetainedUsersWithTokens(apiData[category]?.Total_retained_users_with_tokens ?? 0);
+				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
 				setTotalUsers(0);
 				setTotalSignupCountries(0);
 				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
-				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
-			} else if (category === "") {
-				setTotalRetainedUsersWithTokens(apiData[category]?.Total_retained_users_with_tokens ?? 0);
-				setTotalUsers(0);
-				setTotalSignupCountries(0);
-				setTotalRetainedUsers(apiData[category]?.total_retained_users ?? 0);
-				setTotalRetainedUsersWithTokens(apiData[category]?.total_retained_users_with_tokens ?? 0);
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
@@ -150,24 +143,20 @@ const OpenTelemetry = () => {
 			setLoading(false);
 		}
 	};
+
 	// ===================== fatching summary data ===================================
 	const fetchSummaryData = async () => {
 		setLoading(true);
 		try {
-			const today = new Date();
-			const formattedToday = today.toISOString().split("T")[0];
+			const today = new Date().toISOString().split("T")[0];
 
 			const response = await fetch(
-				`https://api.telemetry.staging.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${formattedToday}&granularity=day&group_by=date&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
+				`https://api.telemetry.staging.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${today}&granularity=day&group_by=date&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 			);
 
-			if (!response.ok) {
-				throw new Error(`Error fetching data: ${response.statusText}`);
-			}
+			if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
 
 			const data = await response.json();
-			console.log("data", data);
-
 			if (data && data.summary) {
 				const {
 					total_signup_users,
@@ -178,7 +167,7 @@ const OpenTelemetry = () => {
 					total_publications
 				} = data.summary;
 
-				// Update state with the fetched data
+				setTotalRecords(data.totalRecords || 0);
 				setTotalUsers(total_signup_users);
 				setTotalRetainedUsers(total_retained_users);
 				setTotalSignupCountries(total_signup_countries);
@@ -200,6 +189,9 @@ const OpenTelemetry = () => {
 		fetchSummaryData();
 	}, [paginationModel]);
 
+	// ======================== Pagination Handlers ====================================
+
+	// ================================================================================================
 	const resetFilters = () => {
 		setStartDate("");
 		setEndDate("");
@@ -210,20 +202,8 @@ const OpenTelemetry = () => {
 	};
 
 	// ============== second table section ======================
-	const countryColumns = [
-		{ field: "country_code", headerName: "Country", flex: 1 },
-		{
-			field: "Countries",
-			headerName: category === "signup" ? "Sign-up Users" : "Users",
-			flex: 1,
-			valueGetter: (params) =>
-				category === "signup" ? params.row.signup_users : params.row.retained_users
-		}
-	];
-
 	const startIdx = page * rowsPerPage;
 	const endIdx = startIdx + rowsPerPage;
-
 	const paginatedData = filteredData.slice(startIdx, endIdx);
 
 	const CountryRows = paginatedData.map((row, index) => ({
@@ -232,6 +212,19 @@ const OpenTelemetry = () => {
 		signup_users: row.signup_users,
 		retained_users: row.retained_users
 	}));
+
+	const countryColumns = [
+		{ field: "id", headerName: "ID", flex: 0.2, width: 100 },
+		{ field: "country_code", headerName: "Country", flex: 0.3, width: 150 },
+		{
+			field: "Countries",
+			headerName: category === "signup" ? "Sign-up Users" : "Users",
+			flex: 0.5,
+			width: 200,
+			valueGetter: (params) =>
+				category === "signup" ? params.row.signup_users : params.row.retained_users
+		}
+	];
 
 	return (
 		<Box
@@ -347,7 +340,6 @@ const OpenTelemetry = () => {
 									max: 5000
 								},
 								{
-									// active user with tokens
 									title: "Active Users",
 									value: totalRetainedUsersWithTokens,
 									icon: <HowToReg fontSize="large" />,
@@ -526,11 +518,22 @@ const OpenTelemetry = () => {
 												"& .MuiMenuItem-root": { padding: "10px 15px" }
 											}}
 										>
-											{field.options.map((option) => (
-												<MenuItem key={option.key} value={option.key}>
-													{option.label}
-												</MenuItem>
-											))}
+											{field.options.map((option) =>
+												option.url ? (
+													<MenuItem
+														key={option.key}
+														component="a"
+														href={option.url}
+														rel="noopener noreferrer"
+													>
+														{option.label}
+													</MenuItem>
+												) : (
+													<MenuItem key={option.key} value={option.key}>
+														{option.label}
+													</MenuItem>
+												)
+											)}
 										</Select>
 									</FormControl>
 								</Grid>
@@ -823,11 +826,13 @@ const OpenTelemetry = () => {
 												rows={CountryRows}
 												columns={countryColumns}
 												getRowId={(row) => row.id}
-												pageSize={paginationModel.pageSize}
-												pageSizeOptions={[10, 25, 50, 100]}
+												pagination
 												paginationModel={paginationModel}
 												paginationMode="server"
+												pageSizeOptions={[10, 25, 50, 100]}
+												pageSize={paginationModel.pageSize}
 												rowCount={totalRecords}
+												onPaginationModelChange={setPaginationModel}
 												sx={{
 													height: 550,
 													borderRadius: "15px",
@@ -855,13 +860,6 @@ const OpenTelemetry = () => {
 													noRowsOverlay: CustomNoRowsOverlay,
 													loadingOverlay: LinearProgress,
 													toolbar: GridToolbar
-												}}
-												// ===================
-												pagination
-												onPaginationModelChange={(model) => {
-													setPaginationModel(model);
-													setPage(model.page);
-													setRowsPerPage(model.pageSize);
 												}}
 											/>
 										)}
