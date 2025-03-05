@@ -28,7 +28,6 @@ const Publication = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [platformFilter, setPlatformFilter] = useState("all");
-	const [totalRecords, setTotalRecords] = useState(0);
 	const [statusFilter, setStatusFilter] = useState("all");
 	const isDarkMode = theme.palette.mode === "dark";
 	const [totals, setTotals] = useState({
@@ -40,6 +39,7 @@ const Publication = () => {
 		page: 0,
 		pageSize: 100
 	});
+	const [totalRecords, setTotalRecords] = useState(0);
 
 	// ======================= Apply filter =======================
 
