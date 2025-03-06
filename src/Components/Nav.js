@@ -67,7 +67,7 @@ const Navbar = ({ onToggle = () => {} }) => {
 					{/* Main Links */}
 					<List>
 						<ListItem button onClick={handleToggle}>
-							<ListItemButton component={Link} to="/OpenTelemetry">
+							<ListItemButton component={Link} to="/">
 								<ListItemIcon>
 									<FaTableCells />
 								</ListItemIcon>
@@ -84,7 +84,7 @@ const Navbar = ({ onToggle = () => {} }) => {
 						</ListItem>
 
 						<ListItem button onClick={handleToggle}>
-							<ListItemButton component={Link} to="/">
+							<ListItemButton component={Link} to="/Reliability">
 								<ListItemIcon>
 									<FaTableCells />
 								</ListItemIcon>

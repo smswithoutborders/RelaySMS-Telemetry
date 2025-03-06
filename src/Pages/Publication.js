@@ -58,7 +58,6 @@ const Publication = () => {
 
 		setLoading(true);
 
-		// Fetch the filtered data from the API
 		fetch(`https://api.telemetry.staging.smswithoutborders.com/v1/publications?${query}`)
 			.then((response) => response.json())
 			.then((result) => {

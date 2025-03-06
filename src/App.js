@@ -70,13 +70,13 @@ function App() {
 				<MobileNav darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Toggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 				<Routes>
-					<Route path="/" element={<Reliability />} />
+					<Route path="/Reliability" element={<Reliability />} />
 					<Route path="/resilience" element={<Resilience />} />
 					<Route path="/publication" element={<Publication />} />
 					<Route path="/help" element={<Help />} />
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/tests" element={<Data />} />
-					<Route path="/OpenTelemetry" element={<OpenTelemetry />} />
+					<Route path="/" element={<OpenTelemetry />} />
 					<Route path="*" element={<PageNotFound />} />
 				</Routes>
 				<Footer />
