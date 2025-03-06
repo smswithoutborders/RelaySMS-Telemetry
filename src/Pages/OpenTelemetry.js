@@ -19,7 +19,6 @@ import {
 	TableHead,
 	TableBody,
 	Skeleton,
-	TablePagination,
 	LinearProgress,
 	Card,
 	CardContent
@@ -109,7 +108,7 @@ const OpenTelemetry = () => {
 			const formattedEndDate = dayjs(endDate).format("YYYY-MM-DD");
 
 			const response = await fetch(
-				`https://api.telemetry.staging.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
+				`https://api.telemetry.smswithoutborders.com/v1/${category}?start_date=${formattedStartDate}&end_date=${formattedEndDate}&granularity=${granularity}&group_by=country&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 			);
 
 			if (!response.ok) {
@@ -153,7 +152,7 @@ const OpenTelemetry = () => {
 			const today = new Date().toISOString().split("T")[0];
 
 			const response = await fetch(
-				`https://api.telemetry.staging.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${today}&granularity=day&group_by=date&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
+				`https://api.telemetry.smswithoutborders.com/v1/summary?start_date=2021-01-10&end_date=${today}&granularity=day&group_by=date&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 			);
 
 			if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
@@ -191,9 +190,6 @@ const OpenTelemetry = () => {
 		fetchSummaryData();
 	}, [paginationModel]);
 
-	// ======================== Pagination Handlers ====================================
-
-	// ================================================================================================
 	const resetFilters = () => {
 		setStartDate("");
 		setEndDate("");
@@ -362,7 +358,6 @@ const OpenTelemetry = () => {
 									max: 5000
 								},
 								{
-									// retained use are active users
 									title: "Users",
 									value: totalRetainedUsers,
 									icon: <Groups fontSize="large" />,
@@ -421,7 +416,6 @@ const OpenTelemetry = () => {
 												}}
 											>
 												<Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-													{/* Title */}
 													<Typography
 														variant="body2"
 														sx={{
@@ -435,7 +429,6 @@ const OpenTelemetry = () => {
 														{item.title}
 													</Typography>
 
-													{/* Icon */}
 													<Typography
 														variant="h5"
 														sx={{
@@ -447,9 +440,7 @@ const OpenTelemetry = () => {
 													</Typography>
 												</Box>
 
-												{/* Value and Percentage */}
 												<Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-													{/* Value */}
 													<Typography
 														variant="h5"
 														sx={{
@@ -460,8 +451,6 @@ const OpenTelemetry = () => {
 													>
 														{item.value}
 													</Typography>
-
-													{/* Percentage */}
 													<Typography
 														variant="body2"
 														sx={{
@@ -474,8 +463,6 @@ const OpenTelemetry = () => {
 														({percentage.toFixed(1)}%)
 													</Typography>
 												</Box>
-
-												{/* Description */}
 												<Typography
 													variant="body2"
 													sx={{
@@ -504,14 +491,12 @@ const OpenTelemetry = () => {
 				>
 					<Box flexGrow={1}>
 						<Grid container spacing={3}>
-							{/*  Total table  */}
 							<Grid item xs={12} sm={6} md={8}>
 								<Card>
 									<CardContent>
 										<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h5">
 											Filter
 										</Typography>
-										{/* ====================== */}
 										<Box
 											sx={{
 												flexGrow: 1,
@@ -667,8 +652,7 @@ const OpenTelemetry = () => {
 											</Grid>
 										</Box>
 
-										{/* ======================================================== */}
-
+										{/* ====================total table ======================================== */}
 										<Box
 											display="flex"
 											sx={{
@@ -685,7 +669,6 @@ const OpenTelemetry = () => {
 																<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h5">
 																	Overview Presentation
 																</Typography>
-																{/* ====================total table ======================================== */}
 																{loading ? (
 																	<Box
 																		display="flex"
@@ -715,7 +698,6 @@ const OpenTelemetry = () => {
 																		gap={3}
 																		position="relative"
 																	>
-																		{/* Loader Overlay */}
 																		{loading && (
 																			<Box
 																				position="absolute"
@@ -744,7 +726,6 @@ const OpenTelemetry = () => {
 																				bgcolor: isDarkMode ? "#2C2C2C" : "#FFFFFF"
 																			}}
 																		>
-																			{/* Loader Overlay inside TableContainer */}
 																			{loading && (
 																				<Box
 																					position="absolute"
