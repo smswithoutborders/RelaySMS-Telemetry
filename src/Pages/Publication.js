@@ -58,7 +58,7 @@ const Publication = () => {
 
 		setLoading(true);
 
-		fetch(`https://api.telemetry.staging.smswithoutborders.com/v1/publications?${query}`)
+		fetch(`https://api.telemetry.smswithoutborders.com/v1/publications?${query}`)
 			.then((response) => response.json())
 			.then((result) => {
 				if (result.publications) {
@@ -88,7 +88,7 @@ const Publication = () => {
 	useEffect(() => {
 		const today = dayjs().format("YYYY-MM-DD");
 		fetch(
-			`https://api.telemetry.staging.smswithoutborders.com/v1/publications?start_date=2020-01-01&end_date=${today}&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
+			`https://api.telemetry.smswithoutborders.com/v1/publications?start_date=2020-01-01&end_date=${today}&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`
 		)
 			.then((response) => response.json())
 			.then((result) => {
@@ -126,7 +126,7 @@ const Publication = () => {
 
 		const today = dayjs().format("YYYY-MM-DD");
 		fetch(
-			`https://api.telemetry.staging.smswithoutborders.com/v1/publications?start_date=2020-01-01&end_date=${today}&page=1&page_size=10`
+			`https://api.telemetry.smswithoutborders.com/v1/publications?start_date=2020-01-01&end_date=${today}&page=1&page_size=10`
 		)
 			.then((response) => response.json())
 			.then((result) => {
@@ -194,15 +194,15 @@ const Publication = () => {
 			cellClassName: (params) => `status-${params.value?.toLowerCase() || "default"}`,
 			renderCell: (params) => {
 				const statusColors = {
-					published: "#28a745", // Green
-					failed: "#dc3545", // Red
-					pending: "#ffc107" // Yellow
+					published: "#28a745",
+					failed: "#dc3545",
+					pending: "#ffc107"
 				};
 
 				return (
 					<Typography
 						sx={{
-							color: statusColors[params.value?.toLowerCase()] || "#6c757d", // Default gray
+							color: statusColors[params.value?.toLowerCase()] || "#6c757d",
 							fontWeight: "bold",
 							textTransform: "capitalize"
 						}}
