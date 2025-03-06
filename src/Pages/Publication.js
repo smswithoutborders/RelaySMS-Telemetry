@@ -149,42 +149,76 @@ const Publication = () => {
 
 	// =========================== Table Columns ============================
 	const columns = [
-		{ field: "id", headerName: "ID", flex: 1 },
+		{
+			field: "id",
+			headerName: "ID",
+			flex: 1,
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell"
+		},
 		{
 			field: "date_time",
 			headerName: "Date & Time",
 			flex: 2,
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell",
 			renderCell: (params) => dayjs(params.value).format("MMMM D, YYYY h:mm A")
 		},
 		{
 			field: "country_code",
 			headerName: "Country",
 			flex: 1,
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell",
 			renderCell: (params) => (params.value ? getName(params.value) : "Unknown")
 		},
-		{ field: "platform_name", headerName: "Platform", flex: 1 },
-		{ field: "source", headerName: "Source", flex: 1 },
+		{
+			field: "platform_name",
+			headerName: "Platform",
+			flex: 1,
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell"
+		},
+		{
+			field: "source",
+			headerName: "Source",
+			flex: 1,
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell"
+		},
 		{
 			field: "status",
 			headerName: "Status",
 			flex: 1,
+			headerClassName: "custom-header",
+			cellClassName: (params) => `status-${params.value?.toLowerCase() || "default"}`,
 			renderCell: (params) => {
 				const statusColors = {
-					published: "green",
-					failed: "red",
-					pending: "orange"
+					published: "#28a745", // Green
+					failed: "#dc3545", // Red
+					pending: "#ffc107" // Yellow
 				};
 
 				return (
 					<Typography
-						sx={{ color: statusColors[params.value?.toLowerCase()] || "gray", fontWeight: "bold" }}
+						sx={{
+							color: statusColors[params.value?.toLowerCase()] || "#6c757d", // Default gray
+							fontWeight: "bold",
+							textTransform: "capitalize"
+						}}
 					>
 						{params.value}
 					</Typography>
 				);
 			}
 		},
-		{ field: "gateway_client", headerName: "Gateway Client", flex: 1 }
+		{
+			field: "gateway_client",
+			headerName: "Gateway Client",
+			flex: 1,
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell"
+		}
 	];
 
 	const today = dayjs().format("YYYY-MM-DD");
