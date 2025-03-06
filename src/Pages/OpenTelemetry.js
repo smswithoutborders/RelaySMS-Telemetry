@@ -216,13 +216,35 @@ const OpenTelemetry = () => {
 	}));
 
 	const countryColumns = [
-		{ field: "id", headerName: "ID", flex: 0.1, width: 25 },
-		{ field: "country_code", headerName: "Country", flex: 0.5, width: 50 },
+		{
+			field: "id",
+			headerName: "ID",
+			flex: 0.1,
+			minWidth: 50,
+			align: "center",
+			headerAlign: "center",
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell"
+		},
+		{
+			field: "country_code",
+			headerName: "Country",
+			flex: 0.5,
+			minWidth: 120,
+			align: "left",
+			headerAlign: "left",
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell"
+		},
 		{
 			field: "Countries",
 			headerName: category === "signup" ? "Sign-up Users" : "Users",
 			flex: 0.3,
-			width: 30,
+			minWidth: 100,
+			align: "right",
+			headerAlign: "right",
+			headerClassName: "custom-header",
+			cellClassName: "custom-cell",
 			valueGetter: (params) =>
 				category === "signup" ? params.row.signup_users : params.row.retained_users
 		}
@@ -713,7 +735,7 @@ const OpenTelemetry = () => {
 																		<TableContainer
 																			component={Paper}
 																			sx={{
-																				position: "relative", // Ensures loader is positioned relative to this container
+																				position: "relative",
 																				borderRadius: "8px",
 																				boxShadow: isDarkMode
 																					? "0px 5px 10px rgba(255, 255, 255, 0.1)"
@@ -844,8 +866,6 @@ const OpenTelemetry = () => {
 												</Grid>
 											</Box>
 										</Box>
-
-										{/* =============================================================================== */}
 									</CardContent>
 								</Card>
 							</Grid>
@@ -873,8 +893,8 @@ const OpenTelemetry = () => {
 											</Typography>
 										) : (
 											<div style={{ width: "100%" }}>
-												<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
-													{category === "signup" ? "Sign-up Users by Country" : "Users by Country"}
+												<Typography variant="h6" sx={{ p: 2 }}>
+													{category === "signup" ? "Sign-up" : "Users"}
 												</Typography>
 
 												<DataGrid
@@ -927,8 +947,6 @@ const OpenTelemetry = () => {
 						</Grid>
 					</Box>
 				</Box>
-				{/* ===================================================================================================================== */}
-				{/* ========================================================= TABLE SECTION ============================================= */}
 			</Box>
 		</Box>
 	);

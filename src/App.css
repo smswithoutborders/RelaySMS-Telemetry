@@ -49,3 +49,24 @@ a:hover {
 	}
 }
 /* ================================================ */
+.custom-header {
+	font-weight: bold;
+	background-color: #012630;
+	color: #cfd0df;
+	text-transform: uppercase;
+}
+
+.custom-cell {
+	font-size: 14px;
+	color: #006f7f;
+}
+
+.MuiDataGrid-root {
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.MuiDataGrid-columnHeaders {
+	background: linear-gradient(135deg, #006f7f, #003f4f);
+	color: white;
+}
