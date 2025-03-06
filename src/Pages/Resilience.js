@@ -136,102 +136,126 @@ const Resilience = () => {
 		<Box
 			sx={{
 				display: "flex",
-				minHeight: "100vh"
+				minHeight: "100vh",
+				overflowX: "hidden",
+				width: "100vw"
 			}}
 		>
 			<Navbar onToggle={setDrawerOpen} />
+
 			<Box
 				sx={{
 					flexGrow: 1,
-					padding: 3,
-					marginLeft: drawerOpen ? "250px" : "0px",
+					padding: { xs: 2, sm: 4, md: 8, lg: 12 },
+					marginLeft: { xs: "0px", sm: drawerOpen ? "250px" : "0px" },
 					transition: "margin-left 0.3s ease-in-out"
 				}}
 			>
-				<Box sx={{ flexGrow: 1, padding: 3 }}>
+				<Box
+					className="hero"
+					sx={{
+						p: 2,
+						mb: 3,
+						boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
+						borderRadius: "8px",
+						position: "relative",
+						minHeight: "250px"
+					}}
+				>
+					{/* Header */}
 					<Box
-						className="hero"
 						sx={{
+							textAlign: "start",
+							mb: 2,
 							p: 2,
-							mb: 3,
-							boxShadow: "5px 5px 0 rgba(0, 0, 0, 0.1)",
-							borderRadius: "8px",
-							position: "relative",
-							minHeight: "250px"
+							borderRadius: 3,
+							color: "inherit"
 						}}
 					>
-						<Box sx={{ flexGrow: 1, padding: 3 }}>
-							{/* =================================================== */}
+						<Typography
+							variant="h3"
+							sx={{
+								fontWeight: "bold",
+								letterSpacing: "1px",
+								maxWidth: "100%",
+								wordWrap: "break-word",
+								mt: 4
+							}}
+						>
+							Resilience
+						</Typography>
+					</Box>
+					{/* =================================================== */}
 
-							<Grid
-								container
-								columnSpacing={4}
-								rowSpacing={4}
-								alignItems="flex-end"
-								sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 2, sm: 2 } }}
-							>
-								<Grid item md={3} xs={6}>
-									<Card sx={{ p: 2 }}>
-										<Typography textAlign="center" variant="h3" sx={{ fontWeight: 600 }}>
-											{totalRows}
-										</Typography>
-										<Typography
-											textAlign="center"
-											variant="body1"
-											sx={{ fontWeight: 500, p: 1, fontSize: { md: 14, sm: 14, xs: 12 } }}
-										>
-											Total Gateway Clients
-										</Typography>
-									</Card>
-								</Grid>
-								<Grid item md={3} xs={6}>
-									<CountrySearch
-										countries={countryData}
-										onSelectCountry={handleCountrySelect}
-										loading={countryLoading}
-									/>
-									{selectedCountry && (
-										<OperatorSearch
-											operators={operatorData}
-											onSelectOperator={setSelectedOperator}
-											loading={operatorLoading}
-										/>
-									)}
-								</Grid>
-								<Grid item md={3} xs={6}>
-									<DateSearch onSelectDate={setSelectedDate} />
-								</Grid>
-							</Grid>
-							<Stack
-								spacing={1}
-								direction="row"
-								alignItems="center"
-								sx={{ mb: 1 }}
-								useFlexGap
-								flexWrap="wrap"
-							>
-								<Button variant="outlined" onClick={handleRefresh} disabled={clientDataLoading}>
-									Refetch data {clientDataLoading && <CircularProgress size={24} sx={{ ml: 2 }} />}
-								</Button>
-							</Stack>
-							<DataGrid
-								loading={clientDataLoading}
-								rows={data}
-								getRowId={(row) => row.msisdn}
-								rowCount={totalRows}
-								columns={columns}
-								pageSizeOptions={[10, 25, 50, 100]}
-								paginationModel={paginationModel}
-								paginationMode="server"
-								onPaginationModelChange={setPaginationModel}
-								slots={{
-									noRowsOverlay: CustomNoRowsOverlay,
-									loadingOverlay: LinearProgress,
-									toolbar: GridToolbar
-								}}
-								sx={{ height: 550 }}
+					<Grid
+						container
+						columnSpacing={4}
+						rowSpacing={4}
+						alignItems="flex-end"
+						sx={{ py: { md: 5, sm: 5, xs: 1 }, pt: { md: 3, xs: 2, sm: 2 } }}
+					>
+						<Grid item md={3} xs={6}>
+							<Card sx={{ p: 2 }}>
+								<Typography textAlign="center" variant="h3" sx={{ fontWeight: 600 }}>
+									{totalRows}
+								</Typography>
+								<Typography
+									textAlign="center"
+									variant="body1"
+									sx={{ fontWeight: 500, p: 1, fontSize: { md: 14, sm: 14, xs: 12 } }}
+								>
+									Total Gateway Clients
+								</Typography>
+							</Card>
+						</Grid>
+						<Grid item md={3} xs={6}>
+							<CountrySearch
+								countries={countryData}
+								onSelectCountry={handleCountrySelect}
+								loading={countryLoading}
 							/>
-						</Box>
+							{selectedCountry && (
+								<OperatorSearch
+									operators={operatorData}
+									onSelectOperator={setSelectedOperator}
+									loading={operatorLoading}
+								/>
+							)}
+						</Grid>
+						<Grid item md={3} xs={6}>
+							<DateSearch onSelectDate={setSelectedDate} />
+						</Grid>
+					</Grid>
+					<Stack
+						spacing={1}
+						direction="row"
+						alignItems="center"
+						sx={{ mb: 1 }}
+						useFlexGap
+						flexWrap="wrap"
+					>
+						<Button variant="outlined" onClick={handleRefresh} disabled={clientDataLoading}>
+							Refetch data {clientDataLoading && <CircularProgress size={24} sx={{ ml: 2 }} />}
+						</Button>
+					</Stack>
+					<Box mt={3} display="grid" gridTemplateColumns={{ xs: "1fr", sm: "1fr" }} gap={3}>
+						<DataGrid
+							loading={clientDataLoading}
+							rows={data}
+							getRowId={(row) => row.msisdn}
+							rowCount={totalRows}
+							columns={columns}
+							pageSizeOptions={[10, 25, 50, 100]}
+							paginationModel={paginationModel}
+							paginationMode="server"
+							onPaginationModelChange={setPaginationModel}
+							slots={{
+								noRowsOverlay: CustomNoRowsOverlay,
+								loadingOverlay: LinearProgress,
+								toolbar: GridToolbar
+							}}
+							sx={{ height: 550 }}
+						/>
 					</Box>
 				</Box>
 			</Box>

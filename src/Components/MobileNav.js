@@ -96,7 +96,7 @@ function MobileNav({ darkMode, toggleDarkMode }) {
 					display: { xs: "block", md: "none" }
 				}}
 			>
-				<MenuItem onClick={handleCloseNavMenu} component={Link} to="/OpenTelemetry">
+				<MenuItem onClick={handleCloseNavMenu} component={Link} to="/">
 					<Typography textAlign="center">Open Telemetry</Typography>
 				</MenuItem>
 
@@ -104,7 +104,7 @@ function MobileNav({ darkMode, toggleDarkMode }) {
 					<Typography textAlign="center">Publication</Typography>
 				</MenuItem>
 
-				<MenuItem onClick={handleCloseNavMenu} component={Link} to="/">
+				<MenuItem onClick={handleCloseNavMenu} component={Link} to="/Reliability">
 					<Typography textAlign="center">Reliability</Typography>
 				</MenuItem>
 

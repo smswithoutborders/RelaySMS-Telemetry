@@ -20,7 +20,9 @@ import {
 	TableBody,
 	Skeleton,
 	TablePagination,
-	LinearProgress
+	LinearProgress,
+	Card,
+	CardContent
 } from "@mui/material";
 import Navbar from "../Components/Nav";
 import dayjs from "dayjs";
@@ -214,13 +216,13 @@ const OpenTelemetry = () => {
 	}));
 
 	const countryColumns = [
-		{ field: "id", headerName: "ID", flex: 0.2, width: 100 },
-		{ field: "country_code", headerName: "Country", flex: 0.3, width: 150 },
+		{ field: "id", headerName: "ID", flex: 0.1, width: 25 },
+		{ field: "country_code", headerName: "Country", flex: 0.5, width: 50 },
 		{
 			field: "Countries",
 			headerName: category === "signup" ? "Sign-up Users" : "Users",
-			flex: 0.5,
-			width: 200,
+			flex: 0.3,
+			width: 30,
 			valueGetter: (params) =>
 				category === "signup" ? params.row.signup_users : params.row.retained_users
 		}
@@ -471,410 +473,462 @@ const OpenTelemetry = () => {
 					)}
 				</Grid>
 				{/* ============================= filters section =============================================== */}
-				<Paper
-					elevation={8}
+				<Box
+					display="flex"
 					sx={{
-						p: 5,
-						mt: 4,
 						borderRadius: 4,
-						bgcolor: isDarkMode ? "#1e1e1e" : "#FAFAFA",
-						boxShadow: isDarkMode ? "0 4px 12px rgb(5, 5, 6)" : "0 4px 12px rgb(202, 203, 206)"
+						mt: 4
 					}}
 				>
-					<Box
-						sx={{
-							flexGrow: 1,
-							padding: 4,
-							marginLeft: drawerOpen ? "260px" : "0px",
-							transition: "margin-left 0.3s ease-in-out"
-						}}
-					>
-						<Grid container spacing={4} justifyContent="center">
-							{[
-								{ label: "Category", value: category, setValue: setCategory, options: categories },
-								{
-									label: "Granularity",
-									value: granularity,
-									setValue: setGranularity,
-									options: granularities
-								},
-								{ label: "Group By", value: groupBy, setValue: setGroupBy, options: groupes }
-							].map((field, index) => (
-								<Grid item xs={12} sm={4} key={index}>
-									<FormControl fullWidth variant="outlined">
-										<InputLabel
-											sx={{ color: isDarkMode ? "#90CAF9" : "#000158", fontWeight: "bold" }}
-										>
-											{field.label}
-										</InputLabel>
-										<Select
-											value={field.value}
-											onChange={(e) => field.setValue(e.target.value)}
-											label={field.label}
+					<Box flexGrow={1}>
+						<Grid container spacing={3}>
+							{/*  Total table  */}
+							<Grid item xs={12} sm={6} md={8}>
+								<Card>
+									<CardContent>
+										<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h5">
+											Filter
+										</Typography>
+										{/* ====================== */}
+										<Box
 											sx={{
-												background: "transparent",
-												borderRadius: "10px",
-												borderColor: isDarkMode ? "#90CAF9" : "#4B6EFD",
-												transition: "all 0.3s ease",
-												"& .MuiSelect-icon": { color: isDarkMode ? "#90CAF9" : "#000158" },
-												"& .MuiOutlinedInput-root": {
-													padding: "10px 15px",
-													"&:hover": { borderColor: isDarkMode ? "#64B5F6" : "#3C5DFF" }
-												},
-												"& .MuiMenuItem-root": { padding: "10px 15px" }
+												flexGrow: 1,
+												padding: 4,
+												marginLeft: drawerOpen ? "260px" : "0px",
+												transition: "margin-left 0.3s ease-in-out"
 											}}
 										>
-											{field.options.map((option) =>
-												option.url ? (
-													<MenuItem
-														key={option.key}
-														component="a"
-														href={option.url}
-														rel="noopener noreferrer"
-													>
-														{option.label}
-													</MenuItem>
-												) : (
-													<MenuItem key={option.key} value={option.key}>
-														{option.label}
-													</MenuItem>
-												)
-											)}
-										</Select>
-									</FormControl>
-								</Grid>
-							))}
-						</Grid>
-
-						<Grid container spacing={4} justifyContent="center" sx={{ mt: 5 }}>
-							<Grid item xs={12} md={6}>
-								<Grid container spacing={3}>
-									{[
-										{ label: "Start Date", value: startDate, setValue: setStartDate },
-										{ label: "End Date", value: endDate, setValue: setEndDate }
-									].map((dateField, index) => (
-										<Grid item xs={6} key={index}>
-											<TextField
-												label={dateField.label}
-												type="date"
-												fullWidth
-												variant="outlined"
-												InputLabelProps={{
-													shrink: true,
-													sx: {
-														color: isDarkMode ? "#90CAF9" : "#000158",
-														fontWeight: "bold"
+											<Grid container spacing={4} justifyContent="center">
+												{[
+													{
+														label: "Category",
+														value: category,
+														setValue: setCategory,
+														options: categories
+													},
+													{
+														label: "Granularity",
+														value: granularity,
+														setValue: setGranularity,
+														options: granularities
+													},
+													{
+														label: "Group By",
+														value: groupBy,
+														setValue: setGroupBy,
+														options: groupes
 													}
-												}}
-												value={dateField.value}
-												onChange={(e) => dateField.setValue(e.target.value)}
-											/>
-										</Grid>
-									))}
-								</Grid>
+												].map((field, index) => (
+													<Grid item xs={12} sm={4} key={index}>
+														<FormControl fullWidth variant="outlined">
+															<InputLabel
+																sx={{
+																	color: isDarkMode ? "#90CAF9" : "#000158",
+																	fontWeight: "bold"
+																}}
+															>
+																{field.label}
+															</InputLabel>
+															<Select
+																value={field.value}
+																onChange={(e) => field.setValue(e.target.value)}
+																label={field.label}
+																sx={{
+																	background: "transparent",
+																	borderRadius: "10px",
+																	borderColor: isDarkMode ? "#90CAF9" : "#4B6EFD",
+																	transition: "all 0.3s ease",
+																	"& .MuiSelect-icon": {
+																		color: isDarkMode ? "#90CAF9" : "#000158"
+																	},
+																	"& .MuiOutlinedInput-root": {
+																		padding: "10px 15px",
+																		"&:hover": { borderColor: isDarkMode ? "#64B5F6" : "#3C5DFF" }
+																	},
+																	"& .MuiMenuItem-root": { padding: "10px 15px" }
+																}}
+															>
+																{field.options.map((option) =>
+																	option.url ? (
+																		<MenuItem
+																			key={option.key}
+																			component="a"
+																			href={option.url}
+																			rel="noopener noreferrer"
+																		>
+																			{option.label}
+																		</MenuItem>
+																	) : (
+																		<MenuItem key={option.key} value={option.key}>
+																			{option.label}
+																		</MenuItem>
+																	)
+																)}
+															</Select>
+														</FormControl>
+													</Grid>
+												))}
+											</Grid>
 
-								<Box sx={{ mt: 4, display: "flex", justifyContent: "center", gap: 3 }}>
-									<Button
-										variant="contained"
-										onClick={applyFilters}
-										sx={{
-											borderRadius: 4,
-											px: 5,
-											py: 1.5,
-											fontWeight: "bold",
-											textTransform: "none",
-											transition: "all 0.3s",
-											backgroundColor: isDarkMode ? "#1565C0" : "#1976D2",
-											boxShadow: isDarkMode
-												? "0px 4px 10px rgba(144, 202, 249, 0.3)"
-												: "0px 4px 10px rgba(25, 118, 210, 0.3)",
-											"&:hover": {
-												backgroundColor: isDarkMode ? "#0D47A1" : "#1565C0",
-												transform: "scale(1.05)"
-											}
-										}}
-									>
-										Apply
-									</Button>
-									<Button
-										variant="outlined"
-										onClick={resetFilters}
-										sx={{
-											borderRadius: 4,
-											px: 5,
-											py: 1.5,
-											fontWeight: "bold",
-											textTransform: "none",
-											borderColor: isDarkMode ? "#B0BEC5" : "#757575",
-											color: isDarkMode ? "#ECEFF1" : "#424242",
-											transition: "all 0.3s",
-											"&:hover": {
-												borderColor: isDarkMode ? "#CFD8DC" : "#424242",
-												transform: "scale(1.05)"
-											}
-										}}
-									>
-										Reset
-									</Button>
-								</Box>
+											<Grid container spacing={4} justifyContent="center" sx={{ mt: 5 }}>
+												<Grid item xs={12} md={6}>
+													<Grid container spacing={3}>
+														{[
+															{ label: "Start Date", value: startDate, setValue: setStartDate },
+															{ label: "End Date", value: endDate, setValue: setEndDate }
+														].map((dateField, index) => (
+															<Grid item xs={6} key={index}>
+																<TextField
+																	label={dateField.label}
+																	type="date"
+																	fullWidth
+																	variant="outlined"
+																	InputLabelProps={{
+																		shrink: true,
+																		sx: {
+																			color: isDarkMode ? "#90CAF9" : "#000158",
+																			fontWeight: "bold"
+																		}
+																	}}
+																	value={dateField.value}
+																	onChange={(e) => dateField.setValue(e.target.value)}
+																/>
+															</Grid>
+														))}
+													</Grid>
+
+													<Box sx={{ mt: 4, display: "flex", justifyContent: "center", gap: 3 }}>
+														<Button
+															variant="contained"
+															onClick={applyFilters}
+															sx={{
+																borderRadius: 4,
+																px: 5,
+																py: 1.5,
+																fontWeight: "bold",
+																textTransform: "none",
+																transition: "all 0.3s",
+																backgroundColor: isDarkMode ? "#1565C0" : "#1976D2",
+																boxShadow: isDarkMode
+																	? "0px 4px 10px rgba(144, 202, 249, 0.3)"
+																	: "0px 4px 10px rgba(25, 118, 210, 0.3)",
+																"&:hover": {
+																	backgroundColor: isDarkMode ? "#0D47A1" : "#1565C0",
+																	transform: "scale(1.05)"
+																}
+															}}
+														>
+															Apply
+														</Button>
+														<Button
+															variant="outlined"
+															onClick={resetFilters}
+															sx={{
+																borderRadius: 4,
+																px: 5,
+																py: 1.5,
+																fontWeight: "bold",
+																textTransform: "none",
+																borderColor: isDarkMode ? "#B0BEC5" : "#757575",
+																color: isDarkMode ? "#ECEFF1" : "#424242",
+																transition: "all 0.3s",
+																"&:hover": {
+																	borderColor: isDarkMode ? "#CFD8DC" : "#424242",
+																	transform: "scale(1.05)"
+																}
+															}}
+														>
+															Reset
+														</Button>
+													</Box>
+												</Grid>
+											</Grid>
+										</Box>
+
+										{/* ======================================================== */}
+
+										<Box
+											display="flex"
+											sx={{
+												borderRadius: 4,
+												mt: 4
+											}}
+										>
+											<Box flexGrow={1}>
+												<Grid container spacing={3}>
+													{/*  Total table  */}
+													<Grid item xs={12} sm={8} md={12}>
+														<Card>
+															<CardContent>
+																<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h5">
+																	Overview Presentation
+																</Typography>
+																{/* ====================total table ======================================== */}
+																{loading ? (
+																	<Box
+																		display="flex"
+																		justifyContent="center"
+																		alignItems="center"
+																		mt={3}
+																	>
+																		<CircularProgress size={40} />
+																	</Box>
+																) : error ? (
+																	<Typography color="error" variant="h6" align="center">
+																		{error.includes("Network")
+																			? "Check your network and try again."
+																			: error}
+																	</Typography>
+																) : !data ||
+																  !data[category] ||
+																  Object.keys(data[category]).length === 0 ? (
+																	<Typography color="textSecondary" variant="h6" align="center">
+																		Apply filter to see data on table
+																	</Typography>
+																) : (
+																	<Box
+																		mt={3}
+																		display="grid"
+																		gridTemplateColumns={{ xs: "1fr", sm: "1fr" }}
+																		gap={3}
+																		position="relative"
+																	>
+																		{/* Loader Overlay */}
+																		{loading && (
+																			<Box
+																				position="absolute"
+																				top={0}
+																				left={0}
+																				width="100%"
+																				height="100%"
+																				display="flex"
+																				alignItems="center"
+																				justifyContent="center"
+																				bgcolor="rgba(255, 255, 255, 0.6)"
+																				zIndex={2}
+																			>
+																				<CircularProgress size={50} />
+																			</Box>
+																		)}
+																		<TableContainer
+																			component={Paper}
+																			sx={{
+																				position: "relative", // Ensures loader is positioned relative to this container
+																				borderRadius: "8px",
+																				boxShadow: isDarkMode
+																					? "0px 5px 10px rgba(255, 255, 255, 0.1)"
+																					: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+																				overflowX: "auto",
+																				bgcolor: isDarkMode ? "#2C2C2C" : "#FFFFFF"
+																			}}
+																		>
+																			{/* Loader Overlay inside TableContainer */}
+																			{loading && (
+																				<Box
+																					position="absolute"
+																					top={0}
+																					left={0}
+																					width="100%"
+																					height="100%"
+																					display="flex"
+																					alignItems="center"
+																					justifyContent="center"
+																					bgcolor="rgba(255, 255, 255, 0.6)"
+																					zIndex={2}
+																				>
+																					<CircularProgress size={50} />
+																				</Box>
+																			)}
+
+																			<Table
+																				sx={{
+																					minWidth: 750,
+																					border: isDarkMode ? "1px solid #555" : "1px solid #ddd",
+																					borderRadius: 2,
+																					overflow: "hidden"
+																				}}
+																			>
+																				<TableHead>
+																					<TableRow
+																						sx={{
+																							backgroundColor: isDarkMode ? "#424242" : "#f5f5f5",
+																							borderBottom: "2px solid #ddd"
+																						}}
+																					>
+																						<TableCell
+																							sx={{
+																								fontWeight: "bold",
+																								fontSize: "0.75rem",
+																								color: isDarkMode ? "#E0E0E0" : "#333",
+																								borderRight: "1px solid #ddd",
+																								px: 2
+																							}}
+																						>
+																							Metric
+																						</TableCell>
+																						{[
+																							"Total Signups",
+																							"Total Retained Users",
+																							"Total Retained Users with Tokens",
+																							"Total Signups from Bridges",
+																							"Total Signup Countries",
+																							"Total Published Publications"
+																						].map((metric, index) => (
+																							<TableCell
+																								key={index}
+																								sx={{
+																									fontWeight: "bold",
+																									fontSize: "0.75rem",
+																									color: isDarkMode ? "#E0E0E0" : "#333",
+																									borderRight: "1px solid #ddd",
+																									px: 2
+																								}}
+																							>
+																								{metric}
+																							</TableCell>
+																						))}
+																					</TableRow>
+																				</TableHead>
+																				<TableBody>
+																					<TableRow
+																						sx={{
+																							"&:nth-of-type(odd)": {
+																								backgroundColor: isDarkMode ? "#383838" : "#fafafa"
+																							},
+																							"&:hover": {
+																								backgroundColor: isDarkMode ? "#4A4A4A" : "#f0f0f0"
+																							}
+																						}}
+																					>
+																						<TableCell
+																							sx={{
+																								fontWeight: "bold",
+																								borderRight: "1px solid #ddd",
+																								px: 1,
+																								minWidth: "50px",
+																								textAlign: "center"
+																							}}
+																						>
+																							Values
+																						</TableCell>
+																						{[
+																							data[category]?.total_signup_users || 0,
+																							data[category]?.total_retained_users || 0,
+																							data[category]?.total_retained_users_with_tokens || 0,
+																							data[category]?.total_signups_from_bridges || 0,
+																							data[category]?.total_signup_countries || 0,
+																							data[category]?.total_publications || 0
+																						].map((value, index) => (
+																							<TableCell
+																								key={index}
+																								sx={{
+																									textAlign: "center",
+																									borderRight: "1px solid #ddd",
+																									px: 1,
+																									minWidth: "50px",
+																									whiteSpace: "nowrap"
+																								}}
+																							>
+																								{value}
+																							</TableCell>
+																						))}
+																					</TableRow>
+																				</TableBody>
+																			</Table>
+																		</TableContainer>
+																	</Box>
+																)}
+															</CardContent>
+														</Card>
+													</Grid>
+												</Grid>
+											</Box>
+										</Box>
+
+										{/* =============================================================================== */}
+									</CardContent>
+								</Card>
+							</Grid>
+							{/*===================================== Country  table ========================================== */}
+							<Grid item xs={12} sm={6} md={4}>
+								<Card>
+									<CardContent>
+										<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h5" gutterBottom>
+											Country Data for Users
+										</Typography>
+										{loading ? (
+											<Box
+												sx={{
+													display: "flex",
+													justifyContent: "center",
+													alignItems: "center",
+													height: "50vh"
+												}}
+											>
+												<CircularProgress size={60} />
+											</Box>
+										) : error ? (
+											<Typography color="error" variant="h6" align="center">
+												{error.includes("Network") ? "Check your network and try again." : error}
+											</Typography>
+										) : (
+											<div style={{ width: "100%" }}>
+												<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
+													{category === "signup" ? "Sign-up Users by Country" : "Users by Country"}
+												</Typography>
+
+												<DataGrid
+													rows={CountryRows}
+													columns={countryColumns}
+													getRowId={(row) => row.id}
+													pagination
+													paginationModel={paginationModel}
+													paginationMode="server"
+													pageSizeOptions={[10, 25, 50, 100]}
+													pageSize={paginationModel.pageSize}
+													rowCount={totalRecords}
+													onPaginationModelChange={setPaginationModel}
+													sx={{
+														height: { xs: 400, sm: 500, md: 550 },
+														maxHeight: "80vh",
+														borderRadius: "15px",
+														overflowX: "auto",
+														boxShadow: (theme) =>
+															theme.palette.mode === "dark"
+																? "0 4px 15px rgba(255, 255, 255, 0.1)"
+																: "0 4px 15px rgba(0, 0, 0, 0.1)",
+														background: (theme) =>
+															theme.palette.mode === "dark" ? "#424242" : "#FFFFFF",
+														"& .MuiDataGrid-root": {
+															borderRadius: "15px",
+															boxShadow: "none"
+														},
+														"& .MuiDataGrid-cell": {
+															transition: "all 0.3s ease",
+															"&:hover": {
+																backgroundColor:
+																	theme.palette.mode === "dark"
+																		? "rgba(255, 255, 255, 0.1)"
+																		: "rgba(0, 0, 0, 0.05)"
+															}
+														}
+													}}
+													slots={{
+														noRowsOverlay: CustomNoRowsOverlay,
+														loadingOverlay: LinearProgress,
+														toolbar: GridToolbar
+													}}
+												/>
+											</div>
+										)}
+									</CardContent>
+								</Card>
 							</Grid>
 						</Grid>
 					</Box>
-				</Paper>
-				{/* ==================================== Table section =================================== */}
-				<Paper
-					elevation={8}
-					sx={{
-						p: 5,
-						mt: 4,
-						borderRadius: 4,
-						bgcolor: isDarkMode ? "#1e1e1e" : "#FAFAFA",
-						boxShadow: isDarkMode ? "0 4px 12px rgb(5, 5, 6)" : "0 4px 12px rgb(202, 203, 206)"
-					}}
-				>
-					<Grid item xs={12} md={12}>
-						<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-							<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h5">
-								Overview Presentation
-							</Typography>
-						</Box>
-
-						{loading ? (
-							<Box
-								sx={{
-									display: "flex",
-									justifyContent: "center",
-									alignItems: "center",
-									height: "50vh"
-								}}
-							>
-								<CircularProgress size={60} />
-							</Box>
-						) : error ? (
-							<Typography color="error" variant="h6" align="center">
-								{error.includes("Network") ? "Check your network and try again." : error}
-							</Typography>
-						) : !data || !data[category] || Object.keys(data[category]).length === 0 ? (
-							<Typography color="textSecondary" variant="h6" align="center">
-								Apply filter to see data on table
-							</Typography>
-						) : (
-							<>
-								<TableContainer
-									component={Paper}
-									sx={{
-										borderRadius: "8px",
-										boxShadow: isDarkMode
-											? "0px 5px 10px rgba(255, 255, 255, 0.1)"
-											: "0px 5px 10px rgba(0, 0, 0, 0.1)",
-										overflowX: "auto",
-										bgcolor: isDarkMode ? "#2C2C2C" : "#FFFFFF"
-									}}
-								>
-									<Table
-										sx={{
-											minWidth: 750,
-											border: isDarkMode ? "1px solid #555" : "1px solid #ddd",
-											borderRadius: 2,
-											overflow: "hidden"
-										}}
-									>
-										<TableHead>
-											<TableRow
-												sx={{
-													backgroundColor: isDarkMode ? "#424242" : "#f5f5f5",
-													borderBottom: "2px solid #ddd"
-												}}
-											>
-												<TableCell
-													sx={{
-														fontWeight: "bold",
-														color: isDarkMode ? "#E0E0E0" : "#333",
-														borderRight: "1px solid #ddd",
-														px: 2
-													}}
-												>
-													<strong>Metric</strong>
-												</TableCell>
-												{[
-													"Total Signups",
-													"Total Retained Users",
-													"Total Retained Users with Tokens",
-													"Total Signups from Bridges",
-													"Total Signup Countries",
-													"Total Published Publications"
-												].map((metric, index) => (
-													<TableCell
-														key={index}
-														sx={{
-															fontWeight: "bold",
-															color: isDarkMode ? "#E0E0E0" : "#333",
-															textAlign: "center",
-															borderRight: "1px solid #ddd",
-															px: 2
-														}}
-													>
-														<strong>{metric}</strong>
-													</TableCell>
-												))}
-											</TableRow>
-										</TableHead>
-										<TableBody>
-											<TableRow
-												sx={{
-													"&:nth-of-type(odd)": {
-														backgroundColor: isDarkMode ? "#383838" : "#fafafa"
-													},
-													"&:hover": { backgroundColor: isDarkMode ? "#4A4A4A" : "#f0f0f0" }
-												}}
-											>
-												<TableCell
-													sx={{
-														fontWeight: "bold",
-														borderRight: "1px solid #ddd",
-														px: 2
-													}}
-												>
-													Values
-												</TableCell>
-												<TableCell
-													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
-												>
-													{data[category]?.total_signup_users || 0}
-												</TableCell>
-												<TableCell
-													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
-												>
-													{data[category]?.total_retained_users || 0}
-												</TableCell>
-												<TableCell
-													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
-												>
-													{data[category]?.total_retained_users_with_tokens || 0}
-												</TableCell>
-												<TableCell
-													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
-												>
-													{data[category]?.total_signups_from_bridges || 0}
-												</TableCell>
-												<TableCell
-													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
-												>
-													{data[category]?.total_signup_countries || 0}
-												</TableCell>
-												<TableCell
-													sx={{ textAlign: "center", borderRight: "1px solid #ddd", px: 2 }}
-												>
-													{data[category]?.total_publications || 0}
-												</TableCell>
-											</TableRow>
-										</TableBody>
-									</Table>
-								</TableContainer>
-								<TablePagination
-									rowsPerPageOptions={[5, 10, 25]}
-									component="div"
-									count={data.totalCount || 0}
-									rowsPerPage={rowsPerPage}
-									page={page}
-									onPageChange={handleChangePage}
-									onRowsPerPageChange={handleChangeRowsPerPage}
-								/>
-							</>
-						)}
-					</Grid>
-				</Paper>
-				{/* =================================================================== */}
-				<Grid item xs={12} md={6}>
-					<Paper
-						elevation={8}
-						sx={{
-							p: 5,
-							mt: 4,
-							borderRadius: 4,
-							bgcolor: isDarkMode ? "#1e1e1e" : "#FAFAFA",
-							boxShadow: isDarkMode ? "0 4px 12px rgb(5, 5, 6)" : "0 4px 12px rgb(202, 203, 206)"
-						}}
-					>
-						<Grid item xs={12} md={12}>
-							<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-								<Typography color={isDarkMode ? "#B0BEC5" : "gray"} variant="h6">
-									Country Data
-								</Typography>
-							</Box>
-
-							{loading ? (
-								<Box
-									sx={{
-										display: "flex",
-										justifyContent: "center",
-										alignItems: "center",
-										height: "50vh"
-									}}
-								>
-									<CircularProgress size={60} />
-								</Box>
-							) : error ? (
-								<Typography color="error" variant="h6" align="center">
-									{error.includes("Network") ? "Check your network and try again." : error}
-								</Typography>
-							) : (
-								<>
-									<div style={{ width: "100%" }}>
-										<Typography variant="h6" sx={{ textAlign: "center", p: 2 }}>
-											{category === "signup" ? "Sign-up Users by Country" : "Users by Country"}
-										</Typography>
-
-										{loading ? (
-											<CircularProgress sx={{ margin: "auto" }} />
-										) : (
-											<DataGrid
-												rows={CountryRows}
-												columns={countryColumns}
-												getRowId={(row) => row.id}
-												pagination
-												paginationModel={paginationModel}
-												paginationMode="server"
-												pageSizeOptions={[10, 25, 50, 100]}
-												pageSize={paginationModel.pageSize}
-												rowCount={totalRecords}
-												onPaginationModelChange={setPaginationModel}
-												sx={{
-													height: 550,
-													borderRadius: "15px",
-													boxShadow: (theme) =>
-														theme.palette.mode === "dark"
-															? "0 4px 15px rgba(255, 255, 255, 0.1)"
-															: "0 4px 15px rgba(0, 0, 0, 0.1)",
-													background: (theme) =>
-														theme.palette.mode === "dark" ? "#424242" : "#FFFFFF",
-													"& .MuiDataGrid-root": {
-														borderRadius: "15px",
-														boxShadow: "none"
-													},
-													"& .MuiDataGrid-cell": {
-														transition: "all 0.3s ease",
-														"&:hover": {
-															backgroundColor:
-																theme.palette.mode === "dark"
-																	? "rgba(255, 255, 255, 0.1)"
-																	: "rgba(0, 0, 0, 0.05)"
-														}
-													}
-												}}
-												slots={{
-													noRowsOverlay: CustomNoRowsOverlay,
-													loadingOverlay: LinearProgress,
-													toolbar: GridToolbar
-												}}
-											/>
-										)}
-									</div>
-								</>
-							)}
-						</Grid>
-					</Paper>
-				</Grid>
+				</Box>
+				{/* ===================================================================================================================== */}
+				{/* ========================================================= TABLE SECTION ============================================= */}
 			</Box>
 		</Box>
 	);
