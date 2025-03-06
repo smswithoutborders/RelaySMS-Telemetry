@@ -219,18 +219,6 @@ const Publication = () => {
 					}}
 				>
 					<Typography
-						variant="h6"
-						sx={{
-							fontSize: "1.2rem",
-							opacity: 0.9,
-							color: theme.palette.mode === "dark" ? "#ffffff" : "#000000",
-							maxWidth: "100%"
-						}}
-					>
-						Message Tracker for RelaySMS
-					</Typography>
-
-					<Typography
 						variant="h3"
 						sx={{
 							fontWeight: "bold",
