@@ -24,7 +24,10 @@ jobs:
           echo "REACT_APP_GATEWAY_SERVER_URL=${{ vars.GATEWAY_SERVER_URL }}" > .env.local
 
       - name: Install Dependencies
-        run: yarn install --no-lockfile
+        run: |
+          corepack enable
+          yarn set version stable
+          yarn install
 
       - name: Build Application
         run: yarn build
