@@ -24,7 +24,6 @@ jobs:
       - name: Install pnpm
         run: |
           corepack enable
-          npm install -g pnpm
 
       - name: Create .env.local file
         run: |
