@@ -25,7 +25,7 @@ jobs:
       - name: Install pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@latest --activate
+          npm install -g pnpm
 
       - name: Create .env.local file
         run: |
@@ -66,4 +66,3 @@ jobs:
             echo "==============================="
             echo "✅ Deployment complete"
             echo "==============================="
-            
