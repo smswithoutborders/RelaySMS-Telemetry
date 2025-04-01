@@ -41,7 +41,7 @@ const Publication = () => {
 	});
 	const [totalRecords, setTotalRecords] = useState(0);
 
-	// ======================= Apply filter =======================
+	// ====================================== Apply filter ======================================
 
 	const applyFilters = () => {
 		let query = `start_date=2020-01-01&end_date=${today}&page=${paginationModel.page + 1}&page_size=${paginationModel.pageSize}`;
@@ -84,7 +84,7 @@ const Publication = () => {
 			});
 	};
 
-	// ========================= Fetch Data =========================
+	// =================================== Fetch Data ==================================
 	useEffect(() => {
 		const today = dayjs().format("YYYY-MM-DD");
 		fetch(
