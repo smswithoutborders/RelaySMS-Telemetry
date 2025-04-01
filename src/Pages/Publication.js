@@ -157,7 +157,7 @@ const Publication = () => {
 			cellClassName: "custom-cell"
 		},
 		{
-			field: "date_time",
+			field: "date_created",
 			headerName: "Date & Time",
 			flex: 2,
 			headerClassName: "custom-header",
