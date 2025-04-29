@@ -23,6 +23,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 import CountryTable from '../../sections/dashboard/default/CountryTable';
 
@@ -80,11 +81,22 @@ export default function DashboardDefault() {
   };
 
   const handleResetFilters = () => {
+    const resetStartDate = dayjs('2021-01-01');
+    const resetEndDate = dayjs();
+
     setCategory('signup');
     setGranularity('month');
     setGroupBy('country');
-    setStartDate(null);
-    setEndDate(null);
+    setStartDate(resetStartDate);
+    setEndDate(resetEndDate);
+
+    setFiltersApplied({
+      category: 'signup',
+      startDate: resetStartDate.format('YYYY-MM-DD'),
+      endDate: resetEndDate.format('YYYY-MM-DD'),
+      granularity: 'month',
+      groupBy: 'country'
+    });
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -141,7 +153,7 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Sign-up Users"
           count={metrics.totalSignupUsers.toLocaleString()}
-          percentage={metrics.percentages.totalSignupUsers}
+          // percentage={metrics.percentages.totalSignupUsers}
           extra="Number of Signups"
         />
       </Grid>
@@ -149,7 +161,7 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Users"
           count={metrics.totalUsers.toLocaleString()}
-          percentage={metrics.percentages.totalUsers}
+          // percentage={metrics.percentages.totalUsers}
           extra="Number of current users"
         />
       </Grid>
@@ -157,7 +169,7 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Active Users"
           count={metrics.totalActiveUsers.toLocaleString()}
-          percentage={metrics.percentages.totalActiveUsers}
+          // percentage={metrics.percentages.totalActiveUsers}
           extra="Number of users with tokens"
         />
       </Grid>
@@ -165,7 +177,7 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Bridge First Users"
           count={metrics.totalSignupsFromBridges.toLocaleString()}
-          percentage={metrics.percentages.totalSignupsFromBridges}
+          // percentage={metrics.percentages.totalSignupsFromBridges}
           extra="Number of users via bridges"
         />
       </Grid>
@@ -173,7 +185,7 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Publications"
           count={metrics.totalPublications.toLocaleString()}
-          percentage={metrics.percentages.totalPublications}
+          // percentage={metrics.percentages.totalPublications}
           extra="Number of messages published"
         />
       </Grid>
@@ -181,9 +193,7 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Countries"
           count={metrics.totalSignupCountries.toLocaleString()}
-          percentage={metrics.percentages.totalSignupCountries}
-          isLoss
-          color="warning"
+          // percentage={metrics.percentages.totalSignupCountries}
           extra="Available countries with users"
         />
       </Grid>
@@ -196,12 +206,12 @@ export default function DashboardDefault() {
               <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
                 Filters
               </Typography>
-              <Grid container spacing={4}>
+              <Grid container spacing={2} sx={{ width: '100%' }}>
                 {/* Category Filter */}
-                <Grid size={{ xs: 12, md: 7, lg: 3 }}>
-                  <FormControl fullWidth sx={{ height: '70px' }}>
+                <Grid xs={12} md={3} lg={4}>
+                  <FormControl fullWidth>
                     <InputLabel>Category</InputLabel>
-                    <Select value={category} onChange={(e) => setCategory(e.target.value)} label="Category">
+                    <Select sx={{ height: '53px' }} value={category} onChange={(e) => setCategory(e.target.value)} label="Category">
                       <MenuItem value="signup">Sign-up Users</MenuItem>
                       <MenuItem value="retained">Users</MenuItem>
                     </Select>
@@ -209,25 +219,43 @@ export default function DashboardDefault() {
                 </Grid>
 
                 {/* Start Date */}
-                <Grid size={{ xs: 12, md: 5, lg: 2 }}>
-                  <DatePicker fullWidth label="Start Date" value={startDate} onChange={(newValue) => setStartDate(newValue)} />
+                <Grid xs={12} md={3} lg={2}>
+                  <DatePicker
+                    label="Start Date"
+                    value={startDate}
+                    onChange={(newValue) => setStartDate(newValue)}
+                    slotProps={{ textField: { fullWidth: true } }}
+                  />
                 </Grid>
 
                 {/* End Date */}
-                <Grid size={{ xs: 12, md: 5, lg: 2 }}>
-                  <DatePicker fullWidth label="End Date" value={endDate} onChange={(newValue) => setEndDate(newValue)} />
+                <Grid xs={12} md={3} lg={2}>
+                  <DatePicker
+                    label="End Date"
+                    value={endDate}
+                    onChange={(newValue) => setEndDate(newValue)}
+                    slotProps={{ textField: { fullWidth: true } }}
+                  />
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 5, lg: 2 }}>
-                  <Button type="button" fullWidth sx={{ px: 4 }} variant="contained" onClick={handleApplyFilters}>
-                    Apply
-                  </Button>
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 5, lg: 2 }}>
-                  <Button fullWidth startIcon={<ReloadOutlined />} sx={{ px: 4 }} variant="outlined" onClick={handleResetFilters}>
-                    Reset
-                  </Button>
+                {/* Buttons */}
+                <Grid xs={12} md={3} lg={4} container spacing={1}>
+                  <Grid xs={6} md={12} lg={6}>
+                    <Button sx={{ height: '53px', px: 4 }} fullWidth variant="contained" onClick={handleApplyFilters}>
+                      Apply
+                    </Button>
+                  </Grid>
+                  <Grid xs={6} md={12} lg={6}>
+                    <Button
+                      sx={{ height: '53px', px: 4 }}
+                      fullWidth
+                      startIcon={<ReloadOutlined />}
+                      variant="outlined"
+                      onClick={handleResetFilters}
+                    >
+                      Reset
+                    </Button>
+                  </Grid>
                 </Grid>
               </Grid>
             </Box>

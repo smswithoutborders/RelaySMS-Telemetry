@@ -291,7 +291,7 @@ export default function Publications() {
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth>
                     <InputLabel>Platform</InputLabel>
-                    <Select value={platform} onChange={(e) => setPlatform(e.target.value)} label="Platform">
+                    <Select sx={{ height: '53px' }} value={platform} onChange={(e) => setPlatform(e.target.value)} label="Platform">
                       <MenuItem value="">All</MenuItem>
                       <MenuItem value="gmail">Gmail</MenuItem>
                       <MenuItem value="twitter">Twitter</MenuItem>
@@ -304,7 +304,7 @@ export default function Publications() {
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth>
                     <InputLabel>Status</InputLabel>
-                    <Select value={status} onChange={(e) => setStatus(e.target.value)} label="Status">
+                    <Select sx={{ height: '53px' }} value={status} onChange={(e) => setStatus(e.target.value)} label="Status">
                       <MenuItem value="">All</MenuItem>
                       <MenuItem value="published">Published</MenuItem>
                       <MenuItem value="failed">Failed</MenuItem>
@@ -315,7 +315,7 @@ export default function Publications() {
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth>
                     <InputLabel>Source</InputLabel>
-                    <Select value={source} onChange={(e) => setSource(e.target.value)} label="Source">
+                    <Select sx={{ height: '53px' }} value={source} onChange={(e) => setSource(e.target.value)} label="Source">
                       <MenuItem value="">All</MenuItem>
                       <MenuItem value="platforms">Platform</MenuItem>
                       <MenuItem value="bridges">Bridge</MenuItem>
@@ -332,12 +332,18 @@ export default function Publications() {
                 </Grid>
 
                 <Grid item xs={6} sm={6} md={2}>
-                  <Button fullWidth variant="contained" onClick={handleApplyFilters}>
+                  <Button sx={{ height: '53px', px: 4 }} fullWidth variant="contained" onClick={handleApplyFilters}>
                     Apply
                   </Button>
                 </Grid>
                 <Grid item xs={6} sm={6} md={2}>
-                  <Button fullWidth variant="outlined" startIcon={<ReloadOutlined />} onClick={handleResetFilters}>
+                  <Button
+                    sx={{ height: '53px', px: 4 }}
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<ReloadOutlined />}
+                    onClick={handleResetFilters}
+                  >
                     Reset
                   </Button>
                 </Grid>

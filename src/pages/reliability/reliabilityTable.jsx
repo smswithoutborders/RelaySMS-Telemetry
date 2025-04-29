@@ -273,11 +273,11 @@ export default function ReliabilityTable() {
               <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
                 Filters
               </Typography>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth>
                     <InputLabel>Country</InputLabel>
-                    <Select value={country} onChange={(e) => setCountry(e.target.value)} label="Country">
+                    <Select sx={{ height: 53 }} value={country} onChange={(e) => setCountry(e.target.value)} label="Country">
                       <MenuItem value="">All</MenuItem>
                       {availableCountries.map((c) => (
                         <MenuItem key={c} value={c}>
@@ -288,11 +288,10 @@ export default function ReliabilityTable() {
                   </FormControl>
                 </Grid>
 
-                {/* New Operator Filter */}
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={2}>
                   <FormControl fullWidth>
                     <InputLabel>Operator</InputLabel>
-                    <Select value={operator} onChange={(e) => setOperator(e.target.value)} label="Operator">
+                    <Select sx={{ height: 53 }} value={operator} onChange={(e) => setOperator(e.target.value)} label="Operator">
                       <MenuItem value="">All</MenuItem>
                       {availableOperators.map((o) => (
                         <MenuItem key={o} value={o}>
@@ -303,17 +302,23 @@ export default function ReliabilityTable() {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
-                  <DatePicker label="Date" value={dateFilter} onChange={(newValue) => setDateFilter(newValue)} fullWidth />
+                <Grid item xs={12} sm={6} md={2}>
+                  <DatePicker
+                    label="Date"
+                    value={dateFilter}
+                    onChange={(newValue) => setDateFilter(newValue)}
+                    slotProps={{ textField: { fullWidth: true, sx: { height: 53 } } }}
+                  />
                 </Grid>
 
-                <Grid item xs={6} sm={6} md={2}>
-                  <Button fullWidth variant="contained" onClick={handleApplyFilters}>
+                <Grid item xs={6} sm={3} md={2}>
+                  <Button sx={{ height: 53 }} fullWidth variant="contained" onClick={handleApplyFilters}>
                     Apply
                   </Button>
                 </Grid>
-                <Grid item xs={6} sm={6} md={2}>
-                  <Button fullWidth variant="outlined" startIcon={<ReloadOutlined />} onClick={handleResetFilters}>
+
+                <Grid item xs={6} sm={3} md={3}>
+                  <Button sx={{ height: 53 }} fullWidth variant="outlined" startIcon={<ReloadOutlined />} onClick={handleResetFilters}>
                     Reset
                   </Button>
                 </Grid>
