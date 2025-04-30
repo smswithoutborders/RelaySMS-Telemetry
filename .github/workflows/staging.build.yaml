@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          yarn install --no-lockfile
+          yarn install
 
       - name: Build project
         run: |
