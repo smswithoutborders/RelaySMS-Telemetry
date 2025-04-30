@@ -24,15 +24,12 @@ jobs:
 
       - name: Configure Environment Variables
         run: |
-          echo "VITE_APP_VERSION=v0.2.0" >> .env
-          echo "GENERATE_SOURCEMAP=false" >> .env
-          echo "PUBLIC_URL=${{ vars.PUBLIC_URL }}" >> .env
-          echo "VITE_APP_BASE_NAME=/dashboard" >> .env
-          echo "VITE_APP_GATEWAY_SERVER_URL=${{ vars.GATEWAY_SERVER_URL }}" >> .env
-          echo "VITE_APP_TELEMETRY_API=${{ vars.TELEMETRY_API }}" >> .env
+          echo "VITE_APP_GATEWAY_SERVER_URL=${{ vars.GATEWAY_SERVER_URL }}" >> .env.local
+          echo "VITE_APP_TELEMETRY_API=${{ vars.TELEMETRY_API }}" >> .env.local
 
       - name: Install dependencies
         run: |
+          cat .env.local
           yarn install
 
       - name: Build project
