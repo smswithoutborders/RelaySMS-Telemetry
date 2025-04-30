@@ -36,9 +36,9 @@ export default function HeaderContent() {
         <GithubOutlined />
       </IconButton>
 
-      <IconButton onClick={toggleColorMode} color="inherit" title="Toggle Theme">
+      {/* <IconButton onClick={toggleColorMode} color="inherit" title="Toggle Theme">
         {isDarkMode ? <SunOutlined /> : <SunFilled />}
-      </IconButton>
+      </IconButton> */}
 
       {downLG && <MobileSection />}
     </>
