@@ -44,7 +44,7 @@ jobs:
           mkdir -p build_output
           mkdir -p build_output/artifacts
 
-          mv build/* build_output/artifacts/
+          mv dist/* build_output/artifacts/
           mv nginx/ build_output/nginx/
           mv scripts/ build_output/scripts/
           mv Dockerfile.nginx build_output/Dockerfile
