@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      build_status: ${{ steps.build_status.outcome }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,7 +36,6 @@ jobs:
           yarn install
 
       - name: Build project
-        id: build_status
         run: |
           yarn build
 
@@ -72,3 +69,15 @@ jobs:
           git add .
           git commit -m "🚀 Build deployed at ${timestamp}"
           git push origin build/staging --force
+
+      - name: Trigger Deployment Pipeline
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const response = await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'staging.deployment.yaml',
+              ref: 'staging'
+            });
+            console.log(response.status);
