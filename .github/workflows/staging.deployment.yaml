@@ -4,7 +4,6 @@ on:
   workflow_run:
     workflows: [Staging Build Pipeline]
     types: [completed]
-    branches: [staging]
 
 jobs:
   on-success:
