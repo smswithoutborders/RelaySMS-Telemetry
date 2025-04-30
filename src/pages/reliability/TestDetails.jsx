@@ -26,27 +26,6 @@ import { LeftOutlined } from '@ant-design/icons';
 import { styled } from '@mui/material/styles';
 import MainCard from 'components/MainCard';
 
-const StyledTableRow = styled(TableRow)(({ theme, status }) => ({
-  ...(status === 'success' && {
-    backgroundColor: '#E9FBEB',
-    '&:hover': {
-      backgroundColor: theme.palette.success.main
-    }
-  }),
-  ...(status === 'timedout' && {
-    backgroundColor: '#FFE5E5',
-    '&:hover': {
-      backgroundColor: theme.palette.error.main
-    }
-  }),
-  ...(status === 'pending' && {
-    backgroundColor: theme.palette.warning.light,
-    '&:hover': {
-      backgroundColor: theme.palette.warning.main
-    }
-  })
-}));
-
 function TestDetails() {
   const { msisdn } = useParams();
   const [allTestData, setAllTestData] = useState([]);
@@ -63,7 +42,7 @@ function TestDetails() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients/${msisdn}/tests`);
+        const response = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER}clients/${msisdn}/tests`);
         setAllTestData(response.data);
       } catch (err) {
         console.error('Error fetching tests:', err);
@@ -132,6 +111,8 @@ function TestDetails() {
     );
   }
 
+  const formatEpoch = (epoch) => (epoch ? new Date(epoch * 1000).toLocaleString() : 'N/A');
+
   return (
     <div>
       <Typography variant="h5" gutterBottom>
@@ -186,23 +167,43 @@ function TestDetails() {
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
+                  <TableCell>start_time</TableCell>
                   <TableCell>sms_received_time</TableCell>
                   <TableCell>sms_routed_time</TableCell>
                   <TableCell>sms_sent_time</TableCell>
-                  <TableCell>start_time</TableCell>
                   <TableCell>Status</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {visibleRows.map((test) => (
-                  <StyledTableRow key={test.id} status={test.status}>
+                  <TableRow key={test.id}>
                     <TableCell>{test.id}</TableCell>
-                    <TableCell>{new Date(test.sms_received_time * 1000).toLocaleString()}</TableCell>
-                    <TableCell>{new Date(test.sms_routed_time * 1000).toLocaleString()}</TableCell>
-                    <TableCell>{new Date(test.sms_sent_time * 1000).toLocaleString()}</TableCell>
-                    <TableCell>{new Date(test.start_time * 1000).toLocaleString()}</TableCell>
-                    <TableCell>{test.status}</TableCell>
-                  </StyledTableRow>
+                    <TableCell>{formatEpoch(test.start_time)}</TableCell>
+                    <TableCell>{formatEpoch(test.sms_received_time)}</TableCell>
+                    <TableCell>{formatEpoch(test.sms_routed_time)}</TableCell>
+                    <TableCell>{formatEpoch(test.sms_sent_time)}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            backgroundColor:
+                              test.status === 'success'
+                                ? '#52C41A'
+                                : test.status === 'timedout'
+                                  ? '#FF4D4F'
+                                  : test.status === 'pending'
+                                    ? '#FAAD14'
+                                    : 'grey',
+                            mr: 1
+                          }}
+                        />
+                        {test.status}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </TableBody>
             </Table>

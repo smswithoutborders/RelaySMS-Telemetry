@@ -168,7 +168,7 @@ export default function ReliabilityTable() {
         if (country) params.country = country;
         if (operator) params.operator = operator;
 
-        const response = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients`, { params });
+        const response = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER}clients`, { params });
         const data = response.data || [];
 
         const countriesSet = new Set();
