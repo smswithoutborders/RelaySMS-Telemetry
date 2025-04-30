@@ -42,7 +42,7 @@ function TestDetails() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER}clients/${msisdn}/tests`);
+        const response = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients/${msisdn}/tests`);
         setAllTestData(response.data);
       } catch (err) {
         console.error('Error fetching tests:', err);
