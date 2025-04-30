@@ -1,11 +1,13 @@
 name: Staging Deployment Pipeline
 
 on:
-  push:
-    branches:
-      - build/staging
+  workflow_run:
+    workflows: [Staging Build Pipeline]
+    types: [completed]
+    branches: [staging]
+
 jobs:
-  deploy:
+  on-success:
     name: Execute Deployment Script on Server
     runs-on: ubuntu-latest
     environment:
