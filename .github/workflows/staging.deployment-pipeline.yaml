@@ -70,16 +70,6 @@ jobs:
           git commit -m "🚀 Build deployed at ${timestamp}"
           git push origin build/staging --force
 
-      - name: Trigger Deployment Pipeline
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'staging.deployment.yaml',
-              ref: 'staging'
-            })
   deploy:
     name: Execute Deployment Script on Server
     runs-on: ubuntu-latest
