@@ -1,11 +1,11 @@
 {
-  "name": "mantis-material-free-react",
+  "name": "relaysms-open-telemetry",
   "version": "1.4.1",
-  "homepage": "https://mantisdashboard.io/free",
+  "homepage": "https://telemetry.smswithoutborders.com/",
   "author": {
-    "name": "CodedThemes",
-    "email": "codedthemes@gmail.com",
-    "url": "https://codedthemes.com/"
+    "name": "SMSWithoutBorders",
+    "email": "developers@smswithoutborders.com",
+    "url": "https://smswithoutborders.com/"
   },
   "scripts": {
     "start": "vite",
