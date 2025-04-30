@@ -67,4 +67,4 @@ jobs:
 
           git add .
           git commit -m "🚀 Build deployed at ${timestamp}"
-          git push origin build --force
+          git push origin build/staging --force
