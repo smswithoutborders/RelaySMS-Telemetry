@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: staging
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,7 +31,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cat .env.local
           yarn install
 
       - name: Build project
@@ -56,7 +57,8 @@ jobs:
 
       - name: Commit and Push to Build Branch
         run: |
-          git checkout --orphan build/staging
+          git fetch origin build/staging || true
+          git checkout -B build/staging
           git rm -rf .
           mv build_output/* .
           mv build_output/.gitignore .gitignore
@@ -64,7 +66,7 @@ jobs:
           timestamp=$(date +"%Y-%m-%d %H:%M:%S (%Z)")
 
           git add .
-          git commit -m "🚀 Build deployed at ${timestamp}"
+          git commit -m "🚀 Build deployed at ${timestamp}" || echo "No changes to commit"
           git push origin build/staging --force
 
   deploy:
@@ -88,10 +90,7 @@ jobs:
             echo "🚀 Fetching all branches ..."
             echo "============================"
             cd ${{ secrets.PROJECT_PATH }}
-            if ! git fetch --all; then
-              echo "❌ Error fetching branches!"
-              exit 1
-            fi
+            git fetch --all || { echo "❌ Error fetching branches!"; exit 1; }
             echo "==============================="
             echo "✅ Branch fetch complete"
             echo "==============================="
@@ -99,10 +98,7 @@ jobs:
             echo "============================"
             echo "🚀 Switching to build/staging branch ..."
             echo "============================"
-            if ! git checkout build/staging; then
-              echo "❌ Error switching to build/staging branch!"
-              exit 1
-            fi
+            git checkout build/staging || { echo "❌ Error switching to build/staging branch!"; exit 1; }
             echo "==============================="
             echo "✅ Switched to build/staging branch"
             echo "==============================="
@@ -110,10 +106,7 @@ jobs:
             echo "============================"
             echo "🚀 Updating repository ..."
             echo "============================"
-            if ! git pull; then
-              echo "❌ Error updating repository!"
-              exit 1
-            fi
+            git pull || { echo "❌ Error updating repository!"; exit 1; }
             echo "==============================="
             echo "✅ Repository update complete"
             echo "==============================="
@@ -121,10 +114,7 @@ jobs:
             echo "========================="
             echo "🚀 Building project ..."
             echo "========================="
-            if ! ${{ secrets.BUILD_CMD }}; then
-              echo "❌ Error building project!"
-              exit 1
-            fi
+            ${{ secrets.BUILD_CMD }} || { echo "❌ Error building project!"; exit 1; }
             echo "==========================="
             echo "✅ Project build complete"
             echo "==========================="
@@ -132,10 +122,7 @@ jobs:
             echo "============================="
             echo "Cleaning up staging builds ..."
             echo "============================="
-            if ! ${{ secrets.CLEANUP_CMD }}; then
-              echo "❌ Error cleaning up builds!"
-              exit 1
-            fi
+            ${{ secrets.CLEANUP_CMD }} || { echo "❌ Error cleaning up builds!"; exit 1; }
             echo "============================="
             echo "✅ Cleanup complete"
             echo "============================="
