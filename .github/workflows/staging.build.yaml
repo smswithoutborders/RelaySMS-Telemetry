@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      build_status: ${{ steps.build_status.outcome }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,6 +38,7 @@ jobs:
           yarn install
 
       - name: Build project
+        id: build_status
         run: |
           yarn build
 
