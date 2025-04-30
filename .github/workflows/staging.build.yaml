@@ -17,6 +17,11 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Enable Corepack and Use Latest Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@stable --activate
+
       - name: Configure Environment Variables
         run: |
           echo "VITE_APP_VERSION=v0.2.0" >> .env
