@@ -57,8 +57,7 @@ jobs:
 
       - name: Commit and Push to Build Branch
         run: |
-          git fetch origin build/staging || true
-          git checkout -B build/staging
+          git checkout --orphan build/staging
           git rm -rf .
           mv build_output/* .
           mv build_output/.gitignore .gitignore
@@ -66,7 +65,7 @@ jobs:
           timestamp=$(date +"%Y-%m-%d %H:%M:%S (%Z)")
 
           git add .
-          git commit -m "🚀 Build deployed at ${timestamp}" || echo "No changes to commit"
+          git commit -m "🚀 Build deployed at ${timestamp}"
           git push origin build/staging --force
 
   deploy:
@@ -90,7 +89,10 @@ jobs:
             echo "🚀 Fetching all branches ..."
             echo "============================"
             cd ${{ secrets.PROJECT_PATH }}
-            git fetch --all || { echo "❌ Error fetching branches!"; exit 1; }
+            if ! git fetch --all; then
+              echo "❌ Error fetching branches!"
+              exit 1
+            fi
             echo "==============================="
             echo "✅ Branch fetch complete"
             echo "==============================="
@@ -98,7 +100,10 @@ jobs:
             echo "============================"
             echo "🚀 Switching to build/staging branch ..."
             echo "============================"
-            git checkout build/staging || { echo "❌ Error switching to build/staging branch!"; exit 1; }
+            if ! git checkout build/staging; then
+              echo "❌ Error switching to build/staging branch!"
+              exit 1
+            fi
             echo "==============================="
             echo "✅ Switched to build/staging branch"
             echo "==============================="
@@ -106,7 +111,10 @@ jobs:
             echo "============================"
             echo "🚀 Updating repository ..."
             echo "============================"
-            git pull || { echo "❌ Error updating repository!"; exit 1; }
+            if ! git pull; then
+              echo "❌ Error updating repository!"
+              exit 1
+            fi
             echo "==============================="
             echo "✅ Repository update complete"
             echo "==============================="
@@ -114,7 +122,10 @@ jobs:
             echo "========================="
             echo "🚀 Building project ..."
             echo "========================="
-            ${{ secrets.BUILD_CMD }} || { echo "❌ Error building project!"; exit 1; }
+            if ! ${{ secrets.BUILD_CMD }}; then
+              echo "❌ Error building project!"
+              exit 1
+            fi
             echo "==========================="
             echo "✅ Project build complete"
             echo "==========================="
@@ -122,7 +133,10 @@ jobs:
             echo "============================="
             echo "Cleaning up staging builds ..."
             echo "============================="
-            ${{ secrets.CLEANUP_CMD }} || { echo "❌ Error cleaning up builds!"; exit 1; }
+            if ! ${{ secrets.CLEANUP_CMD }}; then
+              echo "❌ Error cleaning up builds!"
+              exit 1
+            fi
             echo "============================="
             echo "✅ Cleanup complete"
             echo "============================="
