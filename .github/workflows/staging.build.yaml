@@ -74,10 +74,9 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const response = await github.rest.actions.createWorkflowDispatch({
+            github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'staging.deployment.yaml',
               ref: 'staging'
-            });
-            console.log(response.status);
+            })
