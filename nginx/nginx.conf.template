@@ -40,7 +40,8 @@ server {
     root /usr/share/nginx/html;
     index index.html;
     
-    location / {
+    location /dashboard {
         try_files $uri $uri/ /index.html;
+        include /etc/nginx/mime.types;
     }
 }
