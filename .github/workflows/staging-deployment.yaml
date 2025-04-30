@@ -1,17 +1,13 @@
-name: Deploy to Staging Server
+name: Staging Deployment Pipeline
 
 on:
-  workflow_run:
-    workflows:
-      - Build and Deploy (staging)
-    types:
-      - completed
-
+  push:
+    branches:
+      - build/staging
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Execute Deployment Script on Server
     runs-on: ubuntu-latest
-    
     environment:
       name: staging
       url: https://staging.smswithoutborders.com:18550
