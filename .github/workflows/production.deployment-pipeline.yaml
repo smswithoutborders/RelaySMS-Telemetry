@@ -57,6 +57,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: production-build
+          path: dist
 
       - name: Securely Copy Artifacts to Server
         uses: appleboy/scp-action@master
@@ -64,7 +65,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "./dist/*"
+          source: "dist/*"
           target: ${{ secrets.BUILD_PATH }}
           strip_components: 1
           rm: true
