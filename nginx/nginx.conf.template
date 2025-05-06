@@ -12,25 +12,27 @@ server {
     ssl_certificate_key /etc/nginx/ssl/key.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers on;
-    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
-    ssl_ecdh_curve secp384r1;
+    ssl_ciphers "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256";
+    ssl_ecdh_curve X25519:secp384r1:secp521r1;
     ssl_session_cache shared:SSL:10m;
     ssl_session_tickets off;
     ssl_stapling on;
     ssl_stapling_verify on;
     ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
-    resolver 8.8.8.8 8.8.4.4 valid=300s;
+    resolver 1.1.1.1 1.0.0.1 valid=300s;
     resolver_timeout 5s;
 
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
     add_header X-XSS-Protection "1; mode=block" always;
-    add_header Referrer-Policy "strict-origin" always;
-    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
 
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://gatewayserver.smswithoutborders.com/v3/ https://gatewayserver.staging.smswithoutborders.com/v3/ https://api.telemetry.staging.smswithoutborders.com/ https://api.telemetry.smswithoutborders.com;" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://gatewayserver.smswithoutborders.com/v3/ https://gatewayserver.staging.smswithoutborders.com/v3/ https://api.telemetry.staging.smswithoutborders.com/ https://api.telemetry.smswithoutborders.com;" always;
 
     add_header Permissions-Policy "geolocation=(), midi=(), sync-xhr=(), microphone=(), camera=(), magnetometer=(), gyroscope=(), fullscreen=(self), payment=()" always;
+
+    add_header Expect-CT "enforce, max-age=86400" always;
 
     server_tokens off;
 
@@ -43,5 +45,13 @@ server {
     location / {
         try_files $uri $uri/ /index.html;
         include /etc/nginx/mime.types;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+
+    location ~* (\.php$|\.sh$|\.pl$|\.cgi$|\.py$) {
+        deny all;
     }
 }
