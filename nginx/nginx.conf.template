@@ -5,34 +5,35 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
     server_name {{SERVER_NAME}};
 
     ssl_certificate /etc/nginx/ssl/cert.pem;
     ssl_certificate_key /etc/nginx/ssl/key.pem;
+    ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
+
     ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers on;
-    ssl_ciphers "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256";
-    ssl_ecdh_curve X25519:secp384r1:secp521r1;
+    ssl_prefer_server_ciphers off;
+    ssl_ciphers 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+
+    ssl_ecdh_curve X25519:secp384r1;
     ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1h;
     ssl_session_tickets off;
+
     ssl_stapling on;
     ssl_stapling_verify on;
-    ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
     resolver 1.1.1.1 1.0.0.1 valid=300s;
     resolver_timeout 5s;
 
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header Referrer-Policy "no-referrer-when-downgrade" always;
     add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
-
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://gatewayserver.smswithoutborders.com/v3/ https://gatewayserver.staging.smswithoutborders.com/v3/ https://api.telemetry.staging.smswithoutborders.com/ https://api.telemetry.smswithoutborders.com;" always;
-
-    add_header Permissions-Policy "geolocation=(), midi=(), sync-xhr=(), microphone=(), camera=(), magnetometer=(), gyroscope=(), fullscreen=(self), payment=()" always;
-
+    add_header X-XSS-Protection "0" always; # Modern browsers ignore this; CSP is stronger
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), usb=()" always;
     add_header Expect-CT "enforce, max-age=86400" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://*.smswithoutborders.com https://api.telemetry*.smswithoutborders.com;" always;
 
     server_tokens off;
 
@@ -41,17 +42,18 @@ server {
 
     root /usr/share/nginx/html;
     index index.html;
-    
+
     location / {
         try_files $uri $uri/ /index.html;
-        include /etc/nginx/mime.types;
     }
 
-    location ~ /\. {
+    location ~ /\.(?!well-known) {
         deny all;
     }
 
-    location ~* (\.php$|\.sh$|\.pl$|\.cgi$|\.py$) {
+    location ~* \.(php|sh|pl|cgi|py)$ {
         deny all;
     }
+
+    include /etc/nginx/mime.types;
 }
