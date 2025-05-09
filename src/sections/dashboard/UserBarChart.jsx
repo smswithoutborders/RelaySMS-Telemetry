@@ -144,15 +144,14 @@ export default function UserBarChart({ view, startDate: propStartDate, endDate: 
 
       {/* Pagination Buttons */}
       <Stack direction="row" sx={{ justifyContent: 'center', gap: 2, mt: 2 }}>
-        <Button size="small" variant="contained" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
+        <Button size="small" variant="contained" disabled={currentPage + 1 >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
           <LeftOutlined /> Previous
         </Button>
-
         <Typography variant="body2" color="text.primary">
           Page {currentPage + 1}
         </Typography>
 
-        <Button size="small" variant="contained" disabled={currentPage + 1 >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+        <Button size="small" variant="contained" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
           Next <RightOutlined />
         </Button>
       </Stack>
