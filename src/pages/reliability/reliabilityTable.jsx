@@ -25,14 +25,16 @@ import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { ReloadOutlined } from '@ant-design/icons';
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
+import dayjs from 'dayjs';
+
 countries.registerLocale(enLocale);
 
 const maxValues = {
@@ -100,6 +102,7 @@ export default function ReliabilityTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalRows, setTotalRows] = useState(0);
+  const [period, setPeriod] = useState('day');
   const [metrics, setMetrics] = useState({
     totalGatewayClients: 0,
     percentages: {
@@ -109,6 +112,8 @@ export default function ReliabilityTable() {
   const [tableData, setTableData] = useState([]);
   const [availableCountries, setAvailableCountries] = useState([]);
   const [availableOperators, setAvailableOperators] = useState([]);
+  const [reliabilityValues, setReliabilityValues] = useState({});
+  const [reliabilityLoading, setReliabilityLoading] = useState(false);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -121,8 +126,6 @@ export default function ReliabilityTable() {
     }));
   };
 
-  const today = new Date().toISOString().split('T')[0];
-
   const handleApplyFilters = () => {
     const appliedFilters = {
       msisdn,
@@ -133,13 +136,18 @@ export default function ReliabilityTable() {
       dateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : '2021-01-10'
     };
     setFiltersApplied(appliedFilters);
+    setPage(0);
   };
 
   const handleResetFilters = () => {
     setCountry('');
     setOperator('');
     setDateFilter(null);
+    setMsisdn('');
+    setOperatorCode('');
+    setReliability('');
     setFiltersApplied({});
+    setPage(0);
   };
 
   const handleChangePage = (event, newPage) => setPage(newPage);
@@ -153,11 +161,27 @@ export default function ReliabilityTable() {
     return code.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt()));
   };
 
+  const getPeriodRange = useCallback(() => {
+    const now = dayjs();
+    switch (period) {
+      case 'day':
+        return { start: now.startOf('day').unix(), end: now.endOf('day').unix() };
+      case 'week':
+        return { start: now.startOf('week').unix(), end: now.endOf('week').unix() };
+      case 'month':
+        return { start: now.startOf('month').unix(), end: now.endOf('month').unix() };
+      case 'all':
+      default:
+        return { start: 0, end: now.unix() };
+    }
+  }, [period]);
+
   useEffect(() => {
-    const fetchMetrics = async () => {
+    const fetchClients = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const appliedDate = dateFilter ? dateFilter.format('YYYY-MM-DD') : '2021-01-10';
+        const appliedDate = filtersApplied.dateFilter || '2021-01-10';
 
         const params = {
           date_filter: appliedDate,
@@ -165,15 +189,21 @@ export default function ReliabilityTable() {
           page_size: rowsPerPage
         };
 
-        if (country) params.country = country;
-        if (operator) params.operator = operator;
+        if (filtersApplied.country) params.country = filtersApplied.country;
+        if (filtersApplied.operator) params.operator = filtersApplied.operator;
+        if (filtersApplied.msisdn) params.msisdn = filtersApplied.msisdn;
+        if (filtersApplied.operatorCode) params.operator_code = filtersApplied.operatorCode;
+
+        if (filtersApplied.sort_by) params.sort_by = filtersApplied.sort_by;
+        if (filtersApplied.sort_order) params.sort_order = filtersApplied.sort_order;
 
         const response = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients`, { params });
-        const data = response.data || [];
+
+        const clientsArray = response.data || [];
 
         const countriesSet = new Set();
         const operatorsSet = new Set();
-        data.forEach((item) => {
+        clientsArray.forEach((item) => {
           if (item?.country) {
             countriesSet.add(item.country);
           }
@@ -184,8 +214,8 @@ export default function ReliabilityTable() {
         setAvailableCountries(['', ...Array.from(countriesSet).sort()]);
         setAvailableOperators(['', ...Array.from(operatorsSet).sort()]);
 
-        const formatted = Array.isArray(data)
-          ? data.map((item) => {
+        const formatted = Array.isArray(clientsArray)
+          ? clientsArray.map((item) => {
               const fullCountryName = item?.country || 'Unknown';
               const rawCode = countries.getAlpha2Code(fullCountryName, 'en')?.toUpperCase() || 'UNKNOWN';
               const flag = countries.isValid(rawCode, 'en') ? countryCodeToEmojiFlag(rawCode) : '';
@@ -197,14 +227,13 @@ export default function ReliabilityTable() {
                 msisdn: item.msisdn,
                 operator: item.operator,
                 operator_code: item.operator_code,
-                reliability: item.reliability,
                 last_published_date: new Date(item.last_published_date * 1000)
               };
             })
           : [];
 
         let sortedFormatted = [...formatted];
-        if (orderBy) {
+        if (!params.sort_by) {
           sortedFormatted.sort((a, b) => {
             const isAsc = order === 'asc';
             const valueA = a[orderBy];
@@ -228,26 +257,88 @@ export default function ReliabilityTable() {
           });
         }
 
+        setTableData(sortedFormatted);
+        setTotalRows(response.data?.pagination?.total_records || clientsArray.length);
         setMetrics({
-          totalGatewayClients: response.data?.length || 0,
+          totalGatewayClients: response.data?.total_clients || clientsArray.length,
           percentages: {
-            totalGatewayClients: calculatePercentage(response.data?.length, maxValues.totalGatewayClients)
+            totalGatewayClients: calculatePercentage(response.data?.total_clients || clientsArray.length, maxValues.totalGatewayClients)
           }
         });
-
-        setTableData(sortedFormatted);
-        setTotalRows(response.data?.pagination?.total_records || 0);
-        setError(null);
       } catch (err) {
-        console.error('Error fetching metrics:', err);
-        setError('Failed to fetch metrics. Please try again later.');
+        console.error('Error fetching clients:', err);
+        setError('Failed to fetch clients. Please try again later.');
+        setTableData([]);
+        setTotalRows(0);
+        setMetrics({
+          totalGatewayClients: 0,
+          percentages: { totalGatewayClients: 0 }
+        });
       } finally {
         setLoading(false);
       }
     };
-
-    fetchMetrics();
+    fetchClients();
   }, [filtersApplied, page, rowsPerPage, order, orderBy]);
+
+  useEffect(() => {
+    const fetchReliabilitiesForVisibleClients = async () => {
+      if (!tableData.length || reliabilityLoading) {
+        setReliabilityValues({});
+        setReliabilityLoading(false);
+        return;
+      }
+
+      setReliabilityLoading(true);
+      const { start, end } = getPeriodRange();
+      const newReliabilityValues = {};
+
+      await Promise.allSettled(
+        tableData.map(async (row) => {
+          try {
+            let pageNum = 1;
+            let perPage = 100;
+            let allTests = [];
+            let hasMore = true;
+
+            while (hasMore) {
+              const resp = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients/${row.msisdn}/tests`, {
+                params: {
+                  page: pageNum,
+                  per_page: perPage
+                }
+              });
+              const tests = resp.data || [];
+
+              if (tests.length > 0) {
+                allTests = [...allTests, ...tests];
+                pageNum++;
+              } else {
+                hasMore = false;
+              }
+            }
+
+            const filteredTests = allTests.filter((t) => t.start_time >= start && t.start_time <= end);
+
+            const totalTests = filteredTests.length;
+            const successfulTests = filteredTests.filter((t) => t.status === 'success').length;
+
+            const reliabilityValue = totalTests > 0 ? ((successfulTests / totalTests) * 100).toFixed(2) : '0.00';
+            newReliabilityValues[row.msisdn] = reliabilityValue;
+          } catch (e) {
+            console.error(`Error fetching reliability for ${row.msisdn}:`, e);
+            newReliabilityValues[row.msisdn] = 'N/A';
+          }
+        })
+      );
+
+      setReliabilityValues(newReliabilityValues);
+      setReliabilityLoading(false);
+    };
+
+    fetchReliabilitiesForVisibleClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableData, period, getPeriodRange]);
 
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
@@ -255,17 +346,15 @@ export default function ReliabilityTable() {
         <Typography variant="h5">Open Telemetry</Typography>
       </Grid>
 
-      {/* Metrics */}
       <Grid item xs={12} sm={6} md={2}>
         <AnalyticEcommerce
-          title="Gateway CLients"
+          title="Gateway Clients"
           count={metrics.totalGatewayClients.toLocaleString()}
           percentage={metrics.percentages.totalGatewayClients}
           extra="Total number of listed Gateway Clients"
         />
       </Grid>
 
-      {/* Filters */}
       <Grid item xs={12}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <MainCard sx={{ mt: 1 }} content={false}>
@@ -303,12 +392,15 @@ export default function ReliabilityTable() {
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={2}>
-                  <DatePicker
-                    label="Date"
-                    value={dateFilter}
-                    onChange={(newValue) => setDateFilter(newValue)}
-                    slotProps={{ textField: { fullWidth: true, sx: { height: 53 } } }}
-                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Reliability Period</InputLabel>
+                    <Select sx={{ height: 53 }} value={period} onChange={(e) => setPeriod(e.target.value)} label="Reliability Period">
+                      <MenuItem value="day">Day</MenuItem>
+                      <MenuItem value="week">Week</MenuItem>
+                      <MenuItem value="month">Month</MenuItem>
+                      <MenuItem value="all">All</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
 
                 <Grid item xs={6} sm={3} md={2}>
@@ -328,7 +420,6 @@ export default function ReliabilityTable() {
         </LocalizationProvider>
       </Grid>
 
-      {/* Table */}
       <Grid item xs={12}>
         <Paper>
           <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
@@ -344,23 +435,34 @@ export default function ReliabilityTable() {
               <Table>
                 <PublicationTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
                 <TableBody>
-                  {tableData.map((row) => (
-                    <TableRow key={row.msisdn} hover style={{ cursor: 'pointer' }}>
-                      <TableCell>
-                        <Link to={`/tests/${row.msisdn}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                          {row.msisdn}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span style={{ marginRight: 8 }}>{row.flag}</span>
-                        {row.country ? row.country : 'No Country'}
-                      </TableCell>
-                      <TableCell>{row.operator}</TableCell>
-                      <TableCell>{row.operator_code}</TableCell>
-                      <TableCell>{row.reliability}%</TableCell>
-                      <TableCell>{row.last_published_date.toLocaleString()}</TableCell>
-                    </TableRow>
-                  ))}
+                  {tableData.map((row) => {
+                    const currentReliability = reliabilityValues[row.msisdn];
+                    return (
+                      <TableRow key={row.msisdn} hover style={{ cursor: 'pointer' }}>
+                        <TableCell>
+                          <Link to={`/tests/${row.msisdn}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            {row.msisdn}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <span style={{ marginRight: 8 }}>{row.flag}</span>
+                          {row.country ? row.country : 'No Country'}
+                        </TableCell>
+                        <TableCell>{row.operator}</TableCell>
+                        <TableCell>{row.operator_code}</TableCell>
+                        <TableCell>
+                          {reliabilityLoading ? (
+                            <CircularProgress size={16} />
+                          ) : currentReliability !== undefined ? (
+                            `${currentReliability}%`
+                          ) : (
+                            'N/A'
+                          )}
+                        </TableCell>
+                        <TableCell>{row.last_published_date.toLocaleString()}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
