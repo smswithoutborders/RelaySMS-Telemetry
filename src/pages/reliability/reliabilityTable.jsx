@@ -291,38 +291,25 @@ export default function ReliabilityTable() {
 
       setReliabilityLoading(true);
       const { start, end } = getPeriodRange();
+      const startISO = new Date(start * 1000).toISOString();
+      const endISO = new Date(end * 1000).toISOString();
+
       const newReliabilityValues = {};
 
       await Promise.allSettled(
         tableData.map(async (row) => {
           try {
-            let pageNum = 1;
-            let perPage = 100;
-            let allTests = [];
-            let hasMore = true;
+            const params = {
+              start_time: startISO,
+              end_time: endISO
+            };
 
-            while (hasMore) {
-              const resp = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients/${row.msisdn}/tests`, {
-                params: {
-                  page: pageNum,
-                  per_page: perPage
-                }
-              });
-              const tests = resp.data || [];
-
-              if (tests.length > 0) {
-                allTests = [...allTests, ...tests];
-                pageNum++;
-              } else {
-                hasMore = false;
-              }
-            }
-
-            const filteredTests = allTests.filter((t) => t.start_time >= start && t.start_time <= end);
-
-            const totalTests = filteredTests.length;
-            const successfulTests = filteredTests.filter((t) => t.status === 'success').length;
-
+            const resp = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients/${row.msisdn}/tests`, {
+              params
+            });
+            const data = resp.data || {};
+            const totalTests = data.total_records || 0;
+            const successfulTests = data.total_success || 0;
             const reliabilityValue = totalTests > 0 ? ((successfulTests / totalTests) * 100).toFixed(2) : '0.00';
             newReliabilityValues[row.msisdn] = reliabilityValue;
           } catch (e) {
@@ -350,7 +337,7 @@ export default function ReliabilityTable() {
         <AnalyticEcommerce
           title="Gateway Clients"
           count={metrics.totalGatewayClients.toLocaleString()}
-          percentage={metrics.percentages.totalGatewayClients}
+          // percentage={metrics.percentages.totalGatewayClients}
           extra="Total number of listed Gateway Clients"
         />
       </Grid>

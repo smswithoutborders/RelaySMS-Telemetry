@@ -245,6 +245,7 @@ export default function Publications() {
     };
 
     fetchMetrics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersApplied, page, rowsPerPage, order, orderBy]);
 
   return (
@@ -258,7 +259,7 @@ export default function Publications() {
         <AnalyticEcommerce
           title="Publications"
           count={metrics.totalPublication.toLocaleString()}
-          percentage={metrics.percentages.totalPublication}
+          // percentage={metrics.percentages.totalPublication}
           extra="All Publications"
         />
       </Grid>
@@ -266,7 +267,7 @@ export default function Publications() {
         <AnalyticEcommerce
           title="Published"
           count={metrics.totalPublished.toLocaleString()}
-          percentage={metrics.percentages.totalPublished}
+          // percentage={metrics.percentages.totalPublished}
           extra="Successful Publications"
         />
       </Grid>
@@ -274,7 +275,7 @@ export default function Publications() {
         <AnalyticEcommerce
           title="Failed"
           count={metrics.totalFailed.toLocaleString()}
-          percentage={metrics.percentages.totalFailed}
+          // percentage={metrics.percentages.totalFailed}
           extra="Failed Publications"
         />
       </Grid>

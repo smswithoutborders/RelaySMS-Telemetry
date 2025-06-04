@@ -52,7 +52,7 @@ function TestDetails() {
             `${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients/${msisdn}/tests?page=${page}&per_page=${perPage}`
           );
 
-          const currentData = response.data;
+          const currentData = response.data.data;
           if (currentData.length > 0) {
             allData = [...allData, ...currentData];
             page++;
