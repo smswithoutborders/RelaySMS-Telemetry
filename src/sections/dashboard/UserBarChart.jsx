@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-
 // material-ui
 import { alpha, useTheme } from '@mui/material/styles';
 import Checkbox from '@mui/material/Checkbox';
@@ -11,10 +10,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-
 import { BarChart } from '@mui/x-charts/BarChart';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-
 // project imports
 import MainCard from 'components/MainCard';
 
@@ -144,15 +141,14 @@ export default function UserBarChart({ view, startDate: propStartDate, endDate: 
 
       {/* Pagination Buttons */}
       <Stack direction="row" sx={{ justifyContent: 'center', gap: 2, mt: 2 }}>
-        <Button size="small" variant="contained" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
+        <Button size="small" variant="contained" disabled={currentPage + 1 >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
           <LeftOutlined /> Previous
         </Button>
-
         <Typography variant="body2" color="text.primary">
           Page {currentPage + 1}
         </Typography>
 
-        <Button size="small" variant="contained" disabled={currentPage + 1 >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+        <Button size="small" variant="contained" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
           Next <RightOutlined />
         </Button>
       </Stack>

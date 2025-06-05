@@ -38,12 +38,30 @@ function TestDetails() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
-    const fetchTests = async () => {
+    const fetchAllTests = async () => {
       setLoading(true);
       setError(null);
+      let page = 1;
+      const perPage = 100;
+      let allData = [];
+      let hasMore = true;
+
       try {
-        const response = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients/${msisdn}/tests`);
-        setAllTestData(response.data);
+        while (hasMore) {
+          const response = await axios.get(
+            `${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients/${msisdn}/tests?page=${page}&per_page=${perPage}`
+          );
+
+          const currentData = response.data.data;
+          if (currentData.length > 0) {
+            allData = [...allData, ...currentData];
+            page++;
+          } else {
+            hasMore = false;
+          }
+        }
+
+        setAllTestData(allData);
       } catch (err) {
         console.error('Error fetching tests:', err);
         setError('Failed to fetch test data.');
@@ -52,7 +70,7 @@ function TestDetails() {
       }
     };
 
-    fetchTests();
+    fetchAllTests();
   }, [msisdn]);
 
   useEffect(() => {
@@ -208,7 +226,7 @@ function TestDetails() {
               </TableBody>
             </Table>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[5, 10, 25, 50, 75, 100]}
               component="div"
               count={filteredTestData.length}
               rowsPerPage={rowsPerPage}
