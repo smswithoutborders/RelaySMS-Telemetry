@@ -17,6 +17,7 @@ const Documentation = Loadable(lazy(() => import('pages/extra-pages/documentatio
 const Publications = Loadable(lazy(() => import('pages/publication/publications')));
 const ReliabilityTable = Loadable(lazy(() => import('pages/reliability/reliabilityTable')));
 const TestDetails = Loadable(lazy(() => import('pages/reliability/TestDetails')));
+const NotFound = Loadable(lazy(() => import('pages/extra-pages/notfound')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -47,6 +48,10 @@ const MainRoutes = {
     {
       path: 'documentation',
       element: <Documentation />
+    },
+    {
+      path: '*',
+      element: <NotFound />
     }
   ]
 };
