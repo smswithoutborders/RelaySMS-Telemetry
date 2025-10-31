@@ -12,8 +12,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-// project imports
-i;
+
 export default function UserBarChart({ view, filters }) {
   const theme = useTheme();
 

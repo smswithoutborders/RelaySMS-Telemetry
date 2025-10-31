@@ -158,12 +158,9 @@ export default function CountryMap({ filters }) {
 
     const initializeMap = () => {
       try {
-        console.log('Initializing map with', countryData.length, 'countries');
-
         const L = window.L;
 
         if (mapInstanceRef.current) {
-          console.log('Removing existing map');
           mapInstanceRef.current.remove();
           mapInstanceRef.current = null;
         }
@@ -172,8 +169,6 @@ export default function CountryMap({ filters }) {
 
         container._leaflet_id = null;
         container.innerHTML = '';
-
-        console.log('Creating map on clean container');
 
         const map = L.map(container, {
           center: [20, 0],
@@ -191,8 +186,6 @@ export default function CountryMap({ filters }) {
 
         mapInstanceRef.current = map;
 
-        console.log('Map instance created:', map);
-
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -206,8 +199,6 @@ export default function CountryMap({ filters }) {
           maxZoom: 20,
           pane: 'shadowPane'
         }).addTo(map);
-
-        console.log('Tile layer added');
 
         const userCounts = countryData.map((d) => d.users).sort((a, b) => a - b);
         const lowThreshold = userCounts[Math.floor(userCounts.length / 3)];
@@ -223,15 +214,10 @@ export default function CountryMap({ filters }) {
           }
         };
 
-        console.log('Color thresholds:', { low: lowThreshold, medium: mediumThreshold });
-        console.log('Adding', countryData.length, 'circle markers...');
-
         markersRef.current = [];
 
         const bounds = [];
         countryData.forEach((item, index) => {
-          console.log(`Adding circle ${index + 1}:`, item.country, item.position);
-
           const circleColor = getColor(item.users);
 
           const circle = L.circleMarker([item.position.lat, item.position.lng], {
@@ -242,8 +228,6 @@ export default function CountryMap({ filters }) {
             weight: 1,
             className: 'pulse-marker'
           }).addTo(map);
-
-          console.log('Circle added:', circle);
 
           markersRef.current.push({
             marker: circle,
@@ -315,22 +299,11 @@ export default function CountryMap({ filters }) {
           bounds.push([item.position.lat, item.position.lng]);
         });
 
-        console.log('Markers added, fitting bounds...');
-
         if (bounds.length > 0) {
           map.fitBounds(bounds, { padding: [50, 50], maxZoom: 4 });
-          console.log('Bounds fitted to:', bounds.length, 'markers');
         }
 
-        console.log('Map state:', {
-          center: map.getCenter(),
-          zoom: map.getZoom(),
-          size: map.getSize(),
-          bounds: map.getBounds()
-        });
-
         setMapLoaded(true);
-        console.log('Map initialization complete');
       } catch (err) {
         console.error('Error initializing map:', err);
         setError('Failed to load map');
