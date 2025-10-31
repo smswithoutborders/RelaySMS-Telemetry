@@ -1,9 +1,11 @@
 // ==============================|| OVERRIDES - TABLE ROW ||============================== //
 
 export default function TableBody(theme) {
+  const isDarkMode = theme.palette.mode === 'dark';
+
   const hoverStyle = {
     '&:hover': {
-      backgroundColor: theme.palette.secondary.lighter
+      backgroundColor: isDarkMode ? theme.palette.grey[900] : theme.palette.secondary.lighter
     }
   };
 
@@ -13,7 +15,7 @@ export default function TableBody(theme) {
         root: {
           '&.striped .MuiTableRow-root': {
             '&:nth-of-type(even)': {
-              backgroundColor: theme.palette.grey[50]
+              backgroundColor: isDarkMode ? theme.palette.background.default : theme.palette.grey[50]
             },
             ...hoverStyle
           },

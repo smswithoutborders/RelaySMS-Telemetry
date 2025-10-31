@@ -76,8 +76,9 @@ export default function CountryTable({ filters }) {
     const fetchCountryData = async () => {
       setLoading(true);
       try {
+        const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
         const response = await axios.get(
-          `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}`
+          `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
         );
 
         const categoryKey = effectiveCategory.includes('retained') ? 'retained' : 'signup';
@@ -111,7 +112,7 @@ export default function CountryTable({ filters }) {
     };
 
     fetchCountryData();
-  }, [filters, page, rowsPerPage]);
+  }, [filters, page, rowsPerPage, effectiveCategory, effectiveEndDate, effectiveGranularity, effectiveStartDate]);
 
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
@@ -122,7 +123,7 @@ export default function CountryTable({ filters }) {
   return (
     <>
       <Box component={Paper}>
-        <TableContainer sx={{ minHeight: 495, maxHeight: 495 }}>
+        <TableContainer sx={{ minHeight: 450, maxHeight: 450 }}>
           {loading && (
             <Box display="flex" justifyContent="center" p={4}>
               <CircularProgress />
@@ -182,6 +183,7 @@ CountryTable.propTypes = {
     groupBy: PropTypes.string,
     granularity: PropTypes.string,
     setGranularity: PropTypes.func,
-    category: PropTypes.string
+    category: PropTypes.string,
+    countryCode: PropTypes.string
   })
 };
