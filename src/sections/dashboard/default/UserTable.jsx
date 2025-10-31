@@ -60,7 +60,8 @@ export default function UserTable({ filters }) {
   const effectiveCategory = filters?.category || 'signup';
 
   useEffect(() => {
-    const apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=${groupBy}&page=${page + 1}&page_size=${rowsPerPage}`;
+    const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
+    const apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`;
 
     setLoading(true);
     setError('');
@@ -81,7 +82,18 @@ export default function UserTable({ filters }) {
         setError('Failed to load data.');
       })
       .finally(() => setLoading(false));
-  }, [filters?.startDate, filters?.endDate, groupBy, effectiveCategory, page, rowsPerPage, granularity]);
+  }, [
+    filters?.startDate,
+    filters?.endDate,
+    filters?.countryCode,
+    groupBy,
+    effectiveCategory,
+    page,
+    rowsPerPage,
+    granularity,
+    effectiveStartDate,
+    effectiveEndDate
+  ]);
 
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
@@ -111,7 +123,7 @@ export default function UserTable({ filters }) {
       </Stack>
 
       <Box component={Paper}>
-        <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
+        <TableContainer sx={{ minHeight: 500, maxHeight: 510 }}>
           {loading && (
             <Box display="flex" justifyContent="center" p={4}>
               <CircularProgress />
@@ -159,6 +171,7 @@ UserTable.propTypes = {
     endDate: PropTypes.string,
     groupBy: PropTypes.string,
     setGranularity: PropTypes.func,
-    category: PropTypes.string
+    category: PropTypes.string,
+    countryCode: PropTypes.string
   })
 };

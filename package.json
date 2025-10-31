@@ -1,7 +1,7 @@
 {
   "name": "relaysms-open-telemetry",
   "version": "1.4.1",
-  "homepage": "https://telemetry.smswithoutborders.com/",
+  "homepage": "/",
   "author": {
     "name": "SMSWithoutBorders",
     "email": "developers@smswithoutborders.com",
@@ -34,11 +34,13 @@
     "@mui/x-charts": "7.24.1",
     "@mui/x-date-pickers": "^8.1.0",
     "@vitejs/plugin-react": "4.3.4",
+    "antd": "^5.27.6",
     "axios": "^1.8.4",
     "dayjs": "^1.11.13",
     "formik": "2.4.6",
     "framer-motion": "^12.9.2",
     "i18n-iso-countries": "^7.14.0",
+    "libphonenumber-js": "^1.12.25",
     "lodash-es": "4.17.21",
     "motion-dom": "^12.9.1",
     "react": "18.3.1",
@@ -87,5 +89,6 @@
     "knip": "5.45.0",
     "prettier": "3.4.2",
     "prettier-eslint-cli": "8.0.1"
-  }
+  },
+  "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b"
 }

@@ -1,33 +1,38 @@
 // material-ui
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import { useTheme } from '@mui/material/styles';
+
+// ant design
+import { DatePicker, Select, Button, Dropdown } from 'antd';
+import 'antd/dist/reset.css';
 
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 
-import UniqueVisitorCard from 'sections/dashboard/default/UniqueVisitorCard';
-import ReportCard from 'sections/dashboard/default/ReportCard';
+import CombinedChartCard from 'sections/dashboard/default/CombinedChartCard';
 import UserTable from 'sections/dashboard/default/UserTable';
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, CalendarOutlined } from '@ant-design/icons';
 
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import weekday from 'dayjs/plugin/weekday';
+import localeData from 'dayjs/plugin/localeData';
+import countries from 'i18n-iso-countries';
+import enLocale from 'i18n-iso-countries/langs/en.json';
+import { getCountryCallingCode } from 'libphonenumber-js';
 
 import CountryTable from '../../sections/dashboard/default/CountryTable';
+import CountryMap from '../../sections/dashboard/default/Map';
 
-// Helper function to calculate percentage
+dayjs.extend(weekday);
+dayjs.extend(localeData);
+countries.registerLocale(enLocale);
+
 const maxValues = {
   totalSignupUsers: 50000,
   totalUsers: 30000,
@@ -41,17 +46,38 @@ const calculatePercentage = (value, max) => {
   return max ? Math.min((value / max) * 100, 100).toFixed(2) : '0:00';
 };
 
+const countryCodeToEmojiFlag = (code) => {
+  if (!code) return '';
+  return code.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt()));
+};
+
+const getDialingCode = (countryCode) => {
+  try {
+    const callingCode = getCountryCallingCode(countryCode);
+    return callingCode ? `+${callingCode}` : '';
+  } catch (error) {
+    return '';
+  }
+};
+
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
 export default function DashboardDefault() {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const [category, setCategory] = useState('signup');
   const [granularity, setGranularity] = useState('day');
   const [groupBy, setGroupBy] = useState('date');
+  const [countryCode, setCountryCode] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [dateRangeFilter, setDateRangeFilter] = useState('custom');
+  const [showCustomDatePickers, setShowCustomDatePickers] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filtersApplied, setFiltersApplied] = useState({});
+  const [availableCountries, setAvailableCountries] = useState([]);
   const [metrics, setMetrics] = useState({
     totalSignupUsers: 0,
     totalUsers: 0,
@@ -68,13 +94,150 @@ export default function DashboardDefault() {
       totalSignupCountries: 0
     }
   });
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const handleDateRangeSelect = ({ key }) => {
+    setDateRangeFilter(key);
+    const now = dayjs();
+
+    switch (key) {
+      case 'last24hours':
+        setStartDate(now);
+        setEndDate(now);
+        setShowCustomDatePickers(false);
+        setDropdownOpen(false);
+        break;
+      case 'last7days':
+        setStartDate(now.subtract(7, 'day'));
+        setEndDate(now);
+        setShowCustomDatePickers(false);
+        setDropdownOpen(false);
+        break;
+      case 'thismonth':
+        setStartDate(now.startOf('month'));
+        setEndDate(now);
+        setShowCustomDatePickers(false);
+        setDropdownOpen(false);
+        break;
+      case 'custom':
+        setShowCustomDatePickers(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const getCustomDropdownContent = () => {
+    const dropdownBg = isDarkMode ? '#1e293b' : '#fff';
+    const hoverBg = isDarkMode ? '#334155' : '#f5f5f5';
+    const borderColor = isDarkMode ? '#334155' : '#f0f0f0';
+    const textColor = isDarkMode ? '#e2e8f0' : '#333';
+    const labelColor = isDarkMode ? '#94a3b8' : '#666';
+
+    return (
+      <div
+        style={{
+          padding: '12px',
+          minWidth: '300px',
+          backgroundColor: dropdownBg,
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}
+      >
+        <div
+          style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = hoverBg)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
+          onClick={() => handleDateRangeSelect({ key: 'last24hours' })}
+        >
+          Last 24 Hours
+        </div>
+        <div
+          style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = hoverBg)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
+          onClick={() => handleDateRangeSelect({ key: 'last7days' })}
+        >
+          Last 7 Days
+        </div>
+        <div
+          style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = hoverBg)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
+          onClick={() => handleDateRangeSelect({ key: 'thismonth' })}
+        >
+          This Month
+        </div>
+        <div
+          style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = hoverBg)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
+          onClick={() => handleDateRangeSelect({ key: 'custom' })}
+        >
+          Custom
+        </div>
+        {showCustomDatePickers && (
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${borderColor}` }}>
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: labelColor }}>Start Date</label>
+              <DatePicker
+                placeholder="Start Date"
+                value={startDate}
+                onChange={(date) => setStartDate(date)}
+                style={{ width: '100%' }}
+                format="YYYY-MM-DD"
+              />
+            </div>
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: labelColor }}>End Date</label>
+              <DatePicker
+                placeholder="End Date"
+                value={endDate}
+                onChange={(date) => setEndDate(date)}
+                style={{ width: '100%' }}
+                format="YYYY-MM-DD"
+              />
+            </div>
+            <Button
+              type="primary"
+              style={{ width: '100%' }}
+              onClick={() => {
+                setDropdownOpen(false);
+              }}
+            >
+              Done
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const getDateRangeLabel = () => {
+    switch (dateRangeFilter) {
+      case 'last24hours':
+        return 'Last 24 Hours';
+      case 'last7days':
+        return 'Last 7 Days';
+      case 'thismonth':
+        return 'This Month';
+      case 'custom':
+        return 'Custom Range';
+      default:
+        return 'Date Range Filter';
+    }
+  };
+
   const handleApplyFilters = () => {
+    const today = new Date().toISOString().split('T')[0];
     const appliedFilters = {
       category,
       startDate: startDate ? startDate.format('YYYY-MM-DD') : '2021-01-10',
       endDate: endDate ? endDate.format('YYYY-MM-DD') : today,
       granularity,
-      groupBy
+      groupBy,
+      countryCode: countryCode || undefined
     };
 
     setFiltersApplied(appliedFilters);
@@ -87,8 +250,11 @@ export default function DashboardDefault() {
     setCategory('signup');
     setGranularity('month');
     setGroupBy('country');
+    setCountryCode(null);
     setStartDate(resetStartDate);
     setEndDate(resetEndDate);
+    setDateRangeFilter('custom');
+    setShowCustomDatePickers(false);
 
     setFiltersApplied({
       category: 'signup',
@@ -99,12 +265,11 @@ export default function DashboardDefault() {
     });
   };
 
-  const today = new Date().toISOString().split('T')[0];
-
   useEffect(() => {
     const fetchMetrics = async () => {
       setLoading(true);
       try {
+        const today = new Date().toISOString().split('T')[0];
         const appliedStart = startDate ? startDate.format('YYYY-MM-DD') : '2021-01-10';
         const appliedEnd = endDate ? endDate.format('YYYY-MM-DD') : today;
 
@@ -131,6 +296,28 @@ export default function DashboardDefault() {
             totalSignupCountries: calculatePercentage(data.total_signup_countries, maxValues.totalSignupCountries)
           }
         });
+
+        const countryCodes = category === 'signup' ? data.signup_countries || [] : data.retained_countries || [];
+        const countryOptions = countryCodes
+          .map((code) => {
+            const upperCode = typeof code === 'string' ? code.toUpperCase() : undefined;
+            const isValid = upperCode && countries.isValid(upperCode, 'en');
+            if (!isValid) return null;
+
+            const dialingCode = getDialingCode(upperCode);
+            const name = countries.getName(upperCode, 'en');
+            const flag = countryCodeToEmojiFlag(upperCode);
+
+            return {
+              value: upperCode,
+              label: dialingCode ? `${flag} ${name} (${upperCode}, ${dialingCode})` : `${flag} ${name} (${upperCode})`,
+              searchLabel: name
+            };
+          })
+          .filter(Boolean)
+          .sort((a, b) => a.searchLabel.localeCompare(b.searchLabel));
+
+        setAvailableCountries(countryOptions);
         setError(null);
       } catch (err) {
         console.error('Error fetching metrics:', err);
@@ -141,6 +328,7 @@ export default function DashboardDefault() {
     };
 
     fetchMetrics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersApplied]);
 
   return (
@@ -199,85 +387,97 @@ export default function DashboardDefault() {
       </Grid>
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
       {/* Filters Section */}
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Grid size={{ xs: 12, md: 12, lg: 12 }}>
-          <MainCard sx={{ mt: 1 }} content={false}>
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                Filters
+      <Grid size={{ xs: 12, md: 12, lg: 12 }}>
+        <Box>
+          <Grid container spacing={2} sx={{ width: '100%' }}>
+            {/* Category Filter */}
+            <Grid xs={12} md={3} lg={4}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Category
               </Typography>
-              <Grid container spacing={2} sx={{ width: '100%' }}>
-                {/* Category Filter */}
-                <Grid xs={12} md={3} lg={4}>
-                  <FormControl fullWidth>
-                    <InputLabel>Category</InputLabel>
-                    <Select sx={{ height: '53px' }} value={category} onChange={(e) => setCategory(e.target.value)} label="Category">
-                      <MenuItem value="signup">Sign-up Users</MenuItem>
-                      <MenuItem value="retained">Users</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+              <Select
+                placeholder="Select Category"
+                value={category}
+                onChange={(value) => setCategory(value)}
+                style={{ width: '100%' }}
+                options={[
+                  { value: 'signup', label: 'Sign-up Users' },
+                  { value: 'retained', label: 'Users' }
+                ]}
+              />
+            </Grid>
 
-                {/* Start Date */}
-                <Grid xs={12} md={3} lg={2}>
-                  <DatePicker
-                    label="Start Date"
-                    value={startDate}
-                    onChange={(newValue) => setStartDate(newValue)}
-                    slotProps={{ textField: { fullWidth: true } }}
-                  />
-                </Grid>
+            {/* Date Range Filter Button */}
+            <Grid xs={12} md={3} lg={2}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Date range filter
+              </Typography>
+              <Dropdown
+                dropdownRender={() => getCustomDropdownContent()}
+                trigger={['click']}
+                open={dropdownOpen}
+                onOpenChange={(open) => {
+                  setDropdownOpen(open);
+                  if (!open) {
+                    setShowCustomDatePickers(false);
+                  }
+                }}
+              >
+                <Button style={{ width: '100%' }} type="default" icon={<CalendarOutlined />}>
+                  {getDateRangeLabel()}
+                </Button>
+              </Dropdown>
+            </Grid>
 
-                {/* End Date */}
-                <Grid xs={12} md={3} lg={2}>
-                  <DatePicker
-                    label="End Date"
-                    value={endDate}
-                    onChange={(newValue) => setEndDate(newValue)}
-                    slotProps={{ textField: { fullWidth: true } }}
-                  />
-                </Grid>
+            {/* Country Filter */}
+            <Grid xs={12} md={3} lg={2}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Country {availableCountries.length > 0 && `(${availableCountries.length})`}
+              </Typography>
+              <Select
+                showSearch
+                allowClear
+                placeholder={availableCountries.length === 0 ? 'Loading...' : 'Select Country'}
+                value={countryCode}
+                onChange={(value) => setCountryCode(value)}
+                style={{ width: '100%', minWidth: '250px' }}
+                options={availableCountries}
+                filterOption={(input, option) => (option?.searchLabel ?? '').toLowerCase().includes(input.toLowerCase())}
+                notFoundContent={availableCountries.length === 0 ? 'Loading countries...' : 'No countries found'}
+              />
+            </Grid>
 
-                {/* Buttons */}
-                <Grid xs={12} md={3} lg={4} container spacing={1}>
-                  <Grid xs={6} md={12} lg={6}>
-                    <Button sx={{ height: '53px', px: 4 }} fullWidth variant="contained" onClick={handleApplyFilters}>
-                      Apply
-                    </Button>
-                  </Grid>
-                  <Grid xs={6} md={12} lg={6}>
-                    <Button
-                      sx={{ height: '53px', px: 4 }}
-                      fullWidth
-                      startIcon={<ReloadOutlined />}
-                      variant="outlined"
-                      onClick={handleResetFilters}
-                    >
-                      Reset
-                    </Button>
-                  </Grid>
-                </Grid>
+            {/* Buttons */}
+            <Grid xs={12} md={3} lg={4} container spacing={1} sx={{ mt: { md: 3.5 } }}>
+              <Grid xs={6} md={12} lg={6}>
+                <Button type="primary" style={{ width: '100%' }} onClick={handleApplyFilters}>
+                  Apply
+                </Button>
               </Grid>
-            </Box>
-          </MainCard>
-        </Grid>
-      </LocalizationProvider>
-
-      {/* row 2 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <UniqueVisitorCard filters={filtersApplied} />
+              <Grid xs={6} md={12} lg={6}>
+                <Button type="text" icon={<ReloadOutlined />} style={{ width: '100%' }} onClick={handleResetFilters}>
+                  Reset
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Box>
       </Grid>
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+
+      {/* row 2: Combined Chart and Map */}
+      <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
+        <CountryMap filters={filtersApplied} />
+      </Grid>
+      <Grid size={{ xs: 12, md: 5, lg: 3.5 }}>
         <CountryTable filters={filtersApplied} />
       </Grid>
-      {/* row 3 */}
+
+      {/* row 3: Country Table and User Table */}
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
         <UserTable filters={filtersApplied} />
       </Grid>
-
-      {/* row 4 */}
       <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <ReportCard />
+        <CombinedChartCard filters={filtersApplied} />
       </Grid>
     </Grid>
   );

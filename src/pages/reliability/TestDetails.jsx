@@ -12,19 +12,15 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
   TablePagination,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
   Box
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { LeftOutlined } from '@ant-design/icons';
+import { Button, Select, DatePicker, Space } from 'antd';
 import { styled } from '@mui/material/styles';
 import MainCard from 'components/MainCard';
+import dayjs from 'dayjs';
 
 function TestDetails() {
   const { msisdn } = useParams();
@@ -81,12 +77,10 @@ function TestDetails() {
     }
 
     if (dateFilter) {
-      const filterDate = new Date(dateFilter);
-      filterDate.setHours(0, 0, 0, 0);
+      const filterDate = dayjs(dateFilter).startOf('day');
       filtered = filtered.filter((test) => {
-        const testDate = new Date(test.start_time * 1000);
-        testDate.setHours(0, 0, 0, 0);
-        return testDate.getTime() === filterDate.getTime();
+        const testDate = dayjs(test.start_time * 1000).startOf('day');
+        return testDate.isSame(filterDate);
       });
     }
 
@@ -103,12 +97,12 @@ function TestDetails() {
     setPage(0);
   };
 
-  const handleStatusFilterChange = (event) => {
-    setStatusFilter(event.target.value);
+  const handleStatusFilterChange = (value) => {
+    setStatusFilter(value || '');
   };
 
-  const handleDateFilterChange = (event) => {
-    setDateFilter(event.target.value);
+  const handleDateFilterChange = (date) => {
+    setDateFilter(date);
   };
 
   const visibleRows = filteredTestData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -136,46 +130,40 @@ function TestDetails() {
       <Typography variant="h5" gutterBottom>
         Tests for MSISDN: {msisdn}
       </Typography>
-      <Button component={Link} to="/reliability" variant="text" sx={{ mb: 2 }}>
-        <LeftOutlined /> Back
-      </Button>
+      <Link to="/reliability" style={{ textDecoration: 'none' }}>
+        <Button type="link" icon={<LeftOutlined />} style={{ marginBottom: 16, paddingLeft: 0 }}>
+          Back
+        </Button>
+      </Link>
 
       {/* Filters */}
       <Grid size={{ xs: 12 }}>
-        <MainCard sx={{ mt: 1 }} content={false}>
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-              Filters
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item size={{ xs: 12, md: 6, lg: 3 }}>
-                <FormControl fullWidth>
-                  <InputLabel id="status-filter-label">Status</InputLabel>
-                  <Select labelId="status-filter-label" id="status-filter" value={statusFilter} onChange={handleStatusFilterChange}>
-                    <MenuItem value="">All</MenuItem>
-                    <MenuItem value="pending">Pending</MenuItem>
-                    <MenuItem value="success">Success</MenuItem>
-                    <MenuItem value="timedout">Timedout</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+        <Box>
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+            Filters
+          </Typography>
+          <Space wrap size="middle">
+            <Select
+              placeholder="Status"
+              value={statusFilter || undefined}
+              onChange={handleStatusFilterChange}
+              style={{ width: 150 }}
+              allowClear
+              options={[
+                { value: 'pending', label: 'Pending' },
+                { value: 'success', label: 'Success' },
+                { value: 'timedout', label: 'Timedout' }
+              ]}
+            />
 
-              {/* New Operator Filter */}
-              <Grid item size={{ xs: 12, md: 6, lg: 3 }}>
-                <TextField
-                  id="date-filter"
-                  label="Filter by Date"
-                  type="date"
-                  value={dateFilter}
-                  onChange={handleDateFilterChange}
-                  InputLabelProps={{
-                    shrink: true
-                  }}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-        </MainCard>
+            <DatePicker
+              placeholder="Filter by Date"
+              value={dateFilter ? dayjs(dateFilter) : null}
+              onChange={handleDateFilterChange}
+              format="YYYY-MM-DD"
+            />
+          </Space>
+        </Box>
       </Grid>
 
       <Grid size={{ xs: 12 }} sx={{ mt: 2 }}>

@@ -1,13 +1,20 @@
 import PropTypes from 'prop-types';
+import { useTheme } from '@mui/material/styles';
 
 // project imports
 import DrawerHeaderStyled from './DrawerHeaderStyled';
 import fullLogo from '/full-logo.svg';
 import logo from '/logo.svg';
+import darkLogo from '/RelaySMSDark.png';
 
 // ==============================|| DRAWER HEADER ||============================== //
 
 export default function DrawerHeader({ open }) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+
+  const currentFullLogo = isDarkMode ? darkLogo : fullLogo;
+
   return (
     <DrawerHeaderStyled
       open={open}
@@ -20,7 +27,7 @@ export default function DrawerHeader({ open }) {
       }}
     >
       <img
-        src={open ? fullLogo : logo}
+        src={open ? currentFullLogo : logo}
         alt="Logo"
         style={{
           width: open ? 'auto' : 35,

@@ -6,8 +6,6 @@ import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
 // project imports
-import Search from './Search';
-import MobileSection from './MobileSection';
 import { useThemeCustomization } from '../../../../themes';
 // project import
 import { GithubOutlined, SunFilled, SunOutlined } from '@ant-design/icons';
@@ -22,8 +20,7 @@ export default function HeaderContent() {
 
   return (
     <>
-      {!downLG && <Search />}
-      {downLG && <Box sx={{ width: '100%', ml: 1 }} />}
+      <Box sx={{ width: '100%', ml: 1 }} />
       <IconButton
         component={Link}
         href="https://github.com/smswithoutborders/"
@@ -31,16 +28,30 @@ export default function HeaderContent() {
         disableRipple
         color="secondary"
         title="SMS Without Borders on GitHub"
-        sx={{ color: 'text.primary', bgcolor: 'grey.100', mr: 1 }}
+        sx={(theme) => ({
+          color: 'text.primary',
+          bgcolor: 'grey.100',
+          ...theme.applyStyles('dark', { bgcolor: 'background.default' }),
+          mr: 1
+        })}
       >
         <GithubOutlined />
       </IconButton>
 
-      {/* <IconButton onClick={toggleColorMode} color="inherit" title="Toggle Theme">
+      <IconButton
+        onClick={toggleColorMode}
+        disableRipple
+        color="secondary"
+        title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        sx={(theme) => ({
+          color: 'text.primary',
+          bgcolor: 'grey.100',
+          ...theme.applyStyles('dark', { bgcolor: 'background.default' }),
+          mr: 1
+        })}
+      >
         {isDarkMode ? <SunOutlined /> : <SunFilled />}
-      </IconButton> */}
-
-      {downLG && <MobileSection />}
+      </IconButton>
     </>
   );
 }

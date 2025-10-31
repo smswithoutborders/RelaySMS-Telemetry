@@ -1,13 +1,8 @@
 // material-ui
-import Button from '@mui/material/Button';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -20,6 +15,10 @@ import TablePagination from '@mui/material/TablePagination';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 
+// antd
+import { Button, Select, DatePicker, Space } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
+
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
@@ -27,11 +26,8 @@ import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { ReloadOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 countries.registerLocale(enLocale);
 
 const maxValues = {
@@ -128,8 +124,8 @@ export default function Publications() {
   const handleApplyFilters = () => {
     const appliedFilters = {
       platform,
-      startDate: startDate ? startDate.format('YYYY-MM-DD') : '2021-01-10',
-      endDate: endDate ? endDate.format('YYYY-MM-DD') : today,
+      startDate: startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2021-01-10',
+      endDate: endDate ? dayjs(endDate).format('YYYY-MM-DD') : today,
       status,
       source
     };
@@ -160,8 +156,8 @@ export default function Publications() {
     const fetchMetrics = async () => {
       setLoading(true);
       try {
-        const appliedStart = startDate ? startDate.format('YYYY-MM-DD') : '2021-01-10';
-        const appliedEnd = endDate ? endDate.format('YYYY-MM-DD') : today;
+        const appliedStart = startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2021-01-10';
+        const appliedEnd = endDate ? dayjs(endDate).format('YYYY-MM-DD') : today;
 
         const params = {
           start_date: appliedStart,
@@ -282,76 +278,72 @@ export default function Publications() {
 
       {/* Filters */}
       <Grid item xs={12}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <MainCard sx={{ mt: 1 }} content={false}>
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                Filters
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth>
-                    <InputLabel>Platform</InputLabel>
-                    <Select sx={{ height: '53px' }} value={platform} onChange={(e) => setPlatform(e.target.value)} label="Platform">
-                      <MenuItem value="">All</MenuItem>
-                      <MenuItem value="gmail">Gmail</MenuItem>
-                      <MenuItem value="twitter">Twitter</MenuItem>
-                      <MenuItem value="telegram">Telegram</MenuItem>
-                      <MenuItem value="email_bridge">Email Bridge</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+        <Box>
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+            Filters
+          </Typography>
+          <Space wrap size="middle">
+            <Select
+              placeholder="Platform"
+              value={platform || undefined}
+              onChange={(value) => setPlatform(value || '')}
+              style={{ width: 150 }}
+              allowClear
+              options={[
+                { value: 'gmail', label: 'Gmail' },
+                { value: 'twitter', label: 'Twitter' },
+                { value: 'telegram', label: 'Telegram' },
+                { value: 'email_bridge', label: 'Email Bridge' }
+              ]}
+            />
 
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth>
-                    <InputLabel>Status</InputLabel>
-                    <Select sx={{ height: '53px' }} value={status} onChange={(e) => setStatus(e.target.value)} label="Status">
-                      <MenuItem value="">All</MenuItem>
-                      <MenuItem value="published">Published</MenuItem>
-                      <MenuItem value="failed">Failed</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+            <Select
+              placeholder="Status"
+              value={status || undefined}
+              onChange={(value) => setStatus(value || '')}
+              style={{ width: 150 }}
+              allowClear
+              options={[
+                { value: 'published', label: 'Published' },
+                { value: 'failed', label: 'Failed' }
+              ]}
+            />
 
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth>
-                    <InputLabel>Source</InputLabel>
-                    <Select sx={{ height: '53px' }} value={source} onChange={(e) => setSource(e.target.value)} label="Source">
-                      <MenuItem value="">All</MenuItem>
-                      <MenuItem value="platforms">Platform</MenuItem>
-                      <MenuItem value="bridges">Bridge</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+            <Select
+              placeholder="Source"
+              value={source || undefined}
+              onChange={(value) => setSource(value || '')}
+              style={{ width: 150 }}
+              allowClear
+              options={[
+                { value: 'platforms', label: 'Platform' },
+                { value: 'bridges', label: 'Bridge' }
+              ]}
+            />
 
-                <Grid item xs={12} sm={6} md={3}>
-                  <DatePicker label="Start Date" value={startDate} onChange={(newValue) => setStartDate(newValue)} fullWidth />
-                </Grid>
+            <DatePicker
+              placeholder="Start Date"
+              value={startDate ? dayjs(startDate) : null}
+              onChange={(date) => setStartDate(date)}
+              format="YYYY-MM-DD"
+            />
 
-                <Grid item xs={12} sm={6} md={3}>
-                  <DatePicker label="End Date" value={endDate} onChange={(newValue) => setEndDate(newValue)} fullWidth />
-                </Grid>
+            <DatePicker
+              placeholder="End Date"
+              value={endDate ? dayjs(endDate) : null}
+              onChange={(date) => setEndDate(date)}
+              format="YYYY-MM-DD"
+            />
 
-                <Grid item xs={6} sm={6} md={2}>
-                  <Button sx={{ height: '53px', px: 4 }} fullWidth variant="contained" onClick={handleApplyFilters}>
-                    Apply
-                  </Button>
-                </Grid>
-                <Grid item xs={6} sm={6} md={2}>
-                  <Button
-                    sx={{ height: '53px', px: 4 }}
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<ReloadOutlined />}
-                    onClick={handleResetFilters}
-                  >
-                    Reset
-                  </Button>
-                </Grid>
-              </Grid>
-            </Box>
-          </MainCard>
-        </LocalizationProvider>
+            <Button type="primary" onClick={handleApplyFilters}>
+              Apply
+            </Button>
+
+            <Button icon={<ReloadOutlined />} onClick={handleResetFilters}>
+              Reset
+            </Button>
+          </Space>
+        </Box>
       </Grid>
 
       {/* Table */}
