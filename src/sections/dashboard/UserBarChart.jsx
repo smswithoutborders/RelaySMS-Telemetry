@@ -13,16 +13,15 @@ import Button from '@mui/material/Button';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 // project imports
-import MainCard from 'components/MainCard';
-
-export default function UserBarChart({ view, startDate: propStartDate, endDate: propEndDate }) {
+i;
+export default function UserBarChart({ view, filters }) {
   const theme = useTheme();
 
   const today = new Date();
   const defaultEndDate = today.toISOString().split('T')[0];
 
-  const [startDate, setStartDate] = useState(propStartDate || '2020-01-10');
-  const [endDate, setEndDate] = useState(propEndDate || defaultEndDate);
+  const startDate = filters?.startDate || '2020-01-10';
+  const endDate = filters?.endDate || defaultEndDate;
   const [labels, setLabels] = useState([]);
   const [signupData, setSignupData] = useState([]);
   const [retainedData, setRetainedData] = useState([]);
@@ -42,13 +41,14 @@ export default function UserBarChart({ view, startDate: propStartDate, endDate: 
     const fetchData = async () => {
       try {
         const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
+        const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
 
         const signupResponse = await axios.get(
-          `${baseUrl}signup?category=signup&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}`
+          `${baseUrl}signup?category=signup&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}`
         );
 
         const retainedResponse = await axios.get(
-          `${baseUrl}retained?category=retained&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}`
+          `${baseUrl}retained?category=retained&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}`
         );
 
         const signup = signupResponse?.data?.signup?.data ?? [];
@@ -72,7 +72,7 @@ export default function UserBarChart({ view, startDate: propStartDate, endDate: 
     };
 
     fetchData();
-  }, [startDate, endDate, granularity, currentPage]);
+  }, [startDate, endDate, granularity, currentPage, filters?.countryCode]);
 
   const axisFontStyle = { fontSize: 10, fill: theme.palette.text.secondary };
 
@@ -82,64 +82,61 @@ export default function UserBarChart({ view, startDate: propStartDate, endDate: 
 
   return (
     <>
-      <MainCard sx={{ mt: 1 }} content={false}>
-        <Box sx={{ p: 2.5, pb: 0 }}>
-          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                User Data
-              </Typography>
-              <Typography variant="h4">Signups & Retained</Typography>
-            </Box>
+      <Box sx={{ p: 2.5, pb: 0 }}>
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+              User Data
+            </Typography>
+            <Typography variant="h4">Signups & Retained</Typography>
+          </Box>
 
-            <FormGroup>
-              <Stack direction="row">
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={showSignups}
-                      onChange={() => setShowSignups(!showSignups)}
-                      sx={{ '&.Mui-checked': { color: primaryColor }, '&:hover': { backgroundColor: alpha(primaryColor, 0.08) } }}
-                    />
-                  }
-                  label="Signups"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={showRetained}
-                      onChange={() => setShowRetained(!showRetained)}
-                      sx={{ '&.Mui-checked': { color: secondaryColor } }}
-                    />
-                  }
-                  label="Retained"
-                />
-              </Stack>
-            </FormGroup>
-          </Stack>
+          <FormGroup>
+            <Stack direction="row">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={showSignups}
+                    onChange={() => setShowSignups(!showSignups)}
+                    sx={{ '&.Mui-checked': { color: primaryColor }, '&:hover': { backgroundColor: alpha(primaryColor, 0.08) } }}
+                  />
+                }
+                label="Signups"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={showRetained}
+                    onChange={() => setShowRetained(!showRetained)}
+                    sx={{ '&.Mui-checked': { color: secondaryColor } }}
+                  />
+                }
+                label="Retained"
+              />
+            </Stack>
+          </FormGroup>
+        </Stack>
 
-          <BarChart
-            height={400}
-            grid={{ horizontal: true }}
-            xAxis={[{ data: labels, scaleType: 'band', tickLabelStyle: { ...axisFontStyle, fontSize: 12 } }]}
-            yAxis={[{ disableLine: true, disableTicks: true, tickLabelStyle: axisFontStyle }]}
-            series={[
-              ...(showSignups ? [{ data: signupData, label: 'Signups', color: primaryColor, type: 'bar' }] : []),
-              ...(showRetained ? [{ data: retainedData, label: 'Retained', color: '#ff9e43', type: 'bar' }] : [])
-            ]}
-            slotProps={{ legend: { hidden: true }, bar: { rx: 5, ry: 5 } }}
-            axisHighlight={{ x: 'none' }}
-            margin={{ top: 30, left: 40, right: 10 }}
-            tooltip={{ trigger: 'item' }}
-            sx={{
-              '& .MuiBarElement-root:hover': { opacity: 0.6 },
-              '& .MuiChartsAxis-directionX .MuiChartsAxis-tick, & .MuiChartsAxis-root line': { stroke: theme.palette.divider }
-            }}
-          />
-        </Box>
-      </MainCard>
+        <BarChart
+          height={400}
+          grid={{ horizontal: true }}
+          xAxis={[{ data: labels, scaleType: 'band', tickLabelStyle: { ...axisFontStyle, fontSize: 12 } }]}
+          yAxis={[{ disableLine: true, disableTicks: true, tickLabelStyle: axisFontStyle }]}
+          series={[
+            ...(showSignups ? [{ data: signupData, label: 'Signups', color: primaryColor, type: 'bar' }] : []),
+            ...(showRetained ? [{ data: retainedData, label: 'Retained', color: '#ff9e43', type: 'bar' }] : [])
+          ]}
+          slotProps={{ legend: { hidden: true }, bar: { rx: 5, ry: 5 } }}
+          axisHighlight={{ x: 'none' }}
+          margin={{ top: 30, left: 40, right: 10 }}
+          tooltip={{ trigger: 'item' }}
+          sx={{
+            '& .MuiBarElement-root:hover': { opacity: 0.6 },
+            '& .MuiChartsAxis-directionX .MuiChartsAxis-tick, & .MuiChartsAxis-root line': { stroke: theme.palette.divider }
+          }}
+        />
+      </Box>
 
-      {/* Pagination Buttons */}
       <Stack direction="row" sx={{ justifyContent: 'center', gap: 2, mt: 2 }}>
         <Button size="small" variant="contained" disabled={currentPage + 1 >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
           <LeftOutlined /> Previous
@@ -158,6 +155,9 @@ export default function UserBarChart({ view, startDate: propStartDate, endDate: 
 
 UserBarChart.propTypes = {
   view: PropTypes.oneOf(['month', 'day']),
-  startDate: PropTypes.string,
-  endDate: PropTypes.string
+  filters: PropTypes.shape({
+    startDate: PropTypes.string,
+    endDate: PropTypes.string,
+    countryCode: PropTypes.string
+  })
 };

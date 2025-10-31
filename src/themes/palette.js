@@ -43,20 +43,20 @@ export default function Palette(mode, presetColor) {
   // ];
   // Dark Mode Greys for Very Dark Blue Theme
   let darkGreyPrimary = [
-    '#0a1929',
-    '#0d1b2a',
-    '#112240',
-    '#1b263b',
-    '#415a77',
-    '#778da9',
-    '#aab7c4',
-    '#cbd5e1',
-    '#e2e8f0',
-    '#f1f5f9',
-    '#f8fafc'
+    '#ffffffff', // 0 - lightest (for text on dark bg)
+    '#f5f5f5ff', // 1
+    '#e2e8f0', // 2
+    '#cbd5e1', // 3
+    '#aab7c4', // 4
+    '#99a1acff', // 5
+    '#5c6672ff', // 6
+    '#2e323aff', // 7
+    '#27292eff', // 8
+    '#1d2022ff', // 9
+    '#1e2124ff' // 10 - darkest (for backgrounds)
   ];
 
-  let darkGreyAscent = ['#0d1b2a', '#1b263b', '#415a77', '#778da9'];
+  let darkGreyAscent = ['#121314ff', '#1d2022ff', '#5e6d7eff', '#5c6672ff'];
 
   let darkGreyConstant = ['#0a1929', '#112240'];
 
@@ -74,16 +74,16 @@ export default function Palette(mode, presetColor) {
       },
       ...paletteColor,
       text: {
-        primary: paletteColor.grey[mode === 'dark' ? 300 : 700],
-        secondary: paletteColor.grey[mode === 'dark' ? 500 : 500],
+        primary: paletteColor.grey[mode === 'dark' ? 200 : 700],
+        secondary: paletteColor.grey[mode === 'dark' ? 400 : 500],
         disabled: paletteColor.grey[mode === 'dark' ? 600 : 400]
       },
       action: {
-        disabled: paletteColor.grey[mode === 'dark' ? 800 : 300]
+        disabled: paletteColor.grey[mode === 'dark' ? 700 : 300]
       },
-      divider: paletteColor.grey[mode === 'dark' ? 800 : 200],
+      divider: paletteColor.grey[mode === 'dark' ? 700 : 200],
       background: {
-        paper: paletteColor.grey[mode === 'dark' ? 900 : 0],
+        paper: paletteColor.grey[mode === 'dark' ? 800 : 0],
         default: paletteColor.grey[mode === 'dark' ? 900 : 'A50']
       }
     }

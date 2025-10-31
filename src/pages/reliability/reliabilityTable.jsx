@@ -1,13 +1,8 @@
 // material-ui
-import Button from '@mui/material/Button';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -20,6 +15,10 @@ import TablePagination from '@mui/material/TablePagination';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 
+// antd
+import { Button, Select, Space } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
+
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
@@ -27,11 +26,6 @@ import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import axios from 'axios';
 import { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { ReloadOutlined } from '@ant-design/icons';
-
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 
@@ -133,7 +127,7 @@ export default function ReliabilityTable() {
       operator,
       operatorCode,
       reliability,
-      dateFilter: dateFilter ? dateFilter.format('YYYY-MM-DD') : '2021-01-10'
+      dateFilter: dateFilter ? dayjs(dateFilter).format('YYYY-MM-DD') : '2021-01-10'
     };
     setFiltersApplied(appliedFilters);
     setPage(0);
@@ -343,68 +337,51 @@ export default function ReliabilityTable() {
       </Grid>
 
       <Grid item xs={12}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <MainCard sx={{ mt: 1 }} content={false}>
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                Filters
-              </Typography>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth>
-                    <InputLabel>Country</InputLabel>
-                    <Select sx={{ height: 53 }} value={country} onChange={(e) => setCountry(e.target.value)} label="Country">
-                      <MenuItem value="">All</MenuItem>
-                      {availableCountries.map((c) => (
-                        <MenuItem key={c} value={c}>
-                          {c}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+        <Box>
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+            Filters
+          </Typography>
+          <Space wrap size="middle">
+            <Select
+              placeholder="Country"
+              value={country || undefined}
+              onChange={(value) => setCountry(value || '')}
+              style={{ width: 150 }}
+              allowClear
+              options={availableCountries.filter((c) => c !== '').map((c) => ({ value: c, label: c }))}
+            />
 
-                <Grid item xs={12} sm={6} md={2}>
-                  <FormControl fullWidth>
-                    <InputLabel>Operator</InputLabel>
-                    <Select sx={{ height: 53 }} value={operator} onChange={(e) => setOperator(e.target.value)} label="Operator">
-                      <MenuItem value="">All</MenuItem>
-                      {availableOperators.map((o) => (
-                        <MenuItem key={o} value={o}>
-                          {o}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+            <Select
+              placeholder="Operator"
+              value={operator || undefined}
+              onChange={(value) => setOperator(value || '')}
+              style={{ width: 150 }}
+              allowClear
+              options={availableOperators.filter((o) => o !== '').map((o) => ({ value: o, label: o }))}
+            />
 
-                <Grid item xs={12} sm={6} md={2}>
-                  <FormControl fullWidth>
-                    <InputLabel>Reliability Period</InputLabel>
-                    <Select sx={{ height: 53 }} value={period} onChange={(e) => setPeriod(e.target.value)} label="Reliability Period">
-                      <MenuItem value="day">Day</MenuItem>
-                      <MenuItem value="week">Week</MenuItem>
-                      <MenuItem value="month">Month</MenuItem>
-                      <MenuItem value="all">All</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
+            <Select
+              placeholder="Reliability Period"
+              value={period}
+              onChange={(value) => setPeriod(value)}
+              style={{ width: 150 }}
+              options={[
+                { value: 'day', label: 'Day' },
+                { value: 'week', label: 'Week' },
+                { value: 'month', label: 'Month' },
+                { value: 'all', label: 'All' }
+              ]}
+            />
 
-                <Grid item xs={6} sm={3} md={2}>
-                  <Button sx={{ height: 53 }} fullWidth variant="contained" onClick={handleApplyFilters}>
-                    Apply
-                  </Button>
-                </Grid>
+            <Button type="primary" onClick={handleApplyFilters}>
+              Apply
+            </Button>
 
-                <Grid item xs={6} sm={3} md={3}>
-                  <Button sx={{ height: 53 }} fullWidth variant="outlined" startIcon={<ReloadOutlined />} onClick={handleResetFilters}>
-                    Reset
-                  </Button>
-                </Grid>
-              </Grid>
-            </Box>
-          </MainCard>
-        </LocalizationProvider>
+            <Button icon={<ReloadOutlined />} onClick={handleResetFilters}>
+              Reset
+            </Button>
+          </Space>
+        </Box>
       </Grid>
 
       <Grid item xs={12}>
