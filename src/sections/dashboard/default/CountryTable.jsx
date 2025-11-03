@@ -9,7 +9,6 @@ import {
   TableHead,
   TableRow,
   Box,
-  CircularProgress,
   Typography,
   TablePagination,
   Button,
@@ -19,6 +18,9 @@ import {
 import axios from 'axios';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
+
+// components
+import Loader from 'components/Loader';
 
 countries.registerLocale(enLocale);
 
@@ -49,7 +51,7 @@ CountryTableHead.propTypes = {
   userLabel: PropTypes.string.isRequired
 };
 
-export default function CountryTable({ filters }) {
+export default function CountryTable({ filters, onCountryClick, selectedCountry }) {
   const [countryData, setCountryData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [order] = useState('asc');
@@ -95,6 +97,7 @@ export default function CountryTable({ filters }) {
 
           return {
             country: name || code || 'Unknown',
+            countryCode: code,
             users: count,
             flag: flag || ''
           };
@@ -123,10 +126,10 @@ export default function CountryTable({ filters }) {
   return (
     <>
       <Box component={Paper}>
-        <TableContainer sx={{ minHeight: 450, maxHeight: 450 }}>
+        <TableContainer sx={{ minHeight: 450, maxHeight: 600 }}>
           {loading && (
             <Box display="flex" justifyContent="center" p={4}>
-              <CircularProgress />
+              <Loader size={50} fullScreen={false} />
             </Box>
           )}
 
@@ -142,7 +145,18 @@ export default function CountryTable({ filters }) {
               <TableBody>
                 {countryData.length > 0 ? (
                   countryData.map((row, index) => (
-                    <TableRow key={index} hover>
+                    <TableRow
+                      key={index}
+                      hover
+                      onClick={() => onCountryClick?.(row.countryCode)}
+                      sx={{
+                        cursor: 'pointer',
+                        backgroundColor: selectedCountry === row.countryCode ? 'action.selected' : 'transparent',
+                        '&:hover': {
+                          backgroundColor: selectedCountry === row.countryCode ? 'action.selected' : 'action.hover'
+                        }
+                      }}
+                    >
                       <TableCell>
                         <span style={{ marginRight: 8 }}>{row.flag}</span>
                         {row.country}
@@ -185,5 +199,7 @@ CountryTable.propTypes = {
     setGranularity: PropTypes.func,
     category: PropTypes.string,
     countryCode: PropTypes.string
-  })
+  }),
+  onCountryClick: PropTypes.func,
+  selectedCountry: PropTypes.string
 };

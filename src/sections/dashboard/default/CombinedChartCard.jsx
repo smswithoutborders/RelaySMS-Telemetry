@@ -2,8 +2,8 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 // material-ui
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
+import { Button } from 'antd';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import ToggleButton from '@mui/material/ToggleButton';

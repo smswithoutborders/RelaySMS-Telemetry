@@ -1,92 +1,20 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Box, CircularProgress, Typography, Paper, IconButton, useTheme } from '@mui/material';
+import { Box, Typography, Paper, IconButton, useTheme } from '@mui/material';
 import { FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
+import countryCoords from 'country-coords';
+
+// components
+import Loader from 'components/Loader';
 
 countries.registerLocale(enLocale);
 
-const countryCoordinates = {
-  US: { lat: 37.0902, lng: -95.7129 },
-  CA: { lat: 56.1304, lng: -106.3468 },
-  GB: { lat: 55.3781, lng: -3.436 },
-  DE: { lat: 51.1657, lng: 10.4515 },
-  FR: { lat: 46.2276, lng: 2.2137 },
-  IT: { lat: 41.8719, lng: 12.5674 },
-  ES: { lat: 40.4637, lng: -3.7492 },
-  AU: { lat: -25.2744, lng: 133.7751 },
-  JP: { lat: 36.2048, lng: 138.2529 },
-  CN: { lat: 35.8617, lng: 104.1954 },
-  IN: { lat: 20.5937, lng: 78.9629 },
-  BR: { lat: -14.235, lng: -51.9253 },
-  MX: { lat: 23.6345, lng: -102.5528 },
-  RU: { lat: 61.524, lng: 105.3188 },
-  ZA: { lat: -30.5595, lng: 22.9375 },
-  NG: { lat: 9.082, lng: 8.6753 },
-  CM: { lat: 7.3697, lng: 12.3547 },
-  EG: { lat: 26.8206, lng: 30.8025 },
-  KE: { lat: -0.0236, lng: 37.9062 },
-  GH: { lat: 7.9465, lng: -1.0232 },
-  UG: { lat: 1.3733, lng: 32.2903 },
-  TZ: { lat: -6.369, lng: 34.8888 },
-  ET: { lat: 9.145, lng: 40.4897 },
-  AR: { lat: -38.4161, lng: -63.6167 },
-  CL: { lat: -35.6751, lng: -71.543 },
-  CO: { lat: 4.5709, lng: -74.2973 },
-  PE: { lat: -9.19, lng: -75.0152 },
-  VE: { lat: 6.4238, lng: -66.5897 },
-  TH: { lat: 15.87, lng: 100.9925 },
-  VN: { lat: 14.0583, lng: 108.2772 },
-  PH: { lat: 12.8797, lng: 121.774 },
-  ID: { lat: -0.7893, lng: 113.9213 },
-  MY: { lat: 4.2105, lng: 101.9758 },
-  SG: { lat: 1.3521, lng: 103.8198 },
-  KR: { lat: 35.9078, lng: 127.7669 },
-  PK: { lat: 30.3753, lng: 69.3451 },
-  BD: { lat: 23.685, lng: 90.3563 },
-  NP: { lat: 28.3949, lng: 84.124 },
-  LK: { lat: 7.8731, lng: 80.7718 },
-  SA: { lat: 23.8859, lng: 45.0792 },
-  AE: { lat: 23.4241, lng: 53.8478 },
-  TR: { lat: 38.9637, lng: 35.2433 },
-  IL: { lat: 31.0461, lng: 34.8516 },
-  PL: { lat: 51.9194, lng: 19.1451 },
-  UA: { lat: 48.3794, lng: 31.1656 },
-  RO: { lat: 45.9432, lng: 24.9668 },
-  NL: { lat: 52.1326, lng: 5.2913 },
-  BE: { lat: 50.5039, lng: 4.4699 },
-  SE: { lat: 60.1282, lng: 18.6435 },
-  NO: { lat: 60.472, lng: 8.4689 },
-  DK: { lat: 56.2639, lng: 9.5018 },
-  FI: { lat: 61.9241, lng: 25.7482 },
-  AT: { lat: 47.5162, lng: 14.5501 },
-  CH: { lat: 46.8182, lng: 8.2275 },
-  PT: { lat: 39.3999, lng: -8.2245 },
-  GR: { lat: 39.0742, lng: 21.8243 },
-  CZ: { lat: 49.8175, lng: 15.473 },
-  HU: { lat: 47.1625, lng: 19.5033 },
-  IE: { lat: 53.4129, lng: -8.2439 },
-  NZ: { lat: -40.9006, lng: 174.886 },
-  HR: { lat: 45.1, lng: 15.2 },
-  SI: { lat: 46.1512, lng: 14.9955 },
-  SK: { lat: 48.669, lng: 19.699 },
-  LT: { lat: 55.1694, lng: 23.8813 },
-  LV: { lat: 56.8796, lng: 24.6032 },
-  EE: { lat: 58.5953, lng: 25.0136 },
-  BG: { lat: 42.7339, lng: 25.4858 },
-  RS: { lat: 44.0165, lng: 21.0059 },
-  BA: { lat: 43.9159, lng: 17.6791 },
-  MK: { lat: 41.6086, lng: 21.7453 },
-  AL: { lat: 41.1533, lng: 20.1683 },
-  MT: { lat: 35.9375, lng: 14.3754 },
-  CY: { lat: 35.1264, lng: 33.4299 },
-  LU: { lat: 49.8153, lng: 6.1296 },
-  IS: { lat: 64.9631, lng: -19.0208 }
-};
+const coordsByCountry = countryCoords.byCountry();
 
-export default function CountryMap({ filters }) {
+export default function CountryMap({ filters, selectedCountry, onCountrySelect }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [countryData, setCountryData] = useState([]);
@@ -127,13 +55,20 @@ export default function CountryMap({ filters }) {
           const name = isValidCode ? countries.getName(code, 'en') : 'Unknown';
           const count = item.signup_users ?? item.retained_users ?? 0;
 
-          if (isValidCode && countryCoordinates[code]) {
-            return {
-              country: name || code || 'Unknown',
-              countryCode: code,
-              users: count,
-              position: countryCoordinates[code]
-            };
+          if (isValidCode) {
+            try {
+              const countryInfo = coordsByCountry.get(code);
+              if (countryInfo && countryInfo.latitude !== undefined && countryInfo.longitude !== undefined) {
+                return {
+                  country: name || code || 'Unknown',
+                  countryCode: code,
+                  users: count,
+                  position: { lat: countryInfo.latitude, lng: countryInfo.longitude }
+                };
+              }
+            } catch (error) {
+              console.warn(`Could not get coordinates for country code: ${code}`, error);
+            }
           }
           return null;
         })
@@ -200,6 +135,18 @@ export default function CountryMap({ filters }) {
           pane: 'shadowPane'
         }).addTo(map);
 
+        map.on('click', function (e) {
+          const clickedOnMarker = markersRef.current.some(({ marker }) => {
+            const markerLatLng = marker.getLatLng();
+            const distance = map.distance(e.latlng, markerLatLng);
+            return distance < 50;
+          });
+
+          if (!clickedOnMarker) {
+            onCountrySelect?.(null);
+          }
+        });
+
         const userCounts = countryData.map((d) => d.users).sort((a, b) => a - b);
         const lowThreshold = userCounts[Math.floor(userCounts.length / 3)];
         const mediumThreshold = userCounts[Math.floor((userCounts.length * 2) / 3)];
@@ -234,7 +181,8 @@ export default function CountryMap({ filters }) {
             color: circleColor,
             users: item.users,
             originalRadius: 6,
-            originalOpacity: 0.7
+            originalOpacity: 0.7,
+            countryCode: item.countryCode
           });
 
           circle.bindTooltip(
@@ -260,6 +208,10 @@ export default function CountryMap({ filters }) {
               className: 'custom-popup'
             }
           );
+
+          circle.on('click', function () {
+            onCountrySelect?.(item.countryCode === selectedCountry ? null : item.countryCode);
+          });
 
           circle.on('mouseover', function () {
             if (selectedColor === null || selectedColor === circleColor) {
@@ -324,6 +276,40 @@ export default function CountryMap({ filters }) {
   useEffect(() => {
     setMapLoaded(false);
   }, [filters]);
+
+  useEffect(() => {
+    if (!mapLoaded || markersRef.current.length === 0) return;
+
+    markersRef.current.forEach(({ marker, color, countryCode, originalRadius, originalOpacity }) => {
+      if (selectedCountry && countryCode === selectedCountry) {
+        marker.setStyle({
+          radius: 12,
+          fillOpacity: 1,
+          weight: 3,
+          color: '#f1a35aff'
+        });
+        marker.openPopup();
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.panTo(marker.getLatLng(), { animate: true, duration: 0.5 });
+        }
+      } else if (selectedCountry) {
+        marker.setStyle({
+          radius: originalRadius,
+          fillOpacity: 0.3,
+          weight: 1,
+          color: '#ffffff'
+        });
+      } else {
+        marker.setStyle({
+          radius: originalRadius,
+          fillOpacity: originalOpacity,
+          weight: 1,
+          color: '#ffffff'
+        });
+        marker.closePopup();
+      }
+    });
+  }, [selectedCountry, mapLoaded]);
 
   const toggleFullscreen = () => {
     setIsFullscreen((prev) => !prev);
@@ -472,6 +458,7 @@ export default function CountryMap({ filters }) {
         component={Paper}
         sx={{
           height: '100%',
+          minHeight: { xs: '400px', sm: '500px', md: '600px' },
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -488,7 +475,7 @@ export default function CountryMap({ filters }) {
       >
         {loading && (
           <Box display="flex" justifyContent="center" alignItems="center" sx={{ flex: 1 }}>
-            <CircularProgress />
+            <Loader size={50} fullScreen={false} />
           </Box>
         )}
         {!loading && error && (
@@ -509,32 +496,37 @@ export default function CountryMap({ filters }) {
               onClick={toggleFullscreen}
               sx={(theme) => ({
                 position: 'absolute',
-                top: 10,
-                right: 10,
+                top: { xs: 8, sm: 10 },
+                right: { xs: 8, sm: 10 },
                 backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                 color: 'text.primary',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                 zIndex: 1000,
+                padding: { xs: '6px', sm: '8px' },
                 '&:hover': {
                   backgroundColor: isDarkMode ? 'rgba(51, 65, 85, 1)' : 'rgba(255, 255, 255, 1)'
                 }
               })}
             >
-              {isFullscreen ? <FullscreenExitOutlined style={{ fontSize: 20 }} /> : <FullscreenOutlined style={{ fontSize: 20 }} />}
+              {isFullscreen ? <FullscreenExitOutlined style={{ fontSize: '18px' }} /> : <FullscreenOutlined style={{ fontSize: '18px' }} />}
             </IconButton>
             <Box
               sx={(theme) => ({
                 position: 'absolute',
-                bottom: 20,
-                right: 20,
+                bottom: { xs: 10, sm: 20 },
+                right: { xs: 10, sm: 20 },
                 backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                padding: '12px 16px',
+                padding: { xs: '8px 12px', sm: '12px 16px' },
                 borderRadius: '4px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                zIndex: 1000
+                zIndex: 1000,
+                maxWidth: { xs: '140px', sm: 'none' }
               })}
             >
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.primary' }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 600, mb: 1, color: 'text.primary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
                 {userLabel}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
@@ -571,7 +563,7 @@ export default function CountryMap({ filters }) {
                         flexShrink: 0
                       }}
                     />
-                    <Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                    <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, color: 'text.secondary' }}>
                       {item.label}
                     </Typography>
                   </Box>
@@ -598,5 +590,7 @@ CountryMap.propTypes = {
     granularity: PropTypes.string,
     category: PropTypes.string,
     countryCode: PropTypes.string
-  })
+  }),
+  selectedCountry: PropTypes.string,
+  onCountrySelect: PropTypes.func
 };
