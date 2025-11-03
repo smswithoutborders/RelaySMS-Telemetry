@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 // material-ui
-import Button from '@mui/material/Button';
+import { Button } from 'antd';
 import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -25,7 +25,7 @@ export default function UniqueVisitorCard({ filters }) {
               size="small"
               onClick={() => setView('month')}
               color={view === 'month' ? 'primary' : 'secondary'}
-              variant={view === 'month' ? 'outlined' : 'text'}
+              type={view === 'month' ? 'outlined' : 'text'}
             >
               Month
             </Button>
@@ -33,7 +33,7 @@ export default function UniqueVisitorCard({ filters }) {
               size="small"
               onClick={() => setView('day')}
               color={view === 'day' ? 'primary' : 'secondary'}
-              variant={view === 'day' ? 'outlined' : 'text'}
+              type={view === 'day' ? 'outlined' : 'text'}
             >
               Day
             </Button>

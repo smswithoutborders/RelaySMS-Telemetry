@@ -9,9 +9,12 @@ import FormGroup from '@mui/material/FormGroup';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import { Button } from 'antd';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+
+// components
+import Loader from 'components/Loader';
 
 export default function UserBarChart({ view, filters }) {
   const theme = useTheme();
@@ -26,6 +29,7 @@ export default function UserBarChart({ view, filters }) {
   const [retainedData, setRetainedData] = useState([]);
   const [showSignups, setShowSignups] = useState(true);
   const [showRetained, setShowRetained] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
@@ -38,6 +42,7 @@ export default function UserBarChart({ view, filters }) {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
         const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
@@ -67,6 +72,8 @@ export default function UserBarChart({ view, filters }) {
         setTotalPages(signupResponse?.data?.signup?.pagination?.total_pages || 1);
       } catch (error) {
         console.error('Error fetching bar chart data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -81,73 +88,81 @@ export default function UserBarChart({ view, filters }) {
 
   return (
     <>
-      <Box sx={{ p: 2.5, pb: 0 }}>
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-              User Data
-            </Typography>
-            <Typography variant="h4">Signups & Retained</Typography>
+      {loading ? (
+        <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Loader size={50} fullScreen={false} />
+        </Box>
+      ) : (
+        <>
+          <Box sx={{ p: 2.5, pb: 0 }}>
+            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                  User Data
+                </Typography>
+                <Typography variant="h5">Signups & Retained</Typography>
+              </Box>
+
+              <FormGroup>
+                <Stack direction="row">
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={showSignups}
+                        onChange={() => setShowSignups(!showSignups)}
+                        sx={{ '&.Mui-checked': { color: primaryColor }, '&:hover': { backgroundColor: alpha(primaryColor, 0.08) } }}
+                      />
+                    }
+                    label="Signups"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={showRetained}
+                        onChange={() => setShowRetained(!showRetained)}
+                        sx={{ '&.Mui-checked': { color: secondaryColor } }}
+                      />
+                    }
+                    label="Retained"
+                  />
+                </Stack>
+              </FormGroup>
+            </Stack>
+
+            <BarChart
+              height={400}
+              grid={{ horizontal: true }}
+              xAxis={[{ data: labels, scaleType: 'band', tickLabelStyle: { ...axisFontStyle, fontSize: 12 } }]}
+              yAxis={[{ disableLine: true, disableTicks: true, tickLabelStyle: axisFontStyle }]}
+              series={[
+                ...(showSignups ? [{ data: signupData, label: 'Signups', color: primaryColor, type: 'bar' }] : []),
+                ...(showRetained ? [{ data: retainedData, label: 'Retained', color: '#ff9e43', type: 'bar' }] : [])
+              ]}
+              slotProps={{ legend: { hidden: true }, bar: { rx: 5, ry: 5 } }}
+              axisHighlight={{ x: 'none' }}
+              margin={{ top: 30, left: 40, right: 10 }}
+              tooltip={{ trigger: 'item' }}
+              sx={{
+                '& .MuiBarElement-root:hover': { opacity: 0.6 },
+                '& .MuiChartsAxis-directionX .MuiChartsAxis-tick, & .MuiChartsAxis-root line': { stroke: theme.palette.divider }
+              }}
+            />
           </Box>
 
-          <FormGroup>
-            <Stack direction="row">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={showSignups}
-                    onChange={() => setShowSignups(!showSignups)}
-                    sx={{ '&.Mui-checked': { color: primaryColor }, '&:hover': { backgroundColor: alpha(primaryColor, 0.08) } }}
-                  />
-                }
-                label="Signups"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={showRetained}
-                    onChange={() => setShowRetained(!showRetained)}
-                    sx={{ '&.Mui-checked': { color: secondaryColor } }}
-                  />
-                }
-                label="Retained"
-              />
-            </Stack>
-          </FormGroup>
-        </Stack>
+          <Stack direction="row" sx={{ justifyContent: 'center', gap: 2, mt: 2 }}>
+            <Button size="small" type="text" disabled={currentPage + 1 >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+              <LeftOutlined /> Previous
+            </Button>
+            <Typography variant="body2" color="text.primary">
+              Page {currentPage + 1}
+            </Typography>
 
-        <BarChart
-          height={400}
-          grid={{ horizontal: true }}
-          xAxis={[{ data: labels, scaleType: 'band', tickLabelStyle: { ...axisFontStyle, fontSize: 12 } }]}
-          yAxis={[{ disableLine: true, disableTicks: true, tickLabelStyle: axisFontStyle }]}
-          series={[
-            ...(showSignups ? [{ data: signupData, label: 'Signups', color: primaryColor, type: 'bar' }] : []),
-            ...(showRetained ? [{ data: retainedData, label: 'Retained', color: '#ff9e43', type: 'bar' }] : [])
-          ]}
-          slotProps={{ legend: { hidden: true }, bar: { rx: 5, ry: 5 } }}
-          axisHighlight={{ x: 'none' }}
-          margin={{ top: 30, left: 40, right: 10 }}
-          tooltip={{ trigger: 'item' }}
-          sx={{
-            '& .MuiBarElement-root:hover': { opacity: 0.6 },
-            '& .MuiChartsAxis-directionX .MuiChartsAxis-tick, & .MuiChartsAxis-root line': { stroke: theme.palette.divider }
-          }}
-        />
-      </Box>
-
-      <Stack direction="row" sx={{ justifyContent: 'center', gap: 2, mt: 2 }}>
-        <Button size="small" variant="contained" disabled={currentPage + 1 >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
-          <LeftOutlined /> Previous
-        </Button>
-        <Typography variant="body2" color="text.primary">
-          Page {currentPage + 1}
-        </Typography>
-
-        <Button size="small" variant="contained" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
-          Next <RightOutlined />
-        </Button>
-      </Stack>
+            <Button size="small" type="text" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
+              Next <RightOutlined />
+            </Button>
+          </Stack>
+        </>
+      )}
     </>
   );
 }

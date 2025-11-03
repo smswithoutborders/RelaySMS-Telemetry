@@ -3,7 +3,6 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -19,8 +18,10 @@ import enLocale from 'i18n-iso-countries/langs/en.json';
 import { Button, Select, Space } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 
+// components
+import Loader from 'components/Loader';
+
 // project imports
-import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 
 import axios from 'axios';
@@ -389,7 +390,7 @@ export default function ReliabilityTable() {
           <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
             {loading ? (
               <Box display="flex" justifyContent="center" p={4}>
-                <CircularProgress />
+                <Loader size={50} fullScreen={false} />
               </Box>
             ) : error ? (
               <Box display="flex" justifyContent="center" p={4}>
@@ -416,7 +417,7 @@ export default function ReliabilityTable() {
                         <TableCell>{row.operator_code}</TableCell>
                         <TableCell>
                           {reliabilityLoading ? (
-                            <CircularProgress size={16} />
+                            <Loader size={16} fullScreen={false} />
                           ) : currentReliability !== undefined ? (
                             `${currentReliability}%`
                           ) : (

@@ -2848,6 +2848,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"country-coords@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "country-coords@npm:1.0.0"
+  checksum: 10c0/3b460c90732502a20e2cae1f412cd009a45741ff5cb5c194dca98ff896a451dbda00e6e530abec6a6385f77d3c1b82dac975fcf7760d541e811c384bbc6d93a6
+  languageName: node
+  linkType: hard
+
 "cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.6":
   version: 7.0.6
   resolution: "cross-spawn@npm:7.0.6"
@@ -6442,6 +6449,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:4.3.4"
     antd: "npm:^5.27.6"
     axios: "npm:^1.8.4"
+    country-coords: "npm:^1.0.0"
     dayjs: "npm:^1.11.13"
     eslint: "npm:9.19.0"
     eslint-config-prettier: "npm:10.0.1"
