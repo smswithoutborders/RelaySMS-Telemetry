@@ -94,6 +94,7 @@ export default function DashboardDefault() {
       totalSignupCountries: 0
     }
   });
+  const [selectedCountry, setSelectedCountry] = useState(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -337,7 +338,7 @@ export default function DashboardDefault() {
       <Grid sx={{ mb: -2.25 }} size={12}>
         <Typography variant="h5">Open Telemetry</Typography>
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 2, lg: 2 }}>
+      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Sign-up Users"
           count={metrics.totalSignupUsers.toLocaleString()}
@@ -345,7 +346,7 @@ export default function DashboardDefault() {
           extra="Number of Signups"
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 2, lg: 2 }}>
+      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Users"
           count={metrics.totalUsers.toLocaleString()}
@@ -353,7 +354,7 @@ export default function DashboardDefault() {
           extra="Number of current users"
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 2, lg: 2 }}>
+      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Active Users"
           count={metrics.totalActiveUsers.toLocaleString()}
@@ -361,7 +362,7 @@ export default function DashboardDefault() {
           extra="Number of users with tokens"
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 2, lg: 2 }}>
+      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Bridge First Users"
           count={metrics.totalSignupsFromBridges.toLocaleString()}
@@ -369,7 +370,7 @@ export default function DashboardDefault() {
           extra="Number of users via bridges"
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 2, lg: 2 }}>
+      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Publications"
           count={metrics.totalPublications.toLocaleString()}
@@ -377,7 +378,7 @@ export default function DashboardDefault() {
           extra="Number of messages published"
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 2, lg: 2 }}>
+      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Countries"
           count={metrics.totalSignupCountries.toLocaleString()}
@@ -466,10 +467,10 @@ export default function DashboardDefault() {
 
       {/* row 2: Combined Chart and Map */}
       <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
-        <CountryMap filters={filtersApplied} />
+        <CountryMap filters={filtersApplied} selectedCountry={selectedCountry} onCountrySelect={setSelectedCountry} />
       </Grid>
       <Grid size={{ xs: 12, md: 5, lg: 3.5 }}>
-        <CountryTable filters={filtersApplied} />
+        <CountryTable filters={filtersApplied} onCountryClick={setSelectedCountry} selectedCountry={selectedCountry} />
       </Grid>
 
       {/* row 3: Country Table and User Table */}

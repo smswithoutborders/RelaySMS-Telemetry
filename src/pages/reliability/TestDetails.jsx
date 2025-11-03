@@ -2,24 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import {
-  CircularProgress,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TablePagination,
-  Box
-} from '@mui/material';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { LeftOutlined } from '@ant-design/icons';
 import { Button, Select, DatePicker, Space } from 'antd';
 import { styled } from '@mui/material/styles';
-import MainCard from 'components/MainCard';
+
+// components
+import Loader from 'components/Loader';
 import dayjs from 'dayjs';
 
 function TestDetails() {
@@ -110,7 +100,7 @@ function TestDetails() {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
-        <CircularProgress />
+        <Loader size={50} fullScreen={false} />
       </div>
     );
   }

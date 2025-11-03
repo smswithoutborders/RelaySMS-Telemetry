@@ -8,13 +8,15 @@ import {
   TableHead,
   TableRow,
   Box,
-  CircularProgress,
   Typography,
   TablePagination,
-  Button,
   Stack,
   Paper
 } from '@mui/material';
+import { Button } from 'antd';
+
+// components
+import Loader from 'components/Loader';
 
 const headCells = [
   { id: 'date', align: 'left', label: 'Date' },
@@ -126,7 +128,7 @@ export default function UserTable({ filters }) {
         <TableContainer sx={{ minHeight: 500, maxHeight: 510 }}>
           {loading && (
             <Box display="flex" justifyContent="center" p={4}>
-              <CircularProgress />
+              <Loader size={50} fullScreen={false} />
             </Box>
           )}
 

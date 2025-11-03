@@ -36,6 +36,7 @@
     "@vitejs/plugin-react": "4.3.4",
     "antd": "^5.27.6",
     "axios": "^1.8.4",
+    "country-coords": "^1.0.0",
     "dayjs": "^1.11.13",
     "formik": "2.4.6",
     "framer-motion": "^12.9.2",
