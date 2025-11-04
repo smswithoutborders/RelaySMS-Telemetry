@@ -114,7 +114,10 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
           attributionControl: true,
           zoomAnimation: true,
           fadeAnimation: true,
-          markerZoomAnimation: true
+          markerZoomAnimation: true,
+          scrollWheelZoom: false,
+          touchZoom: false,
+          doubleClickZoom: false
         });
 
         map.zoomControl.setPosition('topleft');
