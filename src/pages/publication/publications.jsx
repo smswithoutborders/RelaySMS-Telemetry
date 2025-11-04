@@ -28,6 +28,11 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 countries.registerLocale(enLocale);
 
@@ -151,6 +156,10 @@ export default function Publications() {
   const countryCodeToEmojiFlag = (code) => {
     if (!code) return '';
     return code.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt()));
+  };
+
+  const formatDateToGMTPlus1 = (dateString) => {
+    return dayjs(dateString).local().format('MMM DD, YYYY hh:mm:ss A');
   };
 
   useEffect(() => {
@@ -366,7 +375,7 @@ export default function Publications() {
                   {tableData.map((row) => (
                     <TableRow key={row.id}>
                       <TableCell>{row.id}</TableCell>
-                      <TableCell>{new Date(row.date_created).toLocaleString()}</TableCell>
+                      <TableCell>{formatDateToGMTPlus1(row.date_created)}</TableCell>
                       <TableCell>
                         <span style={{ marginRight: 8 }}>{row.flag}</span>
                         {row.country ? row.country : 'No Country'}

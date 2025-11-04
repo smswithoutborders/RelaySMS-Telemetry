@@ -29,6 +29,11 @@ import { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 countries.registerLocale(enLocale);
 
@@ -154,6 +159,10 @@ export default function ReliabilityTable() {
   const countryCodeToEmojiFlag = (code) => {
     if (!code) return '';
     return code.toUpperCase().replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt()));
+  };
+
+  const formatDateReadable = (date) => {
+    return dayjs(date).local().format('MMM DD, YYYY hh:mm:ss A');
   };
 
   const getPeriodRange = useCallback(() => {
@@ -424,7 +433,7 @@ export default function ReliabilityTable() {
                             'N/A'
                           )}
                         </TableCell>
-                        <TableCell>{row.last_published_date.toLocaleString()}</TableCell>
+                        <TableCell>{formatDateReadable(row.last_published_date)}</TableCell>
                       </TableRow>
                     );
                   })}

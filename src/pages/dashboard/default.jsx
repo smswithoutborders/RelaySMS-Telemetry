@@ -237,7 +237,7 @@ export default function DashboardDefault() {
       startDate: startDate ? startDate.format('YYYY-MM-DD') : '2021-01-10',
       endDate: endDate ? endDate.format('YYYY-MM-DD') : today,
       granularity,
-      groupBy,
+      // groupBy,
       countryCode: countryCode || undefined
     };
 
@@ -249,8 +249,8 @@ export default function DashboardDefault() {
     const resetEndDate = dayjs();
 
     setCategory('signup');
-    setGranularity('month');
-    setGroupBy('country');
+    // setGranularity('month');
+    // setGroupBy('country');
     setCountryCode(null);
     setStartDate(resetStartDate);
     setEndDate(resetEndDate);
@@ -260,9 +260,9 @@ export default function DashboardDefault() {
     setFiltersApplied({
       category: 'signup',
       startDate: resetStartDate.format('YYYY-MM-DD'),
-      endDate: resetEndDate.format('YYYY-MM-DD'),
-      granularity: 'month',
-      groupBy: 'country'
+      endDate: resetEndDate.format('YYYY-MM-DD')
+      // granularity: 'month',
+      // groupBy: 'country'
     });
   };
 
@@ -271,12 +271,17 @@ export default function DashboardDefault() {
       setLoading(true);
       try {
         const today = new Date().toISOString().split('T')[0];
-        const appliedStart = startDate ? startDate.format('YYYY-MM-DD') : '2021-01-10';
-        const appliedEnd = endDate ? endDate.format('YYYY-MM-DD') : today;
+        const appliedStart = filtersApplied.startDate || '2021-01-10';
+        const appliedEnd = filtersApplied.endDate || today;
 
-        const response = await axios.get(
-          `${import.meta.env.VITE_APP_TELEMETRY_API}summary?start_date=${appliedStart}&end_date=${appliedEnd}&granularity=${granularity}&group_by=${groupBy}&page=1&page_size=10`
-        );
+        // Build API URL with country code filter if selected
+        let apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}summary?start_date=${appliedStart}&end_date=${appliedEnd}`;
+
+        if (filtersApplied.countryCode) {
+          apiUrl += `&country_code=${filtersApplied.countryCode}`;
+        }
+
+        const response = await axios.get(apiUrl);
 
         const data = response.data.summary;
         const totalUsers = data.total_signup_users + data.total_retained_users + data.total_retained_users_with_tokens;
@@ -298,7 +303,8 @@ export default function DashboardDefault() {
           }
         });
 
-        const countryCodes = category === 'signup' ? data.signup_countries || [] : data.retained_countries || [];
+        const effectiveCategory = filtersApplied.category || 'signup';
+        const countryCodes = effectiveCategory === 'signup' ? data.signup_countries || [] : data.retained_countries || [];
         const countryOptions = countryCodes
           .map((code) => {
             const upperCode = typeof code === 'string' ? code.toUpperCase() : undefined;
@@ -311,7 +317,7 @@ export default function DashboardDefault() {
 
             return {
               value: upperCode,
-              label: dialingCode ? `${flag} ${name} (${upperCode}, ${dialingCode})` : `${flag} ${name} (${upperCode})`,
+              label: dialingCode ? `${flag} ${upperCode}, ${dialingCode} - ${name}` : `${flag} ${upperCode} - ${name}`,
               searchLabel: name
             };
           })
@@ -329,7 +335,6 @@ export default function DashboardDefault() {
     };
 
     fetchMetrics();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersApplied]);
 
   return (

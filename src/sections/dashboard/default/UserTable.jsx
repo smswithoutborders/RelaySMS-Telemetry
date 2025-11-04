@@ -14,8 +14,8 @@ import {
   Paper
 } from '@mui/material';
 import { Button } from 'antd';
+import dayjs from 'dayjs';
 
-// components
 import Loader from 'components/Loader';
 
 const headCells = [
@@ -103,6 +103,13 @@ export default function UserTable({ filters }) {
     setPage(0);
   };
 
+  const formatDate = (dateString) => {
+    if (granularity === 'month') {
+      return dayjs(dateString).format('MMMM YYYY');
+    }
+    return dayjs(dateString).format('MMM DD, YYYY');
+  };
+
   return (
     <>
       <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: 'center' }}>
@@ -144,7 +151,7 @@ export default function UserTable({ filters }) {
               <TableBody>
                 {data.map((row, index) => (
                   <TableRow key={index} hover>
-                    <TableCell>{row.date}</TableCell>
+                    <TableCell>{formatDate(row.date)}</TableCell>
                     <TableCell align="right">{row.users}</TableCell>
                   </TableRow>
                 ))}
