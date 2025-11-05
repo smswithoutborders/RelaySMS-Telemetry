@@ -17,7 +17,7 @@ import UserTable from 'sections/dashboard/default/UserTable';
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { ReloadOutlined, CalendarOutlined } from '@ant-design/icons';
+import { ReloadOutlined, CalendarOutlined, DownloadOutlined } from '@ant-design/icons';
 
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -33,17 +33,11 @@ dayjs.extend(weekday);
 dayjs.extend(localeData);
 countries.registerLocale(enLocale);
 
-const maxValues = {
-  totalSignupUsers: 50000,
-  totalUsers: 30000,
-  totalActiveUsers: 20000,
-  totalSignupsFromBridges: 10000,
-  totalPublications: 15000,
-  totalSignupCountries: 200
-};
-
-const calculatePercentage = (value, max) => {
-  return max ? Math.min((value / max) * 100, 100).toFixed(2) : '0:00';
+const calculatePercentageChange = (current, previous) => {
+  if (previous === 0) {
+    return current > 0 ? 100 : 0;
+  }
+  return (((current - previous) / previous) * 100).toFixed(2);
 };
 
 const countryCodeToEmojiFlag = (code) => {
@@ -92,6 +86,14 @@ export default function DashboardDefault() {
       totalSignupsFromBridges: 0,
       totalPublications: 0,
       totalSignupCountries: 0
+    },
+    isHigher: {
+      totalSignupUsers: true,
+      totalUsers: true,
+      totalActiveUsers: true,
+      totalSignupsFromBridges: true,
+      totalPublications: true,
+      totalSignupCountries: true
     }
   });
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -152,7 +154,7 @@ export default function DashboardDefault() {
           onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
           onClick={() => handleDateRangeSelect({ key: 'last24hours' })}
         >
-          Last 24 Hours
+          Today
         </div>
         <div
           style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
@@ -218,7 +220,7 @@ export default function DashboardDefault() {
   const getDateRangeLabel = () => {
     switch (dateRangeFilter) {
       case 'last24hours':
-        return 'Last 24 Hours';
+        return 'Today';
       case 'last7days':
         return 'Last 7 Days';
       case 'thismonth':
@@ -266,6 +268,72 @@ export default function DashboardDefault() {
     });
   };
 
+  const handleDownloadData = async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const appliedStart = filtersApplied.startDate || '2021-01-10';
+      const appliedEnd = filtersApplied.endDate || today;
+
+      let apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}summary?start_date=${appliedStart}&end_date=${appliedEnd}`;
+
+      if (filtersApplied.countryCode) {
+        apiUrl += `&country_code=${filtersApplied.countryCode}`;
+      }
+
+      const response = await axios.get(apiUrl);
+      const data = response.data.summary;
+
+      const downloadData = {
+        metadata: {
+          exportDate: new Date().toISOString(),
+          filters: {
+            category: filtersApplied.category || category,
+            startDate: appliedStart,
+            endDate: appliedEnd,
+            countryCode: filtersApplied.countryCode || countryCode || 'All Countries'
+          }
+        },
+        summary: {
+          signup: {
+            total_signup_users: data.total_signup_users || 0,
+            total_signups_from_bridges: data.total_signups_from_bridges || 0,
+            signup_countries: data.signup_countries || [],
+            total_signup_countries: data.total_signup_countries || 0
+          },
+          retained: {
+            total_retained_users: data.total_retained_users || 0,
+            total_retained_users_with_tokens: data.total_retained_users_with_tokens || 0,
+            retained_countries: data.retained_countries || [],
+            total_retained_countries: data.total_retained_countries || 0
+          },
+          publications: {
+            total_publications: data.total_publications || 0
+          }
+        },
+        rawData: data
+      };
+
+      const jsonString = JSON.stringify(downloadData, null, 2);
+
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      link.download = `telemetry-dashboard-data-${timestamp}.json`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading data:', error);
+      alert('Failed to download data. Please try again.');
+    }
+  };
+
   useEffect(() => {
     const fetchMetrics = async () => {
       setLoading(true);
@@ -274,17 +342,26 @@ export default function DashboardDefault() {
         const appliedStart = filtersApplied.startDate || '2021-01-10';
         const appliedEnd = filtersApplied.endDate || today;
 
-        // Build API URL with country code filter if selected
-        let apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}summary?start_date=${appliedStart}&end_date=${appliedEnd}`;
+        const startDateObj = dayjs(appliedStart);
+        const endDateObj = dayjs(appliedEnd);
+        const periodDuration = endDateObj.diff(startDateObj, 'day');
+
+        const previousStart = startDateObj.subtract(periodDuration + 1, 'day').format('YYYY-MM-DD');
+        const previousEnd = startDateObj.subtract(1, 'day').format('YYYY-MM-DD');
+
+        let currentApiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}summary?start_date=${appliedStart}&end_date=${appliedEnd}`;
+        let previousApiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}summary?start_date=${previousStart}&end_date=${previousEnd}`;
 
         if (filtersApplied.countryCode) {
-          apiUrl += `&country_code=${filtersApplied.countryCode}`;
+          currentApiUrl += `&country_code=${filtersApplied.countryCode}`;
+          previousApiUrl += `&country_code=${filtersApplied.countryCode}`;
         }
 
-        const response = await axios.get(apiUrl);
+        // Fetch both current and previous period data
+        const [currentResponse, previousResponse] = await Promise.all([axios.get(currentApiUrl), axios.get(previousApiUrl)]);
 
-        const data = response.data.summary;
-        const totalUsers = data.total_signup_users + data.total_retained_users + data.total_retained_users_with_tokens;
+        const data = currentResponse.data.summary;
+        const previousData = previousResponse.data.summary;
 
         setMetrics({
           totalSignupUsers: data.total_signup_users || 0,
@@ -294,12 +371,26 @@ export default function DashboardDefault() {
           totalPublications: data.total_publications || 0,
           totalSignupCountries: data.total_signup_countries || 0,
           percentages: {
-            totalSignupUsers: calculatePercentage(data.total_signup_users, maxValues.totalSignupUsers),
-            totalUsers: calculatePercentage(data.total_retained_users, maxValues.totalUsers),
-            totalActiveUsers: calculatePercentage(data.total_retained_users_with_tokens, maxValues.totalActiveUsers),
-            totalSignupsFromBridges: calculatePercentage(data.total_signups_from_bridges, maxValues.totalSignupsFromBridges),
-            totalPublications: calculatePercentage(data.total_publications, maxValues.totalPublications),
-            totalSignupCountries: calculatePercentage(data.total_signup_countries, maxValues.totalSignupCountries)
+            totalSignupUsers: calculatePercentageChange(data.total_signup_users || 0, previousData.total_signup_users || 0),
+            totalUsers: calculatePercentageChange(data.total_retained_users || 0, previousData.total_retained_users || 0),
+            totalActiveUsers: calculatePercentageChange(
+              data.total_retained_users_with_tokens || 0,
+              previousData.total_retained_users_with_tokens || 0
+            ),
+            totalSignupsFromBridges: calculatePercentageChange(
+              data.total_signups_from_bridges || 0,
+              previousData.total_signups_from_bridges || 0
+            ),
+            totalPublications: calculatePercentageChange(data.total_publications || 0, previousData.total_publications || 0),
+            totalSignupCountries: calculatePercentageChange(data.total_signup_countries || 0, previousData.total_signup_countries || 0)
+          },
+          isHigher: {
+            totalSignupUsers: (data.total_signup_users || 0) >= (previousData.total_signup_users || 0),
+            totalUsers: (data.total_retained_users || 0) >= (previousData.total_retained_users || 0),
+            totalActiveUsers: (data.total_retained_users_with_tokens || 0) >= (previousData.total_retained_users_with_tokens || 0),
+            totalSignupsFromBridges: (data.total_signups_from_bridges || 0) >= (previousData.total_signups_from_bridges || 0),
+            totalPublications: (data.total_publications || 0) >= (previousData.total_publications || 0),
+            totalSignupCountries: (data.total_signup_countries || 0) >= (previousData.total_signup_countries || 0)
           }
         });
 
@@ -347,7 +438,8 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Sign-up Users"
           count={metrics.totalSignupUsers.toLocaleString()}
-          // percentage={metrics.percentages.totalSignupUsers}
+          percentage={metrics.percentages.totalSignupUsers}
+          isLoss={!metrics.isHigher.totalSignupUsers}
           extra="Number of Signups"
         />
       </Grid>
@@ -355,7 +447,8 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Users"
           count={metrics.totalUsers.toLocaleString()}
-          // percentage={metrics.percentages.totalUsers}
+          percentage={metrics.percentages.totalUsers}
+          isLoss={!metrics.isHigher.totalUsers}
           extra="Number of current users"
         />
       </Grid>
@@ -363,7 +456,8 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Active Users"
           count={metrics.totalActiveUsers.toLocaleString()}
-          // percentage={metrics.percentages.totalActiveUsers}
+          percentage={metrics.percentages.totalActiveUsers}
+          isLoss={!metrics.isHigher.totalActiveUsers}
           extra="Number of users with tokens"
         />
       </Grid>
@@ -371,7 +465,8 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Bridge First Users"
           count={metrics.totalSignupsFromBridges.toLocaleString()}
-          // percentage={metrics.percentages.totalSignupsFromBridges}
+          percentage={metrics.percentages.totalSignupsFromBridges}
+          isLoss={!metrics.isHigher.totalSignupsFromBridges}
           extra="Number of users via bridges"
         />
       </Grid>
@@ -379,7 +474,8 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Publications"
           count={metrics.totalPublications.toLocaleString()}
-          // percentage={metrics.percentages.totalPublications}
+          percentage={metrics.percentages.totalPublications}
+          isLoss={!metrics.isHigher.totalPublications}
           extra="Number of messages published"
         />
       </Grid>
@@ -387,7 +483,8 @@ export default function DashboardDefault() {
         <AnalyticEcommerce
           title="Countries"
           count={metrics.totalSignupCountries.toLocaleString()}
-          // percentage={metrics.percentages.totalSignupCountries}
+          percentage={metrics.percentages.totalSignupCountries}
+          isLoss={!metrics.isHigher.totalSignupCountries}
           extra="Available countries with users"
         />
       </Grid>
@@ -455,14 +552,19 @@ export default function DashboardDefault() {
 
             {/* Buttons */}
             <Grid xs={12} md={3} lg={4} container spacing={1} sx={{ mt: { md: 3.5 } }}>
-              <Grid xs={6} md={12} lg={6}>
+              <Grid xs={4} md={12} lg={4}>
                 <Button type="primary" style={{ width: '100%' }} onClick={handleApplyFilters}>
                   Apply
                 </Button>
               </Grid>
-              <Grid xs={6} md={12} lg={6}>
+              <Grid xs={4} md={12} lg={4}>
                 <Button type="text" icon={<ReloadOutlined />} style={{ width: '100%' }} onClick={handleResetFilters}>
                   Reset
+                </Button>
+              </Grid>
+              <Grid xs={4} md={12} lg={4}>
+                <Button type="default" icon={<DownloadOutlined />} style={{ width: '100%' }} onClick={handleDownloadData}>
+                  Download Data
                 </Button>
               </Grid>
             </Grid>

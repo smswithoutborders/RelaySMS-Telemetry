@@ -44,6 +44,20 @@ export default function Documentation() {
           This section displays user signups, active users, and geographical distribution. It helps us identify areas affected by internet
           shutdowns and find ways to provide better access and support.
         </Typography>
+        <Typography fontWeight="bold" variant="body1" gutterBottom>
+          How It Works:
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          <ul>
+            <li>If you're viewing data from Jan 1-31 (31 days), it compares against the previous 31 days (Dec 1-31)</li>
+            <li>Positive percentages show growth (displayed in green)</li>
+            <li>Negative percentages show decline (displayed in red via the isLoss prop)</li>
+            <li>
+              The percentage shown represents the actual change: e.g., "+25.50%" means 25.5% increase, "-10.20%" means 10.2% decrease{' '}
+            </li>
+          </ul>
+          This gives you real insights into whether your metrics are improving or declining over time!
+        </Typography>
       </Box>
 
       <Box sx={{ my: 3 }}>
