@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 // material-ui
-import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -13,9 +12,11 @@ import MainCard from 'components/MainCard';
 import RiseOutlined from '@ant-design/icons/RiseOutlined';
 import FallOutlined from '@ant-design/icons/FallOutlined';
 
-const iconSX = { fontSize: '0.75rem', color: 'inherit', marginLeft: 0, marginRight: 0 };
+const iconSX = { fontSize: '0.75rem', marginLeft: 0, marginRight: 0 };
 
 export default function AnalyticEcommerce({ color = 'primary', title, count, percentage, isLoss, extra }) {
+  const percentageColor = isLoss ? 'error.main' : 'success.main';
+
   return (
     <MainCard contentSX={{ p: 2.25 }}>
       <Stack sx={{ gap: 0.5 }}>
@@ -30,14 +31,16 @@ export default function AnalyticEcommerce({ color = 'primary', title, count, per
           </Grid>
           {percentage && (
             <Grid>
-              <Chip
-                variant="combined"
-                color={color}
-                icon={isLoss ? <FallOutlined style={iconSX} /> : <RiseOutlined style={iconSX} />}
-                label={`${percentage}%`}
-                sx={{ ml: 1.25, pl: 1 }}
-                size="small"
-              />
+              <Box sx={{ ml: 1.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {isLoss ? (
+                  <FallOutlined style={{ ...iconSX, color: 'inherit' }} />
+                ) : (
+                  <RiseOutlined style={{ ...iconSX, color: 'inherit' }} />
+                )}
+                <Typography variant="caption" color={percentageColor} sx={{ fontWeight: 500 }}>
+                  {percentage}%
+                </Typography>
+              </Box>
             </Grid>
           )}
         </Grid>
