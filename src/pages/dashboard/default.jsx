@@ -226,6 +226,9 @@ export default function DashboardDefault() {
       case 'thismonth':
         return 'This Month';
       case 'custom':
+        if (startDate && endDate) {
+          return `${startDate.format('YYYY-MM-DD')} - ${endDate.format('YYYY-MM-DD')}`;
+        }
         return 'Custom Range';
       default:
         return 'Date Range Filter';
@@ -357,7 +360,6 @@ export default function DashboardDefault() {
           previousApiUrl += `&country_code=${filtersApplied.countryCode}`;
         }
 
-        // Fetch both current and previous period data
         const [currentResponse, previousResponse] = await Promise.all([axios.get(currentApiUrl), axios.get(previousApiUrl)]);
 
         const data = currentResponse.data.summary;
