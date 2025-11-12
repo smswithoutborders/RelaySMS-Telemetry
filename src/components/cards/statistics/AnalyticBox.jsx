@@ -14,18 +14,18 @@ import FallOutlined from '@ant-design/icons/FallOutlined';
 
 const iconSX = { fontSize: '0.75rem', marginLeft: 0, marginRight: 0 };
 
-export default function AnalyticEcommerce({ color = 'primary', title, count, percentage, isLoss, extra }) {
+export default function AnalyticBox({ color = 'primary', title, count, percentage, isLoss, extra }) {
   const percentageColor = isLoss ? 'error.main' : 'success.main';
 
   return (
-    <MainCard contentSX={{ p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-      <Stack sx={{ gap: 0.25 }}>
-        <Typography variant="body2" color="text.secondary">
+    <Box contentSX={{ p: 2.25, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <Stack sx={{ gap: 0.5 }}>
+        <Typography variant="h6" color="text.secondary">
           {title}
         </Typography>
         <Grid container alignItems="center">
           <Grid>
-            <Typography variant="h5" color="inherit">
+            <Typography variant="h4" color="inherit">
               {count}
             </Typography>
           </Grid>
@@ -45,16 +45,16 @@ export default function AnalyticEcommerce({ color = 'primary', title, count, per
           )}
         </Grid>
       </Stack>
-      <Box sx={{ pt: 0.25 }}>
-        <Typography variant="subtitle2" color="text.secondary">
+      <Box sx={{ pt: 2.25 }}>
+        <Typography variant="caption" color="text.secondary">
           {extra}
         </Typography>
       </Box>
-    </MainCard>
+    </Box>
   );
 }
 
-AnalyticEcommerce.propTypes = {
+AnalyticBox.propTypes = {
   color: PropTypes.string,
   title: PropTypes.string,
   count: PropTypes.string,

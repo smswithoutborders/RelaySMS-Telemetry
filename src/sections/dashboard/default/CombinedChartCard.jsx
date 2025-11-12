@@ -32,18 +32,20 @@ export default function CombinedChartCard({ filters }) {
         <Grid>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Button
+              style={{ fontSize: '0.7rem' }}
               size="small"
               onClick={() => setView('month')}
               color={view === 'month' ? 'primary' : 'secondary'}
-              variant={view === 'month' ? 'outlined' : 'text'}
+              variant={view === 'month' ? 'dashed' : 'text'}
             >
               Month
             </Button>
             <Button
+              style={{ fontSize: '0.7rem' }}
               size="small"
               onClick={() => setView('day')}
               color={view === 'day' ? 'primary' : 'secondary'}
-              variant={view === 'day' ? 'outlined' : 'text'}
+              variant={view === 'day' ? 'dashed' : 'text'}
             >
               Day
             </Button>
@@ -61,11 +63,11 @@ export default function CombinedChartCard({ filters }) {
         </Grid>
       </Grid>
 
-      <MainCard content={false} sx={{ mt: 1.5 }}>
+      <Box content={false} sx={{ mt: 1.5 }}>
         <Box sx={{ py: 2, pr: 2 }}>
           {chartType === 'area' ? <UserAreaChart view={view} filters={filters} /> : <UserBarChart view={view} filters={filters} />}
         </Box>
-      </MainCard>
+      </Box>
     </>
   );
 }

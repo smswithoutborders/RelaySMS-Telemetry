@@ -12,6 +12,44 @@ export default function Palette(mode, presetColor) {
   const colors = presetPalettes;
   const darkColors = presetDarkPalettes;
 
+  // Custom blue color palette based on #336AFF for primary color
+  const customBlue = [
+    '#EEF3FF', // 0 - lightest
+    '#D6E4FF', // 1
+    '#ADC8FF', // 2
+    '#85ACFF', // 3 - light
+    '#5C8FFF', // 4
+    '#336AFF', // 5 - main
+    '#2952CC', // 6 - dark
+    '#1F3D99', // 7
+    '#142966', // 8 - darker
+    '#0A1433', // 9
+    '#050A1A' // 10 - darkest
+  ];
+
+  // Custom orange color palette based on #E66F00 for secondary/graph use
+  const customOrange = [
+    '#FFF7F0', // 0 - lightest
+    '#FFE8D6', // 1
+    '#FFD4B3', // 2
+    '#FFC08F', // 3 - light
+    '#FF9B5C', // 4
+    '#FF9E43', // 5 - main
+    '#C75F00', // 6 - dark
+    '#A84F00', // 7
+    '#8A4000', // 8 - darker
+    '#6B3000', // 9
+    '#4D2100' // 10 - darkest
+  ];
+
+  // Override blue with custom blue for primary color
+  colors.blue = customBlue;
+  darkColors.blue = customBlue;
+
+  // Add custom orange as cyan for secondary/graph use
+  colors.cyan = customOrange;
+  darkColors.cyan = customOrange;
+
   let greyPrimary = [
     '#ffffff',
     '#fafafa',
@@ -43,22 +81,22 @@ export default function Palette(mode, presetColor) {
   // ];
   // Dark Mode Greys for Very Dark Blue Theme
   let darkGreyPrimary = [
-    '#ffffffff', // 0 - lightest (for text on dark bg)
-    '#f5f5f5ff', // 1
-    '#e2e8f0', // 2
-    '#cbd5e1', // 3
-    '#aab7c4', // 4
-    '#99a1acff', // 5
-    '#5c6672ff', // 6
-    '#2e323aff', // 7
-    '#27292eff', // 8
-    '#1d2022ff', // 9
-    '#1e2124ff' // 10 - darkest (for backgrounds)
+    '#fafafa', // 0 - lightest (for text on dark bg)
+    '#f5f5f5', // 1
+    '#f0f0f0', // 2
+    '#d9d9d9', // 3
+    '#bfbfbf', // 4
+    '#8c8c8c', // 5
+    '#595959', // 6
+    '#4d4d4d', // 7
+    '#262626', // 8
+    '#141414ff', // 9
+    '#0f0f0fff' // 10 - darkest (for backgrounds)
   ];
 
-  let darkGreyAscent = ['#121314ff', '#1d2022ff', '#5e6d7eff', '#5c6672ff'];
+  let darkGreyAscent = ['#1f1f1f', '#2b2b2bff', '#afafafff', '#ccccccff'];
 
-  let darkGreyConstant = ['#0a1929', '#112240'];
+  let darkGreyConstant = ['#0a1929', '#333333ff'];
 
   colors.grey = [...greyPrimary, ...greyAscent, ...greyConstant];
   darkColors.grey = [...darkGreyPrimary, ...darkGreyAscent, ...darkGreyConstant];

@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
 // ant design
-import { DatePicker, Select, Button, Dropdown } from 'antd';
+import { DatePicker, Select, Button, Dropdown, Switch } from 'antd';
 import 'antd/dist/reset.css';
 
 // project imports
@@ -28,6 +28,7 @@ import { getCountryCallingCode } from 'libphonenumber-js';
 
 import CountryTable from '../../sections/dashboard/default/CountryTable';
 import CountryMap from '../../sections/dashboard/default/Map';
+import { Tooltip } from '@mui/material';
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
@@ -72,28 +73,38 @@ export default function DashboardDefault() {
   const [error, setError] = useState(null);
   const [filtersApplied, setFiltersApplied] = useState({});
   const [availableCountries, setAvailableCountries] = useState([]);
+  const [showTotals, setShowTotals] = useState(true);
   const [metrics, setMetrics] = useState({
     totalSignupUsers: 0,
     totalUsers: 0,
     totalActiveUsers: 0,
+    totalEmailSignups: 0,
+    totalEmailRetained: 0,
     totalSignupsFromBridges: 0,
     totalPublications: 0,
     totalSignupCountries: 0,
+    totalRetainedCountries: 0,
     percentages: {
       totalSignupUsers: 0,
       totalUsers: 0,
       totalActiveUsers: 0,
+      totalEmailSignups: 0,
+      totalEmailRetained: 0,
       totalSignupsFromBridges: 0,
       totalPublications: 0,
-      totalSignupCountries: 0
+      totalSignupCountries: 0,
+      totalRetainedCountries: 0
     },
     isHigher: {
       totalSignupUsers: true,
       totalUsers: true,
       totalActiveUsers: true,
+      totalEmailSignups: true,
+      totalEmailRetained: true,
       totalSignupsFromBridges: true,
       totalPublications: true,
-      totalSignupCountries: true
+      totalSignupCountries: true,
+      totalRetainedCountries: true
     }
   });
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -369,9 +380,12 @@ export default function DashboardDefault() {
           totalSignupUsers: data.total_signup_users || 0,
           totalUsers: data.total_retained_users || 0,
           totalActiveUsers: data.total_retained_users_with_tokens || 0,
+          totalEmailSignups: data.total_signup_users_with_emails || 0,
+          totalEmailRetained: data.total_retained_users_with_emails || 0,
           totalSignupsFromBridges: data.total_signups_from_bridges || 0,
           totalPublications: data.total_publications || 0,
           totalSignupCountries: data.total_signup_countries || 0,
+          totalRetainedCountries: data.total_retained_countries || 0,
           percentages: {
             totalSignupUsers: calculatePercentageChange(data.total_signup_users || 0, previousData.total_signup_users || 0),
             totalUsers: calculatePercentageChange(data.total_retained_users || 0, previousData.total_retained_users || 0),
@@ -379,20 +393,35 @@ export default function DashboardDefault() {
               data.total_retained_users_with_tokens || 0,
               previousData.total_retained_users_with_tokens || 0
             ),
+            totalEmailSignups: calculatePercentageChange(
+              data.total_signup_users_with_emails || 0,
+              previousData.total_signup_users_with_emails || 0
+            ),
+            totalEmailRetained: calculatePercentageChange(
+              data.total_retained_users_with_emails || 0,
+              previousData.total_retained_users_with_emails || 0
+            ),
             totalSignupsFromBridges: calculatePercentageChange(
               data.total_signups_from_bridges || 0,
               previousData.total_signups_from_bridges || 0
             ),
             totalPublications: calculatePercentageChange(data.total_publications || 0, previousData.total_publications || 0),
-            totalSignupCountries: calculatePercentageChange(data.total_signup_countries || 0, previousData.total_signup_countries || 0)
+            totalSignupCountries: calculatePercentageChange(data.total_signup_countries || 0, previousData.total_signup_countries || 0),
+            totalRetainedCountries: calculatePercentageChange(
+              data.total_retained_countries || 0,
+              previousData.total_retained_countries || 0
+            )
           },
           isHigher: {
             totalSignupUsers: (data.total_signup_users || 0) >= (previousData.total_signup_users || 0),
             totalUsers: (data.total_retained_users || 0) >= (previousData.total_retained_users || 0),
             totalActiveUsers: (data.total_retained_users_with_tokens || 0) >= (previousData.total_retained_users_with_tokens || 0),
+            totalEmailSignups: (data.total_signup_users_with_emails || 0) >= (previousData.total_signup_users_with_emails || 0),
+            totalEmailRetained: (data.total_retained_users_with_emails || 0) >= (previousData.total_retained_users_with_emails || 0),
             totalSignupsFromBridges: (data.total_signups_from_bridges || 0) >= (previousData.total_signups_from_bridges || 0),
             totalPublications: (data.total_publications || 0) >= (previousData.total_publications || 0),
-            totalSignupCountries: (data.total_signup_countries || 0) >= (previousData.total_signup_countries || 0)
+            totalSignupCountries: (data.total_signup_countries || 0) >= (previousData.total_signup_countries || 0),
+            totalRetainedCountries: (data.total_retained_countries || 0) >= (previousData.total_retained_countries || 0)
           }
         });
 
@@ -433,64 +462,139 @@ export default function DashboardDefault() {
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       {/* row 1 */}
-      <Grid sx={{ mb: -2.25 }} size={12}>
+      {/* <Grid sx={{ mb: -2.25 }} size={12}>
         <Typography variant="h5">Open Telemetry</Typography>
+      </Grid> */}
+
+      {/* Toggle for Totals Visibility */}
+      <Grid size={12}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 0 }}>
+          <Typography variant="body2" sx={{ mr: 1.5 }}>
+            Show Totals
+          </Typography>
+          <Switch checked={showTotals} onChange={(checked) => setShowTotals(checked)} />
+        </Box>
       </Grid>
-      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
-        <AnalyticEcommerce
-          title="Sign-up Users"
-          count={metrics.totalSignupUsers.toLocaleString()}
-          percentage={metrics.percentages.totalSignupUsers}
-          isLoss={!metrics.isHigher.totalSignupUsers}
-          extra="Number of Signups"
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
-        <AnalyticEcommerce
-          title="Users"
-          count={metrics.totalUsers.toLocaleString()}
-          percentage={metrics.percentages.totalUsers}
-          isLoss={!metrics.isHigher.totalUsers}
-          extra="Number of current users"
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
-        <AnalyticEcommerce
-          title="Active Users"
-          count={metrics.totalActiveUsers.toLocaleString()}
-          percentage={metrics.percentages.totalActiveUsers}
-          isLoss={!metrics.isHigher.totalActiveUsers}
-          extra="Number of users with tokens"
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
-        <AnalyticEcommerce
-          title="Bridge First Users"
-          count={metrics.totalSignupsFromBridges.toLocaleString()}
-          percentage={metrics.percentages.totalSignupsFromBridges}
-          isLoss={!metrics.isHigher.totalSignupsFromBridges}
-          extra="Number of users via bridges"
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
-        <AnalyticEcommerce
-          title="Publications"
-          count={metrics.totalPublications.toLocaleString()}
-          percentage={metrics.percentages.totalPublications}
-          isLoss={!metrics.isHigher.totalPublications}
-          extra="Number of messages published"
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 6, md: 2 }}>
-        <AnalyticEcommerce
-          title="Countries"
-          count={metrics.totalSignupCountries.toLocaleString()}
-          percentage={metrics.percentages.totalSignupCountries}
-          isLoss={!metrics.isHigher.totalSignupCountries}
-          extra="Available countries with users"
-        />
-      </Grid>
-      <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
+
+      {/* Sign-up Category */}
+      {showTotals && (
+        <>
+          <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
+            <Tooltip title="Any attempt to sign-up">
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                Sign-up
+              </Typography>
+            </Tooltip>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+              Any attempt to sign-up
+            </Typography>
+            <Grid container spacing={1}>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Sign-up Users"
+                  count={metrics.totalSignupUsers.toLocaleString()}
+                  percentage={metrics.percentages.totalSignupUsers}
+                  isLoss={!metrics.isHigher.totalSignupUsers}
+                  extra="Total number of signups"
+                />
+              </Grid>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Sign-up Countries"
+                  count={metrics.totalSignupCountries.toLocaleString()}
+                  percentage={metrics.percentages.totalSignupCountries}
+                  isLoss={!metrics.isHigher.totalSignupCountries}
+                  extra="Countries with signups"
+                />
+              </Grid>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Email Signups"
+                  count={metrics.totalEmailSignups.toLocaleString()}
+                  percentage={metrics.percentages.totalEmailSignups}
+                  isLoss={!metrics.isHigher.totalEmailSignups}
+                  extra="Signups with email"
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+
+          {/* Users Category */}
+          <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
+            <Tooltip title="Users with accounts that have not been deleted">
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                Users
+              </Typography>
+            </Tooltip>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+              Users with accounts that have not been deleted
+            </Typography>
+            <Grid container spacing={1}>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Current Users"
+                  count={metrics.totalUsers.toLocaleString()}
+                  percentage={metrics.percentages.totalUsers}
+                  isLoss={!metrics.isHigher.totalUsers}
+                  extra="Total retained users"
+                />
+              </Grid>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Retained Countries"
+                  count={metrics.totalRetainedCountries.toLocaleString()}
+                  percentage={metrics.percentages.totalRetainedCountries}
+                  isLoss={!metrics.isHigher.totalRetainedCountries}
+                  extra="Countries with retained users"
+                />
+              </Grid>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Email Retained"
+                  count={metrics.totalEmailRetained.toLocaleString()}
+                  percentage={metrics.percentages.totalEmailRetained}
+                  isLoss={!metrics.isHigher.totalEmailRetained}
+                  extra="Retained from email signups"
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+
+          {/* Bridge Category */}
+          <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
+            <Grid container spacing={1} sx={{ mt: 6.7 }}>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Bridge First Users"
+                  count={metrics.totalSignupsFromBridges.toLocaleString()}
+                  percentage={metrics.percentages.totalSignupsFromBridges}
+                  isLoss={!metrics.isHigher.totalSignupsFromBridges}
+                  extra="Users via bridges"
+                />
+              </Grid>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Users with Tokens"
+                  count={metrics.totalActiveUsers.toLocaleString()}
+                  percentage={metrics.percentages.totalActiveUsers}
+                  isLoss={!metrics.isHigher.totalActiveUsers}
+                  extra="Active users with tokens"
+                />
+              </Grid>
+              <Grid size={12}>
+                <AnalyticEcommerce
+                  title="Publications"
+                  count={metrics.totalPublications.toLocaleString()}
+                  percentage={metrics.percentages.totalPublications}
+                  isLoss={!metrics.isHigher.totalPublications}
+                  extra="Messages published"
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+        </>
+      )}
+
       {/* Filters Section */}
       <Grid size={{ xs: 12, md: 12, lg: 12 }}>
         <Box>

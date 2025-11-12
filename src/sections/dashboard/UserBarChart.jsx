@@ -38,7 +38,7 @@ export default function UserBarChart({ view, filters }) {
   const granularity = view === 'month' ? 'month' : 'day';
 
   const primaryColor = theme.palette.primary.main;
-  const secondaryColor = theme.palette.primary[700];
+  const secondaryColor = theme.palette.info.main;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -136,7 +136,7 @@ export default function UserBarChart({ view, filters }) {
               yAxis={[{ disableLine: true, disableTicks: true, tickLabelStyle: axisFontStyle }]}
               series={[
                 ...(showSignups ? [{ data: signupData, label: 'Signups', color: primaryColor, type: 'bar' }] : []),
-                ...(showRetained ? [{ data: retainedData, label: 'Retained', color: '#ff9e43', type: 'bar' }] : [])
+                ...(showRetained ? [{ data: retainedData, label: 'Retained', color: secondaryColor, type: 'bar' }] : [])
               ]}
               slotProps={{ legend: { hidden: true }, bar: { rx: 5, ry: 5 } }}
               axisHighlight={{ x: 'none' }}
