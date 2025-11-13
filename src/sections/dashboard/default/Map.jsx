@@ -27,6 +27,7 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
   const containerRef = useRef(null);
+  const geoJsonLayerRef = useRef(null);
 
   const today = new Date();
   const effectiveStartDate = filters?.startDate || '2020-01-10';
@@ -124,139 +125,162 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
 
         mapInstanceRef.current = map;
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          subdomains: 'abcd',
-          maxZoom: 20
-        }).addTo(map);
+        const bgColor = isDarkMode ? '#0f0f0fff' : '#fafafa';
+        container.style.backgroundColor = bgColor;
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-          attribution: '',
-          subdomains: 'abcd',
-          maxZoom: 20,
-          pane: 'shadowPane'
-        }).addTo(map);
-
-        map.on('click', function (e) {
-          const clickedOnMarker = markersRef.current.some(({ marker }) => {
-            const markerLatLng = marker.getLatLng();
-            const distance = map.distance(e.latlng, markerLatLng);
-            return distance < 50;
-          });
-
-          if (!clickedOnMarker) {
-            onCountrySelect?.(null);
+        L.tileLayer(
+          isDarkMode
+            ? 'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
+          {
+            attribution: '',
+            subdomains: 'abcd',
+            maxZoom: 20,
+            pane: 'shadowPane'
           }
-        });
+        ).addTo(map);
 
         const userCounts = countryData.map((d) => d.users).sort((a, b) => a - b);
         const lowThreshold = userCounts[Math.floor(userCounts.length / 3)];
         const mediumThreshold = userCounts[Math.floor((userCounts.length * 2) / 3)];
 
         const getColor = (users) => {
+          if (users === undefined || users === null) return null;
           if (users <= lowThreshold) {
-            return '#4caf50';
+            return '#C7D3FF';
           } else if (users <= mediumThreshold) {
-            return '#ff9800';
+            return '#577BFF';
           } else {
-            return '#f44336';
+            return '#0024A8';
           }
         };
 
-        markersRef.current = [];
-
-        const bounds = [];
-        countryData.forEach((item, index) => {
-          const circleColor = getColor(item.users);
-
-          const circle = L.circleMarker([item.position.lat, item.position.lng], {
-            radius: 6,
-            color: '#ffffff',
-            fillColor: circleColor,
-            fillOpacity: 0.7,
-            weight: 1,
-            className: 'pulse-marker'
-          }).addTo(map);
-
-          markersRef.current.push({
-            marker: circle,
-            color: circleColor,
+        const countryDataMap = {};
+        countryData.forEach((item) => {
+          countryDataMap[item.countryCode] = {
             users: item.users,
-            originalRadius: 6,
-            originalOpacity: 0.7,
-            countryCode: item.countryCode
-          });
-
-          circle.bindTooltip(
-            `<div style="text-align: start;">
-              <h3>${item.country}</h3>
-              <span style="font-size: 11px;">${item.users.toLocaleString()} ${userLabel.toLowerCase()}</span>
-            </div>`,
-            {
-              direction: 'top',
-              offset: [0, -5],
-              opacity: 0.95,
-              className: 'custom-tooltip'
-            }
-          );
-
-          circle.bindPopup(
-            `<div style="min-width: 150px; padding: 4px;">
-              <strong style="font-size: 15px; color: ${circleColor};">${item.country}</strong><br/>
-              <span style="font-size: 13px; color: #666;">${userLabel}: <strong style="color: #333;">${item.users.toLocaleString()}</strong></span>
-            </div>`,
-            {
-              maxWidth: 250,
-              className: 'custom-popup'
-            }
-          );
-
-          circle.on('click', function () {
-            onCountrySelect?.(item.countryCode === selectedCountry ? null : item.countryCode);
-          });
-
-          circle.on('mouseover', function () {
-            if (selectedColor === null || selectedColor === circleColor) {
-              this.setStyle({
-                radius: 9,
-                fillOpacity: 1,
-                weight: 2
-              });
-            }
-          });
-
-          circle.on('mouseout', function () {
-            const markerData = markersRef.current.find((m) => m.marker === circle);
-            if (markerData) {
-              if (selectedColor === null) {
-                this.setStyle({
-                  radius: markerData.originalRadius,
-                  fillOpacity: markerData.originalOpacity,
-                  weight: 1
-                });
-              } else if (selectedColor === circleColor) {
-                this.setStyle({
-                  radius: 8,
-                  fillOpacity: 1,
-                  weight: 1
-                });
-              } else {
-                this.setStyle({
-                  radius: 6,
-                  fillOpacity: 0.2,
-                  weight: 1
-                });
-              }
-            }
-          });
-
-          bounds.push([item.position.lat, item.position.lng]);
+            country: item.country,
+            color: getColor(item.users)
+          };
         });
 
-        if (bounds.length > 0) {
-          map.fitBounds(bounds, { padding: [50, 50], maxZoom: 4 });
-        }
+        markersRef.current = [];
+
+        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+          .then((response) => response.json())
+          .then((data) => {
+            const geoJsonLayer = L.geoJSON(data, {
+              style: (feature) => {
+                const countryCode = feature.properties['ISO3166-1-Alpha-2'];
+                const countryInfo = countryDataMap[countryCode];
+
+                if (countryInfo) {
+                  return {
+                    fillColor: countryInfo.color,
+                    fillOpacity: 0.8,
+                    color: isDarkMode ? '#475569' : '#d8d8d8ff',
+                    weight: 1.5
+                  };
+                } else {
+                  return {
+                    fillColor: isDarkMode ? '#2d2d2d' : '#e8e8e8',
+                    fillOpacity: 0.6,
+                    color: isDarkMode ? '#475569' : '#cccccc',
+                    weight: 1
+                  };
+                }
+              },
+              onEachFeature: (feature, layer) => {
+                const countryCode = feature.properties['ISO3166-1-Alpha-2'];
+                const countryInfo = countryDataMap[countryCode];
+
+                if (countryInfo) {
+                  markersRef.current.push({
+                    layer: layer,
+                    color: countryInfo.color,
+                    users: countryInfo.users,
+                    countryCode: countryCode,
+                    originalOpacity: 0.7
+                  });
+
+                  layer.bindTooltip(
+                    `<div style="text-align: start;">
+                      <h3>${countryInfo.country}</h3>
+                      <span style="font-size: 11px;">${countryInfo.users.toLocaleString()} ${userLabel.toLowerCase()}</span>
+                    </div>`,
+                    {
+                      direction: 'top',
+                      offset: [0, 0],
+                      opacity: 0.95,
+                      className: 'custom-tooltip'
+                    }
+                  );
+
+                  layer.bindPopup(
+                    `<div style="min-width: 150px; padding: 4px;">
+                      <strong style="font-size: 15px; color: ${countryInfo.color};">${countryInfo.country}</strong><br/>
+                      <span style="font-size: 13px; color: #666;">${userLabel}: <strong style="color: #333;">${countryInfo.users.toLocaleString()}</strong></span>
+                    </div>`,
+                    {
+                      maxWidth: 250,
+                      className: 'custom-popup'
+                    }
+                  );
+
+                  layer.on('click', function () {
+                    onCountrySelect?.(countryCode === selectedCountry ? null : countryCode);
+                  });
+
+                  layer.on('mouseover', function (e) {
+                    if (selectedColor === null || selectedColor === countryInfo.color) {
+                      this.setStyle({
+                        fillOpacity: 0.9,
+                        weight: 2,
+                        color: '#ffffff'
+                      });
+                    }
+                  });
+
+                  layer.on('mouseout', function () {
+                    const layerData = markersRef.current.find((m) => m.layer === layer);
+                    if (layerData) {
+                      if (selectedColor === null) {
+                        this.setStyle({
+                          fillOpacity: layerData.originalOpacity,
+                          weight: 1,
+                          color: isDarkMode ? '#475569' : '#d8d8d8ff'
+                        });
+                      } else if (selectedColor === countryInfo.color) {
+                        this.setStyle({
+                          fillOpacity: 0.9,
+                          weight: 1,
+                          color: isDarkMode ? '#475569' : '#d8d8d8ff'
+                        });
+                      } else {
+                        this.setStyle({
+                          fillOpacity: 0.2,
+                          weight: 1,
+                          color: isDarkMode ? '#475569' : '#d8d8d8ff'
+                        });
+                      }
+                    }
+                  });
+                }
+              },
+              pane: 'tilePane'
+            }).addTo(map);
+
+            geoJsonLayerRef.current = geoJsonLayer;
+
+            if (countryData.length > 0) {
+              const bounds = [];
+              countryData.forEach((item) => {
+                bounds.push([item.position.lat, item.position.lng]);
+              });
+              map.fitBounds(bounds, { padding: [50, 50], maxZoom: 4 });
+            }
+          })
+          .catch((error) => console.error('Error loading GeoJSON:', error));
 
         setMapLoaded(true);
       } catch (err) {
@@ -274,7 +298,7 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countryData, userLabel]);
+  }, [countryData, userLabel, isDarkMode]);
 
   useEffect(() => {
     setMapLoaded(false);
@@ -283,36 +307,34 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
   useEffect(() => {
     if (!mapLoaded || markersRef.current.length === 0) return;
 
-    markersRef.current.forEach(({ marker, color, countryCode, originalRadius, originalOpacity }) => {
+    markersRef.current.forEach(({ layer, color, countryCode, originalOpacity }) => {
       if (selectedCountry && countryCode === selectedCountry) {
-        marker.setStyle({
-          radius: 12,
+        layer.setStyle({
           fillOpacity: 1,
           weight: 3,
           color: '#f1a35aff'
         });
-        marker.openPopup();
+        layer.openPopup();
         if (mapInstanceRef.current) {
-          mapInstanceRef.current.panTo(marker.getLatLng(), { animate: true, duration: 0.5 });
+          const bounds = layer.getBounds();
+          mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 0.5 });
         }
       } else if (selectedCountry) {
-        marker.setStyle({
-          radius: originalRadius,
+        layer.setStyle({
           fillOpacity: 0.3,
           weight: 1,
-          color: '#ffffff'
+          color: isDarkMode ? '#475569' : '#d8d8d8ff'
         });
       } else {
-        marker.setStyle({
-          radius: originalRadius,
+        layer.setStyle({
           fillOpacity: originalOpacity,
           weight: 1,
-          color: '#ffffff'
+          color: isDarkMode ? '#475569' : '#d8d8d8ff'
         });
-        marker.closePopup();
+        layer.closePopup();
       }
     });
-  }, [selectedCountry, mapLoaded]);
+  }, [selectedCountry, mapLoaded, isDarkMode]);
 
   const toggleFullscreen = () => {
     setIsFullscreen((prev) => !prev);
@@ -344,24 +366,21 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
   const handleColorClick = (color) => {
     if (selectedColor === color) {
       setSelectedColor(null);
-      markersRef.current.forEach(({ marker, color: markerColor }) => {
-        marker.setStyle({
-          fillOpacity: 0.7,
-          radius: 6
+      markersRef.current.forEach(({ layer }) => {
+        layer.setStyle({
+          fillOpacity: 0.7
         });
       });
     } else {
       setSelectedColor(color);
-      markersRef.current.forEach(({ marker, color: markerColor }) => {
-        if (markerColor === color) {
-          marker.setStyle({
-            fillOpacity: 1,
-            radius: 8
+      markersRef.current.forEach(({ layer, color: layerColor }) => {
+        if (layerColor === color) {
+          layer.setStyle({
+            fillOpacity: 0.9
           });
         } else {
-          marker.setStyle({
-            fillOpacity: 0.2,
-            radius: 6
+          layer.setStyle({
+            fillOpacity: 0.2
           });
         }
       });
@@ -423,24 +442,14 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
             color: #1976d2 !important;
           }
           
-          /* Marker pulse animation */
-          @keyframes pulse {
-            0% {
-              transform: scale(1);
-              opacity: 1;
-            }
-            50% {
-              transform: scale(1.1);
-              opacity: 0.8;
-            }
-            100% {
-              transform: scale(1);
-              opacity: 1;
-            }
+          /* Country hover transition */
+          .leaflet-interactive {
+            transition: fill-opacity 0.2s ease, stroke-width 0.2s ease !important;
+            cursor: pointer !important;
           }
           
-          .pulse-marker:hover {
-            animation: pulse 0.1s ease-in-out;
+          .leaflet-interactive:hover {
+            stroke-width: 2 !important;
           }
           
           /* Attribution styling */
@@ -458,7 +467,6 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
       </style>
       <Box
         ref={containerRef}
-        component={Paper}
         sx={{
           height: '100%',
           minHeight: { xs: '400px', sm: '500px', md: '600px' },
@@ -499,8 +507,8 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
               onClick={toggleFullscreen}
               sx={(theme) => ({
                 position: 'absolute',
-                top: { xs: 8, sm: 10 },
-                right: { xs: 8, sm: 10 },
+                top: { xs: 8, sm: 90 },
+                left: { xs: 8, sm: 10 },
                 backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                 color: 'text.primary',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
@@ -517,7 +525,7 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
               sx={(theme) => ({
                 position: 'absolute',
                 bottom: { xs: 10, sm: 20 },
-                right: { xs: 10, sm: 20 },
+                left: { xs: 10, sm: 20 },
                 backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                 padding: { xs: '8px 12px', sm: '12px 16px' },
                 borderRadius: '4px',
@@ -534,9 +542,9 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
                 {[
-                  { color: '#4caf50', label: 'Low', value: 'low' },
-                  { color: '#ff9800', label: 'Medium', value: 'medium' },
-                  { color: '#f44336', label: 'High', value: 'high' }
+                  { color: '#C7D3FF', label: 'Low', value: 'low' },
+                  { color: '#577BFF', label: 'Medium', value: 'medium' },
+                  { color: '#0024A8', label: 'High', value: 'high' }
                 ].map((item) => (
                   <Box
                     key={item.value}

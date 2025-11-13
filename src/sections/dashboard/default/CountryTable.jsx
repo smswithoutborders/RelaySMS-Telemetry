@@ -125,16 +125,16 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
 
   return (
     <>
-      <Box component={Paper}>
+      <Box component={Paper} elevation={0} sx={{ backgroundColor: 'transparent', mb: 3 }}>
         <TableContainer sx={{ minHeight: 450, maxHeight: 600 }}>
           {loading && (
-            <Box display="flex" justifyContent="center" p={4}>
-              <Loader size={50} fullScreen={false} />
+            <Box display="flex" justifyContent="center" p={1}>
+              <Loader size={30} fullScreen={false} />
             </Box>
           )}
 
           {!loading && error && (
-            <Box display="flex" justifyContent="center" p={4}>
+            <Box display="flex" justifyContent="center" p={1}>
               <Typography color="error">{error}</Typography>
             </Box>
           )}

@@ -1,6 +1,6 @@
 // material-ui
 import TableSortLabel from '@mui/material/TableSortLabel';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -13,16 +13,20 @@ import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
+import { useTheme } from '@mui/material/styles';
 
 // antd
-import { Button, Select, DatePicker, Space } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { Button, Select, DatePicker, Space, Dropdown } from 'antd';
+import { ReloadOutlined, CalendarOutlined } from '@ant-design/icons';
 
 // components
 import Loader from 'components/Loader';
+import MainCard from 'components/MainCard';
 
 // project imports
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
+import PublicationChart from 'sections/publications/PublicationChart';
+import PlatformDistributionChart from 'sections/publications/PlatformDistributionChart';
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -89,13 +93,20 @@ PublicationTableHead.propTypes = {
 };
 
 export default function Publications() {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const [order, setOrder] = useState('desc');
   const [orderBy, setOrderBy] = useState('date');
   const [platform, setPlatform] = useState('');
   const [status, setStatus] = useState('');
   const [source, setSource] = useState('');
+  const [country, setCountry] = useState('');
+  const [availableCountries, setAvailableCountries] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [dateRangeFilter, setDateRangeFilter] = useState('custom');
+  const [showCustomDatePickers, setShowCustomDatePickers] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filtersApplied, setFiltersApplied] = useState({});
@@ -133,17 +144,156 @@ export default function Publications() {
       startDate: startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2021-01-10',
       endDate: endDate ? dayjs(endDate).format('YYYY-MM-DD') : today,
       status,
-      source
+      source,
+      country
     };
     setFiltersApplied(appliedFilters);
+  };
+
+  const handleDateRangeSelect = ({ key }) => {
+    setDateRangeFilter(key);
+    const now = dayjs();
+
+    switch (key) {
+      case 'last24hours':
+        setStartDate(now);
+        setEndDate(now);
+        setShowCustomDatePickers(false);
+        setDropdownOpen(false);
+        break;
+      case 'last7days':
+        setStartDate(now.subtract(7, 'day'));
+        setEndDate(now);
+        setShowCustomDatePickers(false);
+        setDropdownOpen(false);
+        break;
+      case 'thismonth':
+        setStartDate(now.startOf('month'));
+        setEndDate(now);
+        setShowCustomDatePickers(false);
+        setDropdownOpen(false);
+        break;
+      case 'custom':
+        setShowCustomDatePickers(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const getCustomDropdownContent = () => {
+    const dropdownBg = isDarkMode ? '#1e293b' : '#fff';
+    const hoverBg = isDarkMode ? '#334155' : '#f5f5f5';
+    const borderColor = isDarkMode ? '#334155' : '#f0f0f0';
+    const textColor = isDarkMode ? '#e2e8f0' : '#333';
+    const labelColor = isDarkMode ? '#94a3b8' : '#666';
+
+    return (
+      <div
+        style={{
+          padding: '12px',
+          minWidth: '300px',
+          backgroundColor: dropdownBg,
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}
+      >
+        <div
+          style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = hoverBg)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
+          onClick={() => handleDateRangeSelect({ key: 'last24hours' })}
+        >
+          Today
+        </div>
+        <div
+          style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = hoverBg)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
+          onClick={() => handleDateRangeSelect({ key: 'last7days' })}
+        >
+          Last 7 Days
+        </div>
+        <div
+          style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = hoverBg)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
+          onClick={() => handleDateRangeSelect({ key: 'thismonth' })}
+        >
+          This Month
+        </div>
+        <div
+          style={{ cursor: 'pointer', padding: '8px 12px', borderRadius: '4px', color: textColor }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = hoverBg)}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = 'transparent')}
+          onClick={() => handleDateRangeSelect({ key: 'custom' })}
+        >
+          Custom
+        </div>
+        {showCustomDatePickers && (
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${borderColor}` }}>
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: labelColor }}>Start Date</label>
+              <DatePicker
+                placeholder="Start Date"
+                value={startDate}
+                onChange={(date) => setStartDate(date)}
+                style={{ width: '100%' }}
+                format="YYYY-MM-DD"
+              />
+            </div>
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: labelColor }}>End Date</label>
+              <DatePicker
+                placeholder="End Date"
+                value={endDate}
+                onChange={(date) => setEndDate(date)}
+                style={{ width: '100%' }}
+                format="YYYY-MM-DD"
+              />
+            </div>
+            <Button
+              type="primary"
+              style={{ width: '100%' }}
+              onClick={() => {
+                setDropdownOpen(false);
+              }}
+            >
+              Done
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const getDateRangeLabel = () => {
+    switch (dateRangeFilter) {
+      case 'last24hours':
+        return 'Today';
+      case 'last7days':
+        return 'Last 7 Days';
+      case 'thismonth':
+        return 'This Month';
+      case 'custom':
+        if (startDate && endDate) {
+          return `${startDate.format('YYYY-MM-DD')} - ${endDate.format('YYYY-MM-DD')}`;
+        }
+        return 'Custom Range';
+      default:
+        return 'Date Range Filter';
+    }
   };
 
   const handleResetFilters = () => {
     setPlatform('');
     setStatus('');
     setSource('');
+    setCountry('');
     setStartDate(null);
     setEndDate(null);
+    setDateRangeFilter('custom');
+    setShowCustomDatePickers(false);
     setFiltersApplied({});
   };
 
@@ -160,6 +310,30 @@ export default function Publications() {
 
   const formatDateToGMTPlus1 = (dateString) => {
     return dayjs(dateString).local().format('MMM DD, YYYY hh:mm:ss A');
+  };
+
+  const getPlatformLogo = (platformName) => {
+    const platform = platformName?.toLowerCase();
+    switch (platform) {
+      case 'telegram':
+        return '/telegram.png';
+      case 'twitter':
+      case 'x':
+        return '/x-twitter-brands-solid.svg';
+      case 'gmail':
+        return '/Gmail_icon.svg';
+      case 'bluesky':
+        return '/Bluesky_Logo.svg';
+      case 'mastodon':
+        return '/mastodon.svg';
+      case 'slack':
+        return '/slack.png';
+      case 'email_bridge':
+      case 'email bridge':
+        return '/logo.svg';
+      default:
+        return '/logo.svg';
+    }
   };
 
   useEffect(() => {
@@ -179,6 +353,7 @@ export default function Publications() {
         if (platform) params.platform_name = platform;
         if (status) params.status = status;
         if (source) params.source = source;
+        if (country) params.country_code = country;
 
         const response = await axios.get(`${import.meta.env.VITE_APP_TELEMETRY_API}publications`, { params });
 
@@ -241,6 +416,7 @@ export default function Publications() {
         });
         setTableData(sortedFormatted);
         setTotalRows(response.data.publications?.pagination?.total_records || 0);
+
         setError(null);
       } catch (err) {
         console.error('Error fetching metrics:', err);
@@ -254,14 +430,53 @@ export default function Publications() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersApplied, page, rowsPerPage, order, orderBy]);
 
+  useEffect(() => {
+    const fetchAllCountries = async () => {
+      try {
+        const params = {
+          start_date: '2021-01-10',
+          end_date: new Date().toISOString().split('T')[0],
+          page: 1,
+          page_size: 100
+        };
+
+        const response = await axios.get(`${import.meta.env.VITE_APP_TELEMETRY_API}publications`, { params });
+        const data = response.data.publications?.data || [];
+
+        const formatted = Array.isArray(data)
+          ? data.map((item) => {
+              const rawCode = item?.country_code?.toUpperCase() || 'UNKNOWN';
+              const name = countries.isValid(rawCode, 'en') ? countries.getName(rawCode, 'en') : 'Unknown';
+              const flag = countries.isValid(rawCode, 'en') ? countryCodeToEmojiFlag(rawCode) : '';
+
+              return {
+                country: name || rawCode,
+                flag: flag || '',
+                country_code: rawCode
+              };
+            })
+          : [];
+
+        const uniqueCountries = [...new Map(formatted.map((item) => [item.country_code, item])).values()]
+          .filter((item) => item.country_code !== 'UNKNOWN')
+          .sort((a, b) => a.country.localeCompare(b.country));
+
+        setAvailableCountries(uniqueCountries);
+      } catch (err) {
+        console.error('Error fetching countries:', err);
+      }
+    };
+
+    fetchAllCountries();
+  }, []);
+
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      <Grid item xs={12}>
-        <Typography variant="h5">Open Telemetry</Typography>
+      <Grid size={12}>
+        <Typography variant="h5">Publications</Typography>
       </Grid>
 
-      {/* Metrics */}
-      <Grid item xs={12} sm={6} md={2}>
+      <Grid size={{ xs: 12, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Publications"
           count={metrics.totalPublication.toLocaleString()}
@@ -269,7 +484,7 @@ export default function Publications() {
           extra="All Publications"
         />
       </Grid>
-      <Grid item xs={12} sm={6} md={2}>
+      <Grid size={{ xs: 12, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Published"
           count={metrics.totalPublished.toLocaleString()}
@@ -277,7 +492,7 @@ export default function Publications() {
           extra="Successful Publications"
         />
       </Grid>
-      <Grid item xs={12} sm={6} md={2}>
+      <Grid size={{ xs: 12, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Failed"
           count={metrics.totalFailed.toLocaleString()}
@@ -287,23 +502,79 @@ export default function Publications() {
       </Grid>
 
       {/* Filters */}
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Box>
-          <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-            Filters
-          </Typography>
           <Space wrap size="middle">
             <Select
               placeholder="Platform"
               value={platform || undefined}
               onChange={(value) => setPlatform(value || '')}
-              style={{ width: 150 }}
+              style={{ width: 200 }}
               allowClear
               options={[
-                { value: 'gmail', label: 'Gmail' },
-                { value: 'twitter', label: 'Twitter' },
-                { value: 'telegram', label: 'Telegram' },
-                { value: 'email_bridge', label: 'Email Bridge' }
+                {
+                  value: 'gmail',
+                  label: (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img src="/Gmail_icon.svg" alt="Gmail" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                      <span>Gmail</span>
+                    </Box>
+                  )
+                },
+                {
+                  value: 'twitter',
+                  label: (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img src="/x-twitter-brands-solid.svg" alt="Twitter" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                      <span>Twitter</span>
+                    </Box>
+                  )
+                },
+                {
+                  value: 'telegram',
+                  label: (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img src="/telegram.png" alt="Telegram" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                      <span>Telegram</span>
+                    </Box>
+                  )
+                },
+                {
+                  value: 'bluesky',
+                  label: (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img src="/Bluesky_Logo.svg" alt="Bluesky" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                      <span>Bluesky</span>
+                    </Box>
+                  )
+                },
+                {
+                  value: 'mastodon',
+                  label: (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img src="/mastodon.svg" alt="Mastodon" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                      <span>Mastodon</span>
+                    </Box>
+                  )
+                },
+                // {
+                //   value: 'slack',
+                //   label: (
+                //     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                //       <img src="/slack.png" alt="Slack" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                //       <span>Slack</span>
+                //     </Box>
+                //   )
+                // },
+                {
+                  value: 'email_bridge',
+                  label: (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img src="/logo.svg" alt="Email Bridge" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                      <span>Email Bridge</span>
+                    </Box>
+                  )
+                }
               ]}
             />
 
@@ -331,25 +602,48 @@ export default function Publications() {
               ]}
             />
 
-            <DatePicker
-              placeholder="Start Date"
-              value={startDate ? dayjs(startDate) : null}
-              onChange={(date) => setStartDate(date)}
-              format="YYYY-MM-DD"
+            <Select
+              placeholder="Country"
+              value={country || undefined}
+              onChange={(value) => setCountry(value || '')}
+              style={{ width: 200 }}
+              allowClear
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label?.props?.children?.[1]?.props?.children || '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={availableCountries.map((item) => ({
+                value: item.country_code,
+                label: (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <span>{item.flag}</span>
+                    <span>{item.country}</span>
+                  </Box>
+                )
+              }))}
             />
 
-            <DatePicker
-              placeholder="End Date"
-              value={endDate ? dayjs(endDate) : null}
-              onChange={(date) => setEndDate(date)}
-              format="YYYY-MM-DD"
-            />
+            <Dropdown
+              popupRender={() => getCustomDropdownContent()}
+              trigger={['click']}
+              open={dropdownOpen}
+              onOpenChange={(open) => {
+                setDropdownOpen(open);
+                if (!open) {
+                  setShowCustomDatePickers(false);
+                }
+              }}
+            >
+              <Button style={{ width: 200 }} type="default" icon={<CalendarOutlined />}>
+                {getDateRangeLabel()}
+              </Button>
+            </Dropdown>
 
             <Button type="primary" onClick={handleApplyFilters}>
               Apply
             </Button>
 
-            <Button icon={<ReloadOutlined />} onClick={handleResetFilters}>
+            <Button type="text" icon={<ReloadOutlined />} onClick={handleResetFilters}>
               Reset
             </Button>
           </Space>
@@ -357,12 +651,12 @@ export default function Publications() {
       </Grid>
 
       {/* Table */}
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Paper>
           <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
             {loading ? (
               <Box display="flex" justifyContent="center" p={4}>
-                <Loader size={50} fullScreen={false} />
+                <Loader size={40} fullScreen={false} />
               </Box>
             ) : error ? (
               <Box display="flex" justifyContent="center" p={4}>
@@ -380,7 +674,16 @@ export default function Publications() {
                         <span style={{ marginRight: 8 }}>{row.flag}</span>
                         {row.country ? row.country : 'No Country'}
                       </TableCell>
-                      <TableCell>{row.platform_name}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <img
+                            src={getPlatformLogo(row.platform_name)}
+                            alt={row.platform_name}
+                            style={{ width: 18, height: 18, objectFit: 'contain' }}
+                          />
+                          <span>{row.platform_name}</span>
+                        </Box>
+                      </TableCell>
                       <TableCell>{row.source}</TableCell>
                       <TableCell>{row.status}</TableCell>
                     </TableRow>
@@ -399,6 +702,19 @@ export default function Publications() {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Paper>
+      </Grid>
+      {/* Charts */}
+      <Grid size={12}>
+        <MainCard>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 8 }}>
+              <PublicationChart filters={filtersApplied} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <PlatformDistributionChart filters={filtersApplied} />
+            </Grid>
+          </Grid>
+        </MainCard>
       </Grid>
     </Grid>
   );
