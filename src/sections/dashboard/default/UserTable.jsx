@@ -17,6 +17,7 @@ import { Button } from 'antd';
 import dayjs from 'dayjs';
 
 import Loader from 'components/Loader';
+import { fontSize } from '@mui/system';
 
 const headCells = [
   { id: 'date', align: 'left', label: 'Date' },
@@ -114,24 +115,26 @@ export default function UserTable({ filters }) {
     <>
       <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: 'center' }}>
         <Button
+          style={{ fontSize: '0.7rem' }}
           size="small"
           onClick={() => setGranularity('month')}
           color={granularity === 'month' ? 'primary' : 'secondary'}
-          variant={granularity === 'month' ? 'outlined' : 'text'}
+          variant={granularity === 'month' ? 'dashed' : 'text'}
         >
           Month
         </Button>
         <Button
+          style={{ fontSize: '0.7rem' }}
           size="small"
           onClick={() => setGranularity('day')}
           color={granularity === 'day' ? 'primary' : 'secondary'}
-          variant={granularity === 'day' ? 'outlined' : 'text'}
+          variant={granularity === 'day' ? 'dashed' : 'text'}
         >
           Day
         </Button>
       </Stack>
 
-      <Box component={Paper}>
+      <Box component={Paper} elevation={0} sx={{ backgroundColor: 'transparent' }}>
         <TableContainer sx={{ minHeight: 500, maxHeight: 510 }}>
           {loading && (
             <Box display="flex" justifyContent="center" p={4}>

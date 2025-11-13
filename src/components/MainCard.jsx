@@ -5,6 +5,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Divider from '@mui/material/Divider';
+import { Box } from '@mui/material';
 
 // header style
 const headerSX = {
@@ -35,7 +36,7 @@ const MainCard = forwardRef(function MainCard(
   ref
 ) {
   return (
-    <Card
+    <Box
       elevation={elevation || 0}
       sx={[
         (theme) => ({
@@ -81,7 +82,7 @@ const MainCard = forwardRef(function MainCard(
           <Highlighter codeString={codeString} codeHighlight={codeHighlight} />
         </>
       )} */}
-    </Card>
+    </Box>
   );
 });
 
