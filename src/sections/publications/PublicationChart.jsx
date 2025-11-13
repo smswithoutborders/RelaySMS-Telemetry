@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -28,6 +28,7 @@ export default function PublicationChart({ filters }) {
   const platform = filters?.platform || '';
   const status = filters?.status || '';
   const source = filters?.source || '';
+  const country = filters?.country || '';
 
   const [labels, setLabels] = useState([]);
   const [publishedData, setPublishedData] = useState([]);
@@ -52,49 +53,42 @@ export default function PublicationChart({ filters }) {
         const params = {
           start_date: startDate,
           end_date: endDate,
-          granularity: 'day',
-          group_by: 'date',
           page: currentPage + 1,
-          page_size: pageSize
+          page_size: 100
         };
 
         if (platform) params.platform_name = platform;
         if (source) params.source = source;
+        if (country) params.country_code = country;
 
-        // Fetch published data
-        const publishedParams = { ...params, status: 'published' };
-        const publishedResponse = await axios.get(`${baseUrl}publications`, { params: publishedParams });
+        const response = await axios.get(`${baseUrl}publications`, { params });
 
-        // Fetch failed data
-        const failedParams = { ...params, status: 'failed' };
-        const failedResponse = await axios.get(`${baseUrl}publications`, { params: failedParams });
+        const allPublications = response?.data?.publications?.data ?? [];
 
-        const published = publishedResponse?.data?.publications?.data ?? [];
-        const failed = failedResponse?.data?.publications?.data ?? [];
+        const dataByDate = {};
 
-        // Group published data by date
-        const publishedByDate = published.reduce((acc, item) => {
+        allPublications.forEach((item) => {
           const date = item.date_created?.split('T')[0] || item.date_created;
-          acc[date] = (acc[date] || 0) + 1;
-          return acc;
-        }, {});
+          const itemStatus = item.status?.toLowerCase();
 
-        // Group failed data by date
-        const failedByDate = failed.reduce((acc, item) => {
-          const date = item.date_created?.split('T')[0] || item.date_created;
-          acc[date] = (acc[date] || 0) + 1;
-          return acc;
-        }, {});
+          if (!dataByDate[date]) {
+            dataByDate[date] = { published: 0, failed: 0 };
+          }
 
-        // Get all unique dates and sort them
-        const allLabels = [...new Set([...Object.keys(publishedByDate), ...Object.keys(failedByDate)])].sort();
+          if (itemStatus === 'published') {
+            dataByDate[date].published += 1;
+          } else if (itemStatus === 'failed') {
+            dataByDate[date].failed += 1;
+          }
+        });
+
+        const allLabels = Object.keys(dataByDate).sort();
         setLabels(allLabels);
 
-        // Map the counts to labels
-        setPublishedData(allLabels.map((label) => publishedByDate[label] || 0));
-        setFailedData(allLabels.map((label) => failedByDate[label] || 0));
+        setPublishedData(allLabels.map((label) => dataByDate[label]?.published || 0));
+        setFailedData(allLabels.map((label) => dataByDate[label]?.failed || 0));
 
-        setTotalPages(publishedResponse?.data?.publications?.pagination?.total_pages || 1);
+        setTotalPages(response?.data?.publications?.pagination?.total_pages || 1);
       } catch (error) {
         console.error('Error fetching publication chart data:', error);
       } finally {
@@ -103,31 +97,13 @@ export default function PublicationChart({ filters }) {
     };
 
     fetchData();
-  }, [startDate, endDate, platform, status, source, currentPage]);
+  }, [startDate, endDate, platform, source, country, currentPage]);
 
   const axisFontStyle = { fontSize: 10, fill: theme.palette.text.secondary };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
-
-  const series = [];
-  if (showPublished) {
-    series.push({
-      data: publishedData,
-      label: 'Published',
-      id: 'Published',
-      color: primaryColor
-    });
-  }
-  if (showFailed) {
-    series.push({
-      data: failedData,
-      label: 'Failed',
-      id: 'Failed',
-      color: errorColor
-    });
-  }
 
   return (
     <>
@@ -140,10 +116,7 @@ export default function PublicationChart({ filters }) {
           <Box sx={{ p: 2.5, pb: 0 }}>
             <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
-                <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                  Publication Data
-                </Typography>
-                <Typography variant="h5">Publications Over Time</Typography>
+                <Typography variant="h6">Publications Over Time</Typography>
               </Box>
 
               <FormGroup>
@@ -152,11 +125,8 @@ export default function PublicationChart({ filters }) {
                     control={
                       <Checkbox
                         checked={showPublished}
-                        onChange={(e) => setShowPublished(e.target.checked)}
-                        sx={{
-                          color: primaryColor,
-                          '&.Mui-checked': { color: primaryColor }
-                        }}
+                        onChange={() => setShowPublished(!showPublished)}
+                        sx={{ '&.Mui-checked': { color: primaryColor }, '&:hover': { backgroundColor: alpha(primaryColor, 0.08) } }}
                       />
                     }
                     label="Published"
@@ -165,11 +135,8 @@ export default function PublicationChart({ filters }) {
                     control={
                       <Checkbox
                         checked={showFailed}
-                        onChange={(e) => setShowFailed(e.target.checked)}
-                        sx={{
-                          color: errorColor,
-                          '&.Mui-checked': { color: errorColor }
-                        }}
+                        onChange={() => setShowFailed(!showFailed)}
+                        sx={{ '&.Mui-checked': { color: errorColor }, '&:hover': { backgroundColor: alpha(errorColor, 0.08) } }}
                       />
                     }
                     label="Failed"
@@ -177,41 +144,38 @@ export default function PublicationChart({ filters }) {
                 </Stack>
               </FormGroup>
             </Stack>
-          </Box>
 
-          <Box sx={{ pt: 1, pr: 2 }}>
             <BarChart
-              height={340}
-              series={series}
-              xAxis={[
-                {
-                  scaleType: 'band',
-                  data: labels,
-                  tickLabelStyle: axisFontStyle
-                }
+              height={400}
+              grid={{ horizontal: true }}
+              xAxis={[{ data: labels, scaleType: 'band', tickLabelStyle: { ...axisFontStyle, fontSize: 12 } }]}
+              yAxis={[{ disableLine: true, disableTicks: true, tickLabelStyle: axisFontStyle }]}
+              series={[
+                ...(showPublished ? [{ data: publishedData, label: 'Published', color: primaryColor, type: 'bar' }] : []),
+                ...(showFailed ? [{ data: failedData, label: 'Failed', color: errorColor, type: 'bar' }] : [])
               ]}
-              yAxis={[{ tickLabelStyle: axisFontStyle }]}
-              margin={{ left: 50, right: 10, top: 20, bottom: 50 }}
-              slotProps={{
-                legend: { hidden: true }
-              }}
+              slotProps={{ legend: { hidden: true }, bar: { rx: 5, ry: 5 } }}
+              axisHighlight={{ x: 'none' }}
+              margin={{ top: 30, left: 40, right: 10 }}
+              tooltip={{ trigger: 'item' }}
               sx={{
+                '& .MuiBarElement-root:hover': { opacity: 0.6 },
                 '& .MuiChartsAxis-directionX .MuiChartsAxis-tick, & .MuiChartsAxis-root line': { stroke: theme.palette.divider }
               }}
             />
           </Box>
 
-          <Stack direction="row" spacing={1} sx={{ px: 2.5, pb: 2, justifyContent: 'center', alignItems: 'center' }}>
-            <Button type="text" icon={<LeftOutlined />} disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)} />
+          <Stack direction="row" sx={{ justifyContent: 'center', gap: 2, mt: 2 }}>
+            <Button size="small" type="text" disabled={currentPage >= totalPages - 1} onClick={() => handlePageChange(currentPage + 1)}>
+              <LeftOutlined /> <Typography variant="body2">Previous</Typography>
+            </Button>
             <Typography variant="body2" color="text.primary">
-              Page {currentPage + 1} of {totalPages}
+              Page {currentPage + 1}
             </Typography>
-            <Button
-              type="text"
-              icon={<RightOutlined />}
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => handlePageChange(currentPage + 1)}
-            />
+            <Button size="small" type="text" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
+              <Typography variant="body2">Next</Typography>
+              <RightOutlined />
+            </Button>
           </Stack>
         </>
       )}
@@ -225,6 +189,7 @@ PublicationChart.propTypes = {
     endDate: PropTypes.string,
     platform: PropTypes.string,
     status: PropTypes.string,
-    source: PropTypes.string
+    source: PropTypes.string,
+    country: PropTypes.string
   })
 };

@@ -21,9 +21,11 @@ export default function PlatformDistributionChart({ filters }) {
   const endDate = filters?.endDate || defaultEndDate;
   const status = filters?.status || '';
   const source = filters?.source || '';
+  const country = filters?.country || '';
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [highlightedItem, setHighlightedItem] = useState(null);
 
   const colors = [
     theme.palette.primary.main,
@@ -34,6 +36,17 @@ export default function PlatformDistributionChart({ filters }) {
     theme.palette.secondary.main,
     theme.palette.primary[700]
   ];
+
+  const handleLegendClick = (event, legendItem) => {
+    const clickedIndex = data.findIndex((item) => item.label === legendItem.label);
+    if (clickedIndex !== -1) {
+      setHighlightedItem(highlightedItem === clickedIndex ? null : clickedIndex);
+    }
+  };
+
+  const handleItemClick = (event, itemData) => {
+    setHighlightedItem(highlightedItem === itemData.dataIndex ? null : itemData.dataIndex);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,19 +64,18 @@ export default function PlatformDistributionChart({ filters }) {
 
         if (status) params.status = status;
         if (source) params.source = source;
+        if (country) params.country_code = country;
 
         const response = await axios.get(`${baseUrl}publications`, { params });
 
         const publications = response?.data?.publications?.data ?? [];
 
-        // Group by platform and count
         const platformCounts = publications.reduce((acc, item) => {
           const platform = item.platform_name || 'Unknown';
           acc[platform] = (acc[platform] || 0) + 1;
           return acc;
         }, {});
 
-        // Convert to chart data format
         const chartData = Object.entries(platformCounts).map(([platform, count], index) => ({
           id: index,
           value: count,
@@ -79,52 +91,99 @@ export default function PlatformDistributionChart({ filters }) {
     };
 
     fetchData();
-  }, [startDate, endDate, status, source]);
+  }, [startDate, endDate, status, source, country]);
 
   return (
     <>
       {loading ? (
         <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Loader size={50} fullScreen={false} />
+          <Loader size={30} fullScreen={false} />
         </Box>
       ) : (
         <Box sx={{ p: 2.5 }}>
-          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            Platform Distribution
-          </Typography>
-          <Typography variant="h5" sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
             Publications by Platform
           </Typography>
 
           {data.length > 0 ? (
-            <PieChart
-              series={[
-                {
-                  data: data,
-                  highlightScope: { faded: 'global', highlighted: 'item' },
-                  faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' }
-                }
-              ]}
-              colors={colors}
-              height={300}
-              slotProps={{
-                legend: {
-                  direction: 'row',
-                  position: { vertical: 'bottom', horizontal: 'middle' },
-                  padding: 0,
-                  itemMarkWidth: 10,
-                  itemMarkHeight: 10,
-                  markGap: 5,
-                  itemGap: 10,
-                  labelStyle: {
-                    fontSize: 12,
-                    fill: theme.palette.text.primary
-                  }
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+                '& .MuiPieArc-root': {
+                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
+                  transition: 'all 0.3s ease',
+                  opacity: (theme) => (highlightedItem !== null ? 0.3 : 1)
+                },
+                [`& .MuiPieArc-root:nth-of-type(${highlightedItem !== null ? highlightedItem + 1 : 0})`]: {
+                  filter: 'drop-shadow(0px 4px 12px rgba(0,0,0,0.25))',
+                  transform: 'scale(1.05)',
+                  opacity: 1
+                },
+                '& .MuiPieArc-root:hover': {
+                  filter: 'drop-shadow(0px 4px 12px rgba(0,0,0,0.25))',
+                  transform: 'scale(1.05)',
+                  opacity: '1 !important'
                 }
               }}
-            />
+            >
+              <PieChart
+                series={[
+                  {
+                    data: data,
+                    innerRadius: 60,
+                    outerRadius: 120,
+                    paddingAngle: 2,
+                    cornerRadius: 8,
+                    cx: 150,
+                    cy: 130
+                  }
+                ]}
+                colors={colors}
+                height={370}
+                margin={{ top: 10, bottom: 80, left: 10, right: 10 }}
+                onItemClick={handleItemClick}
+                slotProps={{
+                  legend: {
+                    direction: 'row',
+                    position: { vertical: 'bottom', horizontal: 'middle' },
+                    padding: 0,
+                    itemMarkWidth: 20,
+                    itemMarkHeight: 12,
+                    markGap: 6,
+                    itemGap: 12,
+                    labelStyle: {
+                      fontSize: 12,
+                      fill: theme.palette.text.primary,
+                      fontWeight: 500
+                    },
+                    onItemClick: handleLegendClick
+                  }
+                }}
+                sx={{
+                  '& .MuiChartsLegend-series text': {
+                    fontSize: '12px !important'
+                  },
+                  '& .MuiChartsLegend-mark': {
+                    borderRadius: '3px !important',
+                    rx: 3
+                  },
+                  '& .MuiChartsLegend-series': {
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    '&:hover': {
+                      backgroundColor: theme.palette.action.hover
+                    }
+                  }
+                }}
+              />
+            </Box>
           ) : (
-            <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box sx={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Typography color="text.secondary">No data available</Typography>
             </Box>
           )}
@@ -139,6 +198,7 @@ PlatformDistributionChart.propTypes = {
     startDate: PropTypes.string,
     endDate: PropTypes.string,
     status: PropTypes.string,
-    source: PropTypes.string
+    source: PropTypes.string,
+    country: PropTypes.string
   })
 };

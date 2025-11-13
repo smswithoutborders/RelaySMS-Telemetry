@@ -1,6 +1,6 @@
 // material-ui
 import TableSortLabel from '@mui/material/TableSortLabel';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -100,6 +100,8 @@ export default function Publications() {
   const [platform, setPlatform] = useState('');
   const [status, setStatus] = useState('');
   const [source, setSource] = useState('');
+  const [country, setCountry] = useState('');
+  const [availableCountries, setAvailableCountries] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [dateRangeFilter, setDateRangeFilter] = useState('custom');
@@ -142,7 +144,8 @@ export default function Publications() {
       startDate: startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2021-01-10',
       endDate: endDate ? dayjs(endDate).format('YYYY-MM-DD') : today,
       status,
-      source
+      source,
+      country
     };
     setFiltersApplied(appliedFilters);
   };
@@ -286,6 +289,7 @@ export default function Publications() {
     setPlatform('');
     setStatus('');
     setSource('');
+    setCountry('');
     setStartDate(null);
     setEndDate(null);
     setDateRangeFilter('custom');
@@ -349,6 +353,7 @@ export default function Publications() {
         if (platform) params.platform_name = platform;
         if (status) params.status = status;
         if (source) params.source = source;
+        if (country) params.country_code = country;
 
         const response = await axios.get(`${import.meta.env.VITE_APP_TELEMETRY_API}publications`, { params });
 
@@ -411,6 +416,7 @@ export default function Publications() {
         });
         setTableData(sortedFormatted);
         setTotalRows(response.data.publications?.pagination?.total_records || 0);
+
         setError(null);
       } catch (err) {
         console.error('Error fetching metrics:', err);
@@ -424,14 +430,53 @@ export default function Publications() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersApplied, page, rowsPerPage, order, orderBy]);
 
+  useEffect(() => {
+    const fetchAllCountries = async () => {
+      try {
+        const params = {
+          start_date: '2021-01-10',
+          end_date: new Date().toISOString().split('T')[0],
+          page: 1,
+          page_size: 100
+        };
+
+        const response = await axios.get(`${import.meta.env.VITE_APP_TELEMETRY_API}publications`, { params });
+        const data = response.data.publications?.data || [];
+
+        const formatted = Array.isArray(data)
+          ? data.map((item) => {
+              const rawCode = item?.country_code?.toUpperCase() || 'UNKNOWN';
+              const name = countries.isValid(rawCode, 'en') ? countries.getName(rawCode, 'en') : 'Unknown';
+              const flag = countries.isValid(rawCode, 'en') ? countryCodeToEmojiFlag(rawCode) : '';
+
+              return {
+                country: name || rawCode,
+                flag: flag || '',
+                country_code: rawCode
+              };
+            })
+          : [];
+
+        const uniqueCountries = [...new Map(formatted.map((item) => [item.country_code, item])).values()]
+          .filter((item) => item.country_code !== 'UNKNOWN')
+          .sort((a, b) => a.country.localeCompare(b.country));
+
+        setAvailableCountries(uniqueCountries);
+      } catch (err) {
+        console.error('Error fetching countries:', err);
+      }
+    };
+
+    fetchAllCountries();
+  }, []);
+
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Typography variant="h5">Publications</Typography>
       </Grid>
 
-      {/* Metrics */}
-      <Grid item xs={12} sm={6} md={2}>
+      <Grid size={{ xs: 12, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Publications"
           count={metrics.totalPublication.toLocaleString()}
@@ -439,7 +484,7 @@ export default function Publications() {
           extra="All Publications"
         />
       </Grid>
-      <Grid item xs={12} sm={6} md={2}>
+      <Grid size={{ xs: 12, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Published"
           count={metrics.totalPublished.toLocaleString()}
@@ -447,7 +492,7 @@ export default function Publications() {
           extra="Successful Publications"
         />
       </Grid>
-      <Grid item xs={12} sm={6} md={2}>
+      <Grid size={{ xs: 12, sm: 6, md: 2 }}>
         <AnalyticEcommerce
           title="Failed"
           count={metrics.totalFailed.toLocaleString()}
@@ -457,7 +502,7 @@ export default function Publications() {
       </Grid>
 
       {/* Filters */}
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Box>
           <Space wrap size="middle">
             <Select
@@ -512,15 +557,15 @@ export default function Publications() {
                     </Box>
                   )
                 },
-                {
-                  value: 'slack',
-                  label: (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <img src="/slack.png" alt="Slack" style={{ width: 16, height: 16, objectFit: 'contain' }} />
-                      <span>Slack</span>
-                    </Box>
-                  )
-                },
+                // {
+                //   value: 'slack',
+                //   label: (
+                //     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                //       <img src="/slack.png" alt="Slack" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                //       <span>Slack</span>
+                //     </Box>
+                //   )
+                // },
                 {
                   value: 'email_bridge',
                   label: (
@@ -557,8 +602,29 @@ export default function Publications() {
               ]}
             />
 
+            <Select
+              placeholder="Country"
+              value={country || undefined}
+              onChange={(value) => setCountry(value || '')}
+              style={{ width: 200 }}
+              allowClear
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label?.props?.children?.[1]?.props?.children || '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={availableCountries.map((item) => ({
+                value: item.country_code,
+                label: (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <span>{item.flag}</span>
+                    <span>{item.country}</span>
+                  </Box>
+                )
+              }))}
+            />
+
             <Dropdown
-              dropdownRender={() => getCustomDropdownContent()}
+              popupRender={() => getCustomDropdownContent()}
               trigger={['click']}
               open={dropdownOpen}
               onOpenChange={(open) => {
@@ -585,7 +651,7 @@ export default function Publications() {
       </Grid>
 
       {/* Table */}
-      <Grid item xs={12}>
+      <Grid size={12}>
         <Paper>
           <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
             {loading ? (
@@ -638,15 +704,16 @@ export default function Publications() {
         </Paper>
       </Grid>
       {/* Charts */}
-      <Grid item xs={12} md={8}>
+      <Grid size={12}>
         <MainCard>
-          <PublicationChart filters={filtersApplied} />
-        </MainCard>
-      </Grid>
-
-      <Grid item xs={12} md={4}>
-        <MainCard>
-          <PlatformDistributionChart filters={filtersApplied} />
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 8 }}>
+              <PublicationChart filters={filtersApplied} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <PlatformDistributionChart filters={filtersApplied} />
+            </Grid>
+          </Grid>
         </MainCard>
       </Grid>
     </Grid>

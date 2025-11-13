@@ -622,7 +622,7 @@ export default function DashboardDefault() {
                 Date range filter
               </Typography>
               <Dropdown
-                dropdownRender={() => getCustomDropdownContent()}
+                popupRender={() => getCustomDropdownContent()}
                 trigger={['click']}
                 open={dropdownOpen}
                 onOpenChange={(open) => {
