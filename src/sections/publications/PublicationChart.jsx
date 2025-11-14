@@ -146,9 +146,19 @@ export default function PublicationChart({ filters }) {
             </Stack>
 
             <BarChart
-              height={400}
+              height={450}
               grid={{ horizontal: true }}
-              xAxis={[{ data: labels, scaleType: 'band', tickLabelStyle: { ...axisFontStyle, fontSize: 12 } }]}
+              xAxis={[
+                {
+                  data: labels,
+                  scaleType: 'band',
+                  tickLabelStyle: {
+                    ...axisFontStyle,
+                    fontSize: 11,
+                    fontWeight: 500
+                  }
+                }
+              ]}
               yAxis={[{ disableLine: true, disableTicks: true, tickLabelStyle: axisFontStyle }]}
               series={[
                 ...(showPublished ? [{ data: publishedData, label: 'Published', color: primaryColor, type: 'bar' }] : []),
@@ -156,8 +166,36 @@ export default function PublicationChart({ filters }) {
               ]}
               slotProps={{ legend: { hidden: true }, bar: { rx: 5, ry: 5 } }}
               axisHighlight={{ x: 'none' }}
-              margin={{ top: 30, left: 40, right: 10 }}
-              tooltip={{ trigger: 'item' }}
+              margin={{ top: 30, left: 40, right: 10, bottom: 60 }}
+              tooltip={{
+                trigger: 'item'
+              }}
+              slots={{
+                itemContent: (props) => {
+                  const { itemData, series } = props;
+                  const date = labels[itemData.dataIndex];
+                  const count = itemData.value ?? series.data[itemData.dataIndex];
+                  return (
+                    <Box
+                      sx={{
+                        bgcolor: 'background.paper',
+                        p: 1.5,
+                        border: 1,
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        boxShadow: 2
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        {date}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: series.color }}>
+                        {series.label}: {count}
+                      </Typography>
+                    </Box>
+                  );
+                }
+              }}
               sx={{
                 '& .MuiBarElement-root:hover': { opacity: 0.6 },
                 '& .MuiChartsAxis-directionX .MuiChartsAxis-tick, & .MuiChartsAxis-root line': { stroke: theme.palette.divider }

@@ -26,7 +26,7 @@ const headCells = [
 
 function UserTableHead({ order, orderBy }) {
   return (
-    <TableHead>
+    <TableHead sx={{ backgroundColor: 'background.default', position: 'sticky', top: 0, zIndex: 1 }}>
       <TableRow>
         {headCells.map((headCell) => (
           <TableCell key={headCell.id} align={headCell.align} sortDirection={orderBy === headCell.id ? order : false}>
