@@ -1,0 +1,1 @@
+import{q as t,K as e,M as o}from"./index-CApqMAly.js";function s(){return t.jsxs(e,{sx:{},children:[t.jsx(o,{variant:"h2",gutterBottom:!0,children:"OOPS!"}),t.jsx(o,{variant:"h5",gutterBottom:!0,children:"Seems the page you are looking for does not exist"})]})}export{s as default};
