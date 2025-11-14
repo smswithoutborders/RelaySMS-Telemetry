@@ -66,11 +66,29 @@ export default function PlatformDistributionChart({ filters }) {
         if (source) params.source = source;
         if (country) params.country_code = country;
 
-        const response = await axios.get(`${baseUrl}publications`, { params });
+        const firstResponse = await axios.get(`${baseUrl}publications`, { params });
+        const totalPages = firstResponse?.data?.publications?.pagination?.total_pages || 1;
 
-        const publications = response?.data?.publications?.data ?? [];
+        let allPublications = firstResponse?.data?.publications?.data ?? [];
 
-        const platformCounts = publications.reduce((acc, item) => {
+        if (totalPages > 1) {
+          const pagePromises = [];
+          for (let page = 2; page <= totalPages; page++) {
+            pagePromises.push(
+              axios.get(`${baseUrl}publications`, {
+                params: { ...params, page }
+              })
+            );
+          }
+
+          const responses = await Promise.all(pagePromises);
+          responses.forEach((response) => {
+            const pageData = response?.data?.publications?.data ?? [];
+            allPublications = [...allPublications, ...pageData];
+          });
+        }
+
+        const platformCounts = allPublications.reduce((acc, item) => {
           const platform = item.platform_name || 'Unknown';
           acc[platform] = (acc[platform] || 0) + 1;
           return acc;

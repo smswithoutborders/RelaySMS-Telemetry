@@ -9,7 +9,6 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
@@ -17,7 +16,7 @@ import { useTheme } from '@mui/material/styles';
 
 // antd
 import { Button, Select, DatePicker, Space, Dropdown } from 'antd';
-import { ReloadOutlined, CalendarOutlined } from '@ant-design/icons';
+import { ReloadOutlined, CalendarOutlined, DownloadOutlined } from '@ant-design/icons';
 
 // components
 import Loader from 'components/Loader';
@@ -64,7 +63,7 @@ function PublicationTableHead({ order, orderBy, onRequestSort }) {
     onRequestSort(event, property);
   };
   return (
-    <TableHead>
+    <TableHead sx={{ backgroundColor: 'background.default', position: 'sticky', top: 0, zIndex: 1 }}>
       <TableRow>
         {headCells.map((headCell) => (
           <TableCell key={headCell.id} align={headCell.align} sortDirection={orderBy === headCell.id ? order : false}>
@@ -297,6 +296,78 @@ export default function Publications() {
     setFiltersApplied({});
   };
 
+  const handleDownloadData = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
+      const appliedStart = filtersApplied.startDate || '2021-01-10';
+      const appliedEnd = filtersApplied.endDate || today;
+
+      const params = {
+        start_date: appliedStart,
+        end_date: appliedEnd,
+        page: 1,
+        page_size: 100
+      };
+
+      if (filtersApplied.platform) params.platform_name = filtersApplied.platform;
+      if (filtersApplied.status) params.status = filtersApplied.status;
+      if (filtersApplied.source) params.source = filtersApplied.source;
+      if (filtersApplied.country) params.country_code = filtersApplied.country;
+
+      const firstResponse = await axios.get(`${baseUrl}publications`, { params });
+      const totalPages = firstResponse?.data?.publications?.pagination?.total_pages || 1;
+
+      let allPublications = firstResponse?.data?.publications?.data ?? [];
+
+      if (totalPages > 1) {
+        const pagePromises = [];
+        for (let page = 2; page <= totalPages; page++) {
+          pagePromises.push(axios.get(`${baseUrl}publications`, { params: { ...params, page } }));
+        }
+
+        const responses = await Promise.all(pagePromises);
+        responses.forEach((response) => {
+          const pageData = response?.data?.publications?.data ?? [];
+          allPublications = [...allPublications, ...pageData];
+        });
+      }
+
+      const downloadData = {
+        metadata: {
+          exportDate: new Date().toISOString(),
+          totalRecords: allPublications.length,
+          filters: {
+            platform: filtersApplied.platform || 'All',
+            status: filtersApplied.status || 'All',
+            source: filtersApplied.source || 'All',
+            country: filtersApplied.country || 'All',
+            startDate: appliedStart,
+            endDate: appliedEnd
+          }
+        },
+        publications: allPublications
+      };
+
+      const jsonString = JSON.stringify(downloadData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      link.download = `publications-data-${timestamp}.json`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading publications data:', error);
+      alert('Failed to download data. Please try again.');
+    }
+  };
+
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -473,7 +544,12 @@ export default function Publications() {
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       <Grid size={12}>
-        <Typography variant="h5">Publications</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5">Publications</Typography>
+          <Button type="default" icon={<DownloadOutlined />} onClick={handleDownloadData}>
+            Download Data
+          </Button>
+        </Box>
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -652,7 +728,7 @@ export default function Publications() {
 
       {/* Table */}
       <Grid size={12}>
-        <Paper>
+        <MainCard>
           <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
             {loading ? (
               <Box display="flex" justifyContent="center" p={4}>
@@ -701,7 +777,7 @@ export default function Publications() {
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
-        </Paper>
+        </MainCard>
       </Grid>
       {/* Charts */}
       <Grid size={12}>

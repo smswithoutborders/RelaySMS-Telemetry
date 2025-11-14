@@ -138,6 +138,7 @@ export default function UserAreaChart({ view, filters }) {
         </Box>
       ) : (
         <>
+          <Legend items={visibleSeries} onToggle={toggleVisibility} />
           <LineChart
             grid={{ horizontal: true }}
             xAxis={[{ scaleType: 'point', data: labels, disableLine: true, tickLabelStyle: axisFontStyle }]}
@@ -178,18 +179,18 @@ export default function UserAreaChart({ view, filters }) {
 
           <Stack direction="row" sx={{ justifyContent: 'center', gap: 2, mt: 2 }}>
             <Button size="small" type="text" disabled={currentPage + 1 >= totalPages} onClick={() => handlePageChange(currentPage + 1)}>
-              <LeftOutlined /> Previous
+              <LeftOutlined /> <Typography variant="body2">Previous</Typography>
             </Button>
             <Typography variant="body2" color="text.primary">
               Page {currentPage + 1}
             </Typography>
 
             <Button size="small" type="text" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
-              Next <RightOutlined />
+              <Typography variant="body2">Next</Typography> <RightOutlined />
             </Button>
           </Stack>
 
-          <Legend items={visibleSeries} onToggle={toggleVisibility} />
+          
         </>
       )}
     </>
