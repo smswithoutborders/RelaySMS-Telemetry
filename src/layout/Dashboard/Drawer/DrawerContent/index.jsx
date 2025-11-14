@@ -14,7 +14,7 @@ export default function DrawerContent() {
     <>
       <SimpleBar sx={{ '& .simplebar-content': { display: 'flex', flexDirection: 'column' } }}>
         <Navigation />
-        {drawerOpen && <NavCard />}
+        {drawerOpen}
       </SimpleBar>
     </>
   );

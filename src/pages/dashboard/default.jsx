@@ -492,8 +492,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Sign-up Users"
-                  count={metrics.totalSignupUsers.toLocaleString()}
-                  percentage={metrics.percentages.totalSignupUsers}
+                  count={metrics.totalSignupUsers === 0 ? '-' : metrics.totalSignupUsers.toLocaleString()}
+                  percentage={metrics.totalSignupUsers === 0 ? null : metrics.percentages.totalSignupUsers}
                   isLoss={!metrics.isHigher.totalSignupUsers}
                   extra="Total number of signups"
                 />
@@ -501,8 +501,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Sign-up Countries"
-                  count={metrics.totalSignupCountries.toLocaleString()}
-                  percentage={metrics.percentages.totalSignupCountries}
+                  count={metrics.totalSignupCountries === 0 ? '-' : metrics.totalSignupCountries.toLocaleString()}
+                  percentage={metrics.totalSignupCountries === 0 ? null : metrics.percentages.totalSignupCountries}
                   isLoss={!metrics.isHigher.totalSignupCountries}
                   extra="Countries with signups"
                 />
@@ -510,8 +510,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Email Signups"
-                  count={metrics.totalEmailSignups.toLocaleString()}
-                  percentage={metrics.percentages.totalEmailSignups}
+                  count={metrics.totalEmailSignups === 0 ? '-' : metrics.totalEmailSignups.toLocaleString()}
+                  percentage={metrics.totalEmailSignups === 0 ? null : metrics.percentages.totalEmailSignups}
                   isLoss={!metrics.isHigher.totalEmailSignups}
                   extra="Signups with email"
                 />
@@ -533,8 +533,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Current Users"
-                  count={metrics.totalUsers.toLocaleString()}
-                  percentage={metrics.percentages.totalUsers}
+                  count={metrics.totalUsers === 0 ? '-' : metrics.totalUsers.toLocaleString()}
+                  percentage={metrics.totalUsers === 0 ? null : metrics.percentages.totalUsers}
                   isLoss={!metrics.isHigher.totalUsers}
                   extra="Total retained users"
                 />
@@ -542,8 +542,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Retained Countries"
-                  count={metrics.totalRetainedCountries.toLocaleString()}
-                  percentage={metrics.percentages.totalRetainedCountries}
+                  count={metrics.totalRetainedCountries === 0 ? '-' : metrics.totalRetainedCountries.toLocaleString()}
+                  percentage={metrics.totalRetainedCountries === 0 ? null : metrics.percentages.totalRetainedCountries}
                   isLoss={!metrics.isHigher.totalRetainedCountries}
                   extra="Countries with retained users"
                 />
@@ -551,8 +551,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Email Retained"
-                  count={metrics.totalEmailRetained.toLocaleString()}
-                  percentage={metrics.percentages.totalEmailRetained}
+                  count={metrics.totalEmailRetained === 0 ? '-' : metrics.totalEmailRetained.toLocaleString()}
+                  percentage={metrics.totalEmailRetained === 0 ? null : metrics.percentages.totalEmailRetained}
                   isLoss={!metrics.isHigher.totalEmailRetained}
                   extra="Retained from email signups"
                 />
@@ -566,8 +566,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Bridge First Users"
-                  count={metrics.totalSignupsFromBridges.toLocaleString()}
-                  percentage={metrics.percentages.totalSignupsFromBridges}
+                  count={metrics.totalSignupsFromBridges === 0 ? '-' : metrics.totalSignupsFromBridges.toLocaleString()}
+                  percentage={metrics.totalSignupsFromBridges === 0 ? null : metrics.percentages.totalSignupsFromBridges}
                   isLoss={!metrics.isHigher.totalSignupsFromBridges}
                   extra="Users via bridges"
                 />
@@ -575,8 +575,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Users with Tokens"
-                  count={metrics.totalActiveUsers.toLocaleString()}
-                  percentage={metrics.percentages.totalActiveUsers}
+                  count={metrics.totalActiveUsers === 0 ? '-' : metrics.totalActiveUsers.toLocaleString()}
+                  percentage={metrics.totalActiveUsers === 0 ? null : metrics.percentages.totalActiveUsers}
                   isLoss={!metrics.isHigher.totalActiveUsers}
                   extra="Active users with tokens"
                 />
@@ -584,8 +584,8 @@ export default function DashboardDefault() {
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Publications"
-                  count={metrics.totalPublications.toLocaleString()}
-                  percentage={metrics.percentages.totalPublications}
+                  count={metrics.totalPublications === 0 ? '-' : metrics.totalPublications.toLocaleString()}
+                  percentage={metrics.totalPublications === 0 ? null : metrics.percentages.totalPublications}
                   isLoss={!metrics.isHigher.totalPublications}
                   extra="Messages published"
                 />
@@ -677,22 +677,46 @@ export default function DashboardDefault() {
           </Grid>
         </Box>
       </Grid>
-
       {/* row 2: Combined Chart and Map */}
-      <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
+      <Grid size={12}>
+        <MainCard>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
+              <CountryMap filters={filtersApplied} selectedCountry={selectedCountry} onCountrySelect={setSelectedCountry} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 5, lg: 3.5 }}>
+              <CountryTable filters={filtersApplied} onCountryClick={setSelectedCountry} selectedCountry={selectedCountry} />
+            </Grid>
+          </Grid>
+        </MainCard>
+      </Grid>
+
+      {/* <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
         <CountryMap filters={filtersApplied} selectedCountry={selectedCountry} onCountrySelect={setSelectedCountry} />
       </Grid>
       <Grid size={{ xs: 12, md: 5, lg: 3.5 }}>
         <CountryTable filters={filtersApplied} onCountryClick={setSelectedCountry} selectedCountry={selectedCountry} />
-      </Grid>
+      </Grid> */}
 
       {/* row 3: Country Table and User Table */}
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+      <Grid size={12} sx={{ mb: 4 }}>
+        <MainCard>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 5, lg: 3.5 }}>
+              <UserTable filters={filtersApplied} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
+              <CombinedChartCard filters={filtersApplied} />
+            </Grid>
+          </Grid>
+        </MainCard>
+      </Grid>
+      {/* <Grid size={{ xs: 12, md: 5, lg: 4 }}>
         <UserTable filters={filtersApplied} />
       </Grid>
       <Grid size={{ xs: 12, md: 7, lg: 8 }}>
         <CombinedChartCard filters={filtersApplied} />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 }
