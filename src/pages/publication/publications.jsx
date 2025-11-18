@@ -26,6 +26,7 @@ import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import PublicationChart from 'sections/publications/PublicationChart';
 import PlatformDistributionChart from 'sections/publications/PlatformDistributionChart';
+import PublicationMap from 'sections/publications/PublicationMap';
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -47,6 +48,13 @@ const maxValues = {
 
 const calculatePercentage = (value, max) => {
   return max ? Math.min((value / max) * 100, 100).toFixed(2) : '0.00';
+};
+
+const calculatePercentageChange = (current, previous) => {
+  if (previous === 0) {
+    return current > 0 ? 100 : 0;
+  }
+  return (((current - previous) / previous) * 100).toFixed(2);
 };
 
 const headCells = [
@@ -120,9 +128,15 @@ export default function Publications() {
       totalPublication: 0,
       totalPublished: 0,
       totalFailed: 0
+    },
+    isHigher: {
+      totalPublication: true,
+      totalPublished: true,
+      totalFailed: true
     }
   });
   const [tableData, setTableData] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState(null);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -147,6 +161,7 @@ export default function Publications() {
       country
     };
     setFiltersApplied(appliedFilters);
+    setPage(0);
   };
 
   const handleDateRangeSelect = ({ key }) => {
@@ -414,6 +429,13 @@ export default function Publications() {
         const appliedStart = startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2021-01-10';
         const appliedEnd = endDate ? dayjs(endDate).format('YYYY-MM-DD') : today;
 
+        const startDateObj = dayjs(appliedStart);
+        const endDateObj = dayjs(appliedEnd);
+        const periodDuration = endDateObj.diff(startDateObj, 'day');
+
+        const previousStart = startDateObj.subtract(periodDuration + 1, 'day').format('YYYY-MM-DD');
+        const previousEnd = startDateObj.subtract(1, 'day').format('YYYY-MM-DD');
+
         const params = {
           start_date: appliedStart,
           end_date: appliedEnd,
@@ -421,14 +443,37 @@ export default function Publications() {
           page_size: rowsPerPage
         };
 
-        if (platform) params.platform_name = platform;
-        if (status) params.status = status;
-        if (source) params.source = source;
-        if (country) params.country_code = country;
+        const previousParams = {
+          start_date: previousStart,
+          end_date: previousEnd,
+          page: 1,
+          page_size: rowsPerPage
+        };
 
-        const response = await axios.get(`${import.meta.env.VITE_APP_TELEMETRY_API}publications`, { params });
+        if (platform) {
+          params.platform_name = platform;
+          previousParams.platform_name = platform;
+        }
+        if (status) {
+          params.status = status;
+          previousParams.status = status;
+        }
+        if (source) {
+          params.source = source;
+          previousParams.source = source;
+        }
+        if (country) {
+          params.country_code = country;
+          previousParams.country_code = country;
+        }
+
+        const [response, previousResponse] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_APP_TELEMETRY_API}publications`, { params }),
+          axios.get(`${import.meta.env.VITE_APP_TELEMETRY_API}publications`, { params: previousParams })
+        ]);
 
         const data = response.data.publications?.data || [];
+        const previousData = previousResponse.data.publications || {};
 
         const formatted = Array.isArray(data)
           ? data.map((item) => {
@@ -475,14 +520,27 @@ export default function Publications() {
           });
         }
 
+        const currentPublications = response.data.publications?.total_publications || 0;
+        const currentPublished = response.data.publications?.total_published || 0;
+        const currentFailed = response.data.publications?.total_failed || 0;
+
+        const previousPublications = previousData.total_publications || 0;
+        const previousPublished = previousData.total_published || 0;
+        const previousFailed = previousData.total_failed || 0;
+
         setMetrics({
-          totalPublication: response.data.publications?.total_publications || 0,
-          totalPublished: response.data.publications?.total_published || 0,
-          totalFailed: response.data.publications?.total_failed || 0,
+          totalPublication: currentPublications,
+          totalPublished: currentPublished,
+          totalFailed: currentFailed,
           percentages: {
-            totalPublication: calculatePercentage(response.data.publications?.total_publications, maxValues.totalPublication),
-            totalPublished: calculatePercentage(response.data.publications?.total_published, maxValues.totalPublished),
-            totalFailed: calculatePercentage(response.data.publications?.total_failed, maxValues.totalFailed)
+            totalPublication: calculatePercentageChange(currentPublications, previousPublications),
+            totalPublished: calculatePercentageChange(currentPublished, previousPublished),
+            totalFailed: calculatePercentageChange(currentFailed, previousFailed)
+          },
+          isHigher: {
+            totalPublication: currentPublications >= previousPublications,
+            totalPublished: currentPublished >= previousPublished,
+            totalFailed: currentFailed >= previousFailed
           }
         });
         setTableData(sortedFormatted);
@@ -556,7 +614,8 @@ export default function Publications() {
         <AnalyticEcommerce
           title="Publications"
           count={metrics.totalPublication.toLocaleString()}
-          // percentage={metrics.percentages.totalPublication}
+          percentage={metrics.totalPublication === 0 ? null : metrics.percentages.totalPublication}
+          isLoss={!metrics.isHigher.totalPublication}
           extra="All Publications"
         />
       </Grid>
@@ -564,7 +623,8 @@ export default function Publications() {
         <AnalyticEcommerce
           title="Published"
           count={metrics.totalPublished.toLocaleString()}
-          // percentage={metrics.percentages.totalPublished}
+          percentage={metrics.totalPublished === 0 ? null : metrics.percentages.totalPublished}
+          isLoss={!metrics.isHigher.totalPublished}
           extra="Successful Publications"
         />
       </Grid>
@@ -572,7 +632,8 @@ export default function Publications() {
         <AnalyticEcommerce
           title="Failed"
           count={metrics.totalFailed.toLocaleString()}
-          // percentage={metrics.percentages.totalFailed}
+          percentage={metrics.totalFailed === 0 ? null : metrics.percentages.totalFailed}
+          isLoss={!metrics.isHigher.totalFailed}
           extra="Failed Publications"
         />
       </Grid>
@@ -601,7 +662,16 @@ export default function Publications() {
                   value: 'twitter',
                   label: (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <img src="/x-twitter-brands-solid.svg" alt="Twitter" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                      <img
+                        src="/x-twitter-brands-solid.svg"
+                        alt="Twitter"
+                        style={{
+                          width: 16,
+                          height: 16,
+                          objectFit: 'contain',
+                          filter: isDarkMode ? 'brightness(0) invert(1)' : 'none'
+                        }}
+                      />
                       <span>Twitter</span>
                     </Box>
                   )
@@ -726,57 +796,87 @@ export default function Publications() {
         </Box>
       </Grid>
 
-      {/* Table */}
+      {/* Table and Map */}
       <Grid size={12}>
         <MainCard>
-          <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
-            {loading ? (
-              <Box display="flex" justifyContent="center" p={4}>
-                <Loader size={40} fullScreen={false} />
-              </Box>
-            ) : error ? (
-              <Box display="flex" justifyContent="center" p={4}>
-                <Typography color="error">{error}</Typography>
-              </Box>
-            ) : (
-              <Table>
-                <PublicationTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
-                <TableBody>
-                  {tableData.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.id}</TableCell>
-                      <TableCell>{formatDateToGMTPlus1(row.date_created)}</TableCell>
-                      <TableCell>
-                        <span style={{ marginRight: 8 }}>{row.flag}</span>
-                        {row.country ? row.country : 'No Country'}
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <img
-                            src={getPlatformLogo(row.platform_name)}
-                            alt={row.platform_name}
-                            style={{ width: 18, height: 18, objectFit: 'contain' }}
-                          />
-                          <span>{row.platform_name}</span>
-                        </Box>
-                      </TableCell>
-                      <TableCell>{row.source}</TableCell>
-                      <TableCell>{row.status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </TableContainer>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 7, lg: 7.5 }}>
+              <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
+                {loading ? (
+                  <Box display="flex" justifyContent="center" p={4}>
+                    <Loader size={40} fullScreen={false} />
+                  </Box>
+                ) : error ? (
+                  <Box display="flex" justifyContent="center" p={4}>
+                    <Typography color="error">{error}</Typography>
+                  </Box>
+                ) : (
+                  <Table>
+                    <PublicationTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
+                    <TableBody>
+                      {tableData.map((row) => (
+                        <TableRow key={row.id}>
+                          <TableCell>{row.id}</TableCell>
+                          <TableCell>{formatDateToGMTPlus1(row.date_created)}</TableCell>
+                          <TableCell
+                            onClick={() => {
+                              if (row.country_code && row.country_code !== 'UNKNOWN') {
+                                setSelectedCountry(selectedCountry === row.country_code ? null : row.country_code);
+                              }
+                            }}
+                            sx={{
+                              cursor: row.country_code && row.country_code !== 'UNKNOWN' ? 'pointer' : 'default',
+                              '&:hover': {
+                                backgroundColor: row.country_code && row.country_code !== 'UNKNOWN' ? 'action.hover' : 'transparent'
+                              },
+                              fontWeight: selectedCountry === row.country_code ? 'bold' : 'normal',
+                              color: selectedCountry === row.country_code ? 'primary.main' : 'inherit'
+                            }}
+                          >
+                            <span style={{ marginRight: 8 }}>{row.flag}</span>
+                            {row.country ? row.country : 'No Country'}
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <img
+                                src={getPlatformLogo(row.platform_name)}
+                                alt={row.platform_name}
+                                style={{
+                                  width: 18,
+                                  height: 18,
+                                  objectFit: 'contain',
+                                  filter:
+                                    isDarkMode &&
+                                    (row.platform_name?.toLowerCase() === 'twitter' || row.platform_name?.toLowerCase() === 'x')
+                                      ? 'brightness(0) invert(1)'
+                                      : 'none'
+                                }}
+                              />
+                              <span>{row.platform_name}</span>
+                            </Box>
+                          </TableCell>
+                          <TableCell>{row.source}</TableCell>
+                          <TableCell>{row.status}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </TableContainer>
 
-          <TablePagination
-            component="div"
-            count={totalRows}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+              <TablePagination
+                component="div"
+                count={totalRows}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 5, lg: 4.5 }}>
+              <PublicationMap filters={filtersApplied} selectedCountry={selectedCountry} onCountrySelect={setSelectedCountry} />
+            </Grid>
+          </Grid>
         </MainCard>
       </Grid>
       {/* Charts */}
