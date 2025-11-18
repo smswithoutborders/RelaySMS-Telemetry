@@ -13,10 +13,11 @@ import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
+import MainCard from 'components/MainCard';
 
 // antd
 import { Button, Select, Space } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 
 // components
 import Loader from 'components/Loader';
@@ -59,7 +60,7 @@ function PublicationTableHead({ order, orderBy, onRequestSort }) {
     onRequestSort(event, property);
   };
   return (
-    <TableHead>
+    <TableHead sx={{ backgroundColor: 'background.default', position: 'sticky', top: 0, zIndex: 1 }}>
       <TableRow>
         {headCells.map((headCell) => (
           <TableCell key={headCell.id} align={headCell.align} sortDirection={orderBy === headCell.id ? order : false}>
@@ -148,6 +149,81 @@ export default function ReliabilityTable() {
     setReliability('');
     setFiltersApplied({});
     setPage(0);
+  };
+
+  const handleDownloadData = async () => {
+    try {
+      const appliedDate = filtersApplied.dateFilter || '2021-01-10';
+
+      const params = {
+        date_filter: appliedDate,
+        page: 1,
+        page_size: 100
+      };
+
+      if (filtersApplied.country) params.country = filtersApplied.country;
+      if (filtersApplied.operator) params.operator = filtersApplied.operator;
+      if (filtersApplied.msisdn) params.msisdn = filtersApplied.msisdn;
+      if (filtersApplied.operatorCode) params.operator_code = filtersApplied.operatorCode;
+
+      const firstResponse = await axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients`, { params });
+      const totalPages = firstResponse?.data?.pagination?.total_pages || 1;
+
+      let allClients = firstResponse?.data || [];
+      if (Array.isArray(allClients)) {
+        allClients = allClients;
+      } else {
+        allClients = [];
+      }
+
+      if (totalPages > 1) {
+        const pagePromises = [];
+        for (let page = 2; page <= totalPages; page++) {
+          pagePromises.push(axios.get(`${import.meta.env.VITE_APP_GATEWAY_SERVER_URL}clients`, { params: { ...params, page } }));
+        }
+
+        const responses = await Promise.all(pagePromises);
+        responses.forEach((response) => {
+          const pageData = response?.data || [];
+          if (Array.isArray(pageData)) {
+            allClients = [...allClients, ...pageData];
+          }
+        });
+      }
+
+      const downloadData = {
+        metadata: {
+          exportDate: new Date().toISOString(),
+          totalRecords: allClients.length,
+          filters: {
+            country: filtersApplied.country || 'All',
+            operator: filtersApplied.operator || 'All',
+            msisdn: filtersApplied.msisdn || 'All',
+            operatorCode: filtersApplied.operatorCode || 'All',
+            dateFilter: appliedDate
+          }
+        },
+        clients: allClients
+      };
+
+      const jsonString = JSON.stringify(downloadData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      link.download = `reliability-data-${timestamp}.json`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading reliability data:', error);
+      alert('Failed to download data. Please try again.');
+    }
   };
 
   const handleChangePage = (event, newPage) => setPage(newPage);
@@ -334,7 +410,12 @@ export default function ReliabilityTable() {
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       <Grid item xs={12}>
-        <Typography variant="h5">Open Telemetry</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5">Reliability</Typography>
+          <Button type="default" icon={<DownloadOutlined />} onClick={handleDownloadData}>
+            Download Data
+          </Button>
+        </Box>
       </Grid>
 
       <Grid item xs={12} sm={6} md={2}>
@@ -356,9 +437,23 @@ export default function ReliabilityTable() {
               placeholder="Country"
               value={country || undefined}
               onChange={(value) => setCountry(value || '')}
-              style={{ width: 150 }}
+              style={{ width: 200 }}
               allowClear
-              options={availableCountries.filter((c) => c !== '').map((c) => ({ value: c, label: c }))}
+              options={availableCountries
+                .filter((c) => c !== '')
+                .map((c) => {
+                  const countryCode = countries.getAlpha2Code(c, 'en')?.toUpperCase() || '';
+                  const flag = countries.isValid(countryCode, 'en') ? countryCodeToEmojiFlag(countryCode) : '';
+                  return {
+                    value: c,
+                    label: (
+                      <span>
+                        {flag && <span style={{ marginRight: 8 }}>{flag}</span>}
+                        {c}
+                      </span>
+                    )
+                  };
+                })}
             />
 
             <Select
@@ -395,7 +490,7 @@ export default function ReliabilityTable() {
       </Grid>
 
       <Grid item xs={12}>
-        <Paper>
+        <MainCard>
           <TableContainer sx={{ minHeight: 400, maxHeight: 400 }}>
             {loading ? (
               <Box display="flex" justifyContent="center" p={4}>
@@ -450,7 +545,7 @@ export default function ReliabilityTable() {
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
-        </Paper>
+        </MainCard>
       </Grid>
     </Grid>
   );

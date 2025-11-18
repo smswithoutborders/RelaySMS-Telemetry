@@ -7,6 +7,7 @@ import Grid from '@mui/material/Grid2';
 import { LeftOutlined } from '@ant-design/icons';
 import { Button, Select, DatePicker, Space } from 'antd';
 import { styled } from '@mui/material/styles';
+import MainCard from 'components/MainCard';
 
 // components
 import Loader from 'components/Loader';
@@ -158,61 +159,63 @@ function TestDetails() {
 
       <Grid size={{ xs: 12 }} sx={{ mt: 2 }}>
         {filteredTestData.length > 0 ? (
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>start_time</TableCell>
-                  <TableCell>sms_received_time</TableCell>
-                  <TableCell>sms_routed_time</TableCell>
-                  <TableCell>sms_sent_time</TableCell>
-                  <TableCell>Status</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {visibleRows.map((test) => (
-                  <TableRow key={test.id}>
-                    <TableCell>{test.id}</TableCell>
-                    <TableCell>{formatEpoch(test.start_time)}</TableCell>
-                    <TableCell>{formatEpoch(test.sms_received_time)}</TableCell>
-                    <TableCell>{formatEpoch(test.sms_routed_time)}</TableCell>
-                    <TableCell>{formatEpoch(test.sms_sent_time)}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            backgroundColor:
-                              test.status === 'success'
-                                ? '#52C41A'
-                                : test.status === 'timedout'
-                                  ? '#FF4D4F'
-                                  : test.status === 'pending'
-                                    ? '#FAAD14'
-                                    : 'grey',
-                            mr: 1
-                          }}
-                        />
-                        {test.status}
-                      </Box>
-                    </TableCell>
+          <MainCard>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>start_time</TableCell>
+                    <TableCell>sms_received_time</TableCell>
+                    <TableCell>sms_routed_time</TableCell>
+                    <TableCell>sms_sent_time</TableCell>
+                    <TableCell>Status</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, 50, 75, 100]}
-              component="div"
-              count={filteredTestData.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {visibleRows.map((test) => (
+                    <TableRow key={test.id}>
+                      <TableCell>{test.id}</TableCell>
+                      <TableCell>{formatEpoch(test.start_time)}</TableCell>
+                      <TableCell>{formatEpoch(test.sms_received_time)}</TableCell>
+                      <TableCell>{formatEpoch(test.sms_routed_time)}</TableCell>
+                      <TableCell>{formatEpoch(test.sms_sent_time)}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              backgroundColor:
+                                test.status === 'success'
+                                  ? '#52C41A'
+                                  : test.status === 'timedout'
+                                    ? '#FF4D4F'
+                                    : test.status === 'pending'
+                                      ? '#FAAD14'
+                                      : 'grey',
+                              mr: 1
+                            }}
+                          />
+                          {test.status}
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, 50, 75, 100]}
+                component="div"
+                count={filteredTestData.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </TableContainer>
+          </MainCard>
         ) : (
           <Typography>No tests found matching your criteria.</Typography>
         )}
