@@ -17,7 +17,7 @@ import UserTable from 'sections/dashboard/default/UserTable';
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { ReloadOutlined, CalendarOutlined, DownloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, CalendarOutlined, DownloadOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -258,6 +258,7 @@ export default function DashboardDefault() {
     };
 
     setFiltersApplied(appliedFilters);
+    setPage(0);
   };
 
   const handleResetFilters = () => {
@@ -480,14 +481,14 @@ export default function DashboardDefault() {
       {showTotals && (
         <>
           <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-            <Tooltip title="Any attempt to sign-up">
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
               <Typography variant="h6" sx={{ fontWeight: 500 }}>
                 Sign-up
               </Typography>
-            </Tooltip>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
-              Any attempt to sign-up
-            </Typography>
+              <Tooltip title="Users that created a RelaySMS account" arrow sx={{ color: 'text.secondary' }}>
+                <InfoCircleOutlined sx={{ fontSize: 15, color: 'text.secondary', cursor: 'help' }} />
+              </Tooltip>
+            </Box>
             <Grid container spacing={1}>
               <Grid size={12}>
                 <AnalyticEcommerce
@@ -521,14 +522,14 @@ export default function DashboardDefault() {
 
           {/* Users Category */}
           <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-            <Tooltip title="Users with accounts that have not been deleted">
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
               <Typography variant="h6" sx={{ fontWeight: 500 }}>
                 Users
               </Typography>
-            </Tooltip>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
-              Users with accounts that have not been deleted
-            </Typography>
+              <Tooltip title="Users with accounts that have not been deleted" arrow>
+                <InfoCircleOutlined sx={{ fontSize: 18, color: 'text.secondary', cursor: 'help' }} />
+              </Tooltip>
+            </Box>
             <Grid container spacing={1}>
               <Grid size={12}>
                 <AnalyticEcommerce
@@ -562,7 +563,7 @@ export default function DashboardDefault() {
 
           {/* Bridge Category */}
           <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-            <Grid container spacing={1} sx={{ mt: 6.7 }}>
+            <Grid container spacing={1} sx={{ mt: 4.2 }}>
               <Grid size={12}>
                 <AnalyticEcommerce
                   title="Bridge First Users"
@@ -691,13 +692,6 @@ export default function DashboardDefault() {
         </MainCard>
       </Grid>
 
-      {/* <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
-        <CountryMap filters={filtersApplied} selectedCountry={selectedCountry} onCountrySelect={setSelectedCountry} />
-      </Grid>
-      <Grid size={{ xs: 12, md: 5, lg: 3.5 }}>
-        <CountryTable filters={filtersApplied} onCountryClick={setSelectedCountry} selectedCountry={selectedCountry} />
-      </Grid> */}
-
       {/* row 3: Country Table and User Table */}
       <Grid size={12} sx={{ mb: 4 }}>
         <MainCard>
@@ -711,12 +705,6 @@ export default function DashboardDefault() {
           </Grid>
         </MainCard>
       </Grid>
-      {/* <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <UserTable filters={filtersApplied} />
-      </Grid>
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <CombinedChartCard filters={filtersApplied} />
-      </Grid> */}
     </Grid>
   );
 }
