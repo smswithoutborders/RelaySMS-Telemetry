@@ -19,7 +19,7 @@ export default function Loader({ size = 40, fullScreen = true }) {
   if (fullScreen) {
     return (
       <Box
-        sx={{
+        sx={(theme) => ({
           position: 'fixed',
           top: 0,
           left: 0,
@@ -29,8 +29,8 @@ export default function Loader({ size = 40, fullScreen = true }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.7)'
-        }}
+          backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)'
+        })}
       >
         <Box
           component="img"

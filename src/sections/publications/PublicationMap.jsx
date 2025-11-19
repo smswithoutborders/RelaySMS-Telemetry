@@ -133,8 +133,8 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
 
         const map = L.map(container, {
           center: [20, 0],
-          zoom: 2,
-          minZoom: 2,
+          zoom: 0,
+          minZoom: 0,
           maxZoom: 18,
           zoomControl: true,
           attributionControl: true,
@@ -302,7 +302,7 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
               countryData.forEach((item) => {
                 bounds.push([item.position.lat, item.position.lng]);
               });
-              map.fitBounds(bounds, { padding: [50, 50], maxZoom: 4 });
+              map.fitBounds(bounds, { padding: [10, 10], maxZoom: 1.4 });
             }
           })
           .catch((error) => console.error('Error loading GeoJSON:', error));
