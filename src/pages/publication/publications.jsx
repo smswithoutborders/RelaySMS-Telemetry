@@ -422,6 +422,18 @@ export default function Publications() {
     }
   };
 
+  const formatPlatformName = (platformName) => {
+    if (!platformName) return '';
+    if (platformName.toLowerCase() === 'email_bridge') {
+      return 'EMAIL BRIDGE';
+    }
+    // Capitalize first letter of each word
+    return platformName
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   useEffect(() => {
     const fetchMetrics = async () => {
       setLoading(true);
@@ -852,11 +864,11 @@ export default function Publications() {
                                       : 'none'
                                 }}
                               />
-                              <span>{row.platform_name}</span>
+                              <span>{formatPlatformName(row.platform_name).toUpperCase()}</span>
                             </Box>
                           </TableCell>
-                          <TableCell>{row.source}</TableCell>
-                          <TableCell>{row.status}</TableCell>
+                          <TableCell>{row.source.toUpperCase()}</TableCell>
+                          <TableCell>{row.status.toUpperCase()}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
