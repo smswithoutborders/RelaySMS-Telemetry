@@ -9,6 +9,7 @@ import countryCoords from 'country-coords';
 
 // components
 import Loader from 'components/Loader';
+import ErrorDisplay from 'components/ErrorDisplay';
 
 countries.registerLocale(enLocale);
 
@@ -79,7 +80,7 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
       setError('');
     } catch (err) {
       console.error('Error fetching country data:', err);
-      setError('Failed to load country data');
+      setError('Unable to load map data');
     } finally {
       setLoading(false);
     }
@@ -285,7 +286,7 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
         setMapLoaded(true);
       } catch (err) {
         console.error('Error initializing map:', err);
-        setError('Failed to load map');
+        setError('Unable to initialize map');
       }
     };
 
@@ -335,6 +336,11 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
       }
     });
   }, [selectedCountry, mapLoaded, isDarkMode]);
+
+  const handleRetry = () => {
+    setError('');
+    fetchCountryData();
+  };
 
   const toggleFullscreen = () => {
     setIsFullscreen((prev) => !prev);
@@ -489,11 +495,7 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
             <Loader size={50} fullScreen={false} />
           </Box>
         )}
-        {!loading && error && (
-          <Box display="flex" justifyContent="center" alignItems="center" sx={{ flex: 1 }}>
-            <Typography color="error">{error}</Typography>
-          </Box>
-        )}
+        {!loading && error && <ErrorDisplay onRetry={handleRetry} fullHeight />}
         {!loading && !error && countryData.length > 0 && (
           <Box sx={{ position: 'relative', flex: 1, width: '100%', minHeight: 0 }}>
             <Box
