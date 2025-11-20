@@ -17,6 +17,7 @@ import { Button } from 'antd';
 import dayjs from 'dayjs';
 
 import Loader from 'components/Loader';
+import ErrorDisplay from 'components/ErrorDisplay';
 import { fontSize } from '@mui/system';
 
 const headCells = [
@@ -82,7 +83,7 @@ export default function UserTable({ filters }) {
       })
       .catch((err) => {
         console.error(err);
-        setError('Failed to load data.');
+        setError('Unable to load data');
       })
       .finally(() => setLoading(false));
   }, [
@@ -101,6 +102,13 @@ export default function UserTable({ filters }) {
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleRetry = () => {
+    setError('');
+    setLoading(true);
+    // Trigger re-fetch by updating a dependency
     setPage(0);
   };
 
@@ -142,11 +150,7 @@ export default function UserTable({ filters }) {
             </Box>
           )}
 
-          {!loading && error && (
-            <Box display="flex" justifyContent="center" p={4}>
-              <Typography color="error">{error}</Typography>
-            </Box>
-          )}
+          {!loading && error && <ErrorDisplay onRetry={handleRetry} />}
 
           {!loading && !error && (
             <Table aria-labelledby="tableTitle">
