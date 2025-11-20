@@ -11,6 +11,7 @@ import 'antd/dist/reset.css';
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
+import ErrorDisplay from 'components/ErrorDisplay';
 
 import CombinedChartCard from 'sections/dashboard/default/CombinedChartCard';
 import UserTable from 'sections/dashboard/default/UserTable';
@@ -451,7 +452,7 @@ export default function DashboardDefault() {
         setError(null);
       } catch (err) {
         console.error('Error fetching metrics:', err);
-        setError('Failed to fetch metrics. Please try again later.');
+        setError('Unable to fetch metrics');
       } finally {
         setLoading(false);
       }

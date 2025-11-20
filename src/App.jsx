@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 // project imports
 import router from 'routes';
 import ThemeCustomization from 'themes';
+import ErrorBoundary from 'components/ErrorBoundary';
 
 import ScrollTop from 'components/ScrollTop';
 
@@ -39,8 +40,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ThemeCustomization>
-      <AppContent />
-    </ThemeCustomization>
+    <ErrorBoundary>
+      <ThemeCustomization>
+        <AppContent />
+      </ThemeCustomization>
+    </ErrorBoundary>
   );
 }

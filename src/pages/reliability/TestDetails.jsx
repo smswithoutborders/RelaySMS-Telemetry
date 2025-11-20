@@ -11,6 +11,7 @@ import MainCard from 'components/MainCard';
 
 // components
 import Loader from 'components/Loader';
+import ErrorDisplay from 'components/ErrorDisplay';
 import dayjs from 'dayjs';
 
 function TestDetails() {
@@ -51,7 +52,7 @@ function TestDetails() {
         setAllTestData(allData);
       } catch (err) {
         console.error('Error fetching tests:', err);
-        setError('Failed to fetch test data.');
+        setError('Unable to fetch test data');
       } finally {
         setLoading(false);
       }
@@ -96,6 +97,13 @@ function TestDetails() {
     setDateFilter(date);
   };
 
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    // Re-trigger the fetch by navigating or reloading
+    window.location.reload();
+  };
+
   const visibleRows = filteredTestData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   if (loading) {
@@ -107,11 +115,7 @@ function TestDetails() {
   }
 
   if (error) {
-    return (
-      <Typography color="error" align="center">
-        {error}
-      </Typography>
-    );
+    return <ErrorDisplay onRetry={handleRetry} message="We couldn't load the test data. Please try again." />;
   }
 
   const formatEpoch = (epoch) => (epoch ? new Date(epoch * 1000).toLocaleString() : 'N/A');
