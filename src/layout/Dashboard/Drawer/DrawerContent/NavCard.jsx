@@ -10,8 +10,6 @@ import MainCard from 'components/MainCard';
 
 // assets
 import avatar from 'assets/images/users/avatar-group.png';
-import AnimateButton from 'components/@extended/AnimateButton';
-import { dark } from '@mui/material/styles/createPalette';
 
 // ==============================|| DRAWER CONTENT - NAVIGATION CARD ||============================== //
 
@@ -22,22 +20,17 @@ export default function NavCard() {
         <CardMedia component="img" image={avatar} sx={{ width: 112 }} />
         <Stack alignItems="center">
           <Typography variant="h5">RelaySMS</Typography>
-          {/* <Typography variant="h6" color="secondary">
-            Checkout RelaySMS
-          </Typography> */}
         </Stack>
-        <AnimateButton>
-          <Button
-            component={Link}
-            target="_blank"
-            href="https://relay.smswithoutborders.com"
-            variant="contained"
-            color="success"
-            size="small"
-          >
-            Website
-          </Button>
-        </AnimateButton>
+        <Button
+          component={Link}
+          target="_blank"
+          href="https://relay.smswithoutborders.com"
+          variant="contained"
+          color="success"
+          size="small"
+        >
+          Website
+        </Button>
       </Stack>
     </MainCard>
   );
