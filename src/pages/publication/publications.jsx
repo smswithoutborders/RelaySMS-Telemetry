@@ -34,9 +34,13 @@ import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import weekday from 'dayjs/plugin/weekday';
+import localeData from 'dayjs/plugin/localeData';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(weekday);
+dayjs.extend(localeData);
 
 countries.registerLocale(enLocale);
 
@@ -70,11 +74,31 @@ function PublicationTableHead({ order, orderBy, onRequestSort }) {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
+
+  const columnWidths = {
+    id: '8%',
+    date: '28%',
+    country: '20%',
+    platform: '18%',
+    source: '13%',
+    status: '13%'
+  };
+
   return (
     <TableHead sx={{ backgroundColor: 'background.default', position: 'sticky', top: 0, zIndex: 1 }}>
       <TableRow>
         {headCells.map((headCell) => (
-          <TableCell key={headCell.id} align={headCell.align} sortDirection={orderBy === headCell.id ? order : false}>
+          <TableCell
+            key={headCell.id}
+            align={headCell.align}
+            sortDirection={orderBy === headCell.id ? order : false}
+            sx={{
+              width: columnWidths[headCell.id],
+              fontSize: '0.75rem',
+              padding: '8px',
+              whiteSpace: headCell.id === 'date' ? 'nowrap' : 'normal'
+            }}
+          >
             {headCell.orderBy ? (
               <TableSortLabel
                 active={orderBy === headCell.id}
@@ -293,7 +317,7 @@ export default function Publications() {
         if (startDate && endDate) {
           return `${startDate.format('YYYY-MM-DD')} - ${endDate.format('YYYY-MM-DD')}`;
         }
-        return 'Custom Range';
+        return '2021-01-10 - Today';
       default:
         return 'Date Range Filter';
     }
@@ -395,7 +419,7 @@ export default function Publications() {
   };
 
   const formatDateToGMTPlus1 = (dateString) => {
-    return dayjs(dateString).local().format('MMM DD, YYYY hh:mm:ss A');
+    return dayjs.utc(dateString).local().format('MMM DD, YYYY hh:mm:ss A');
   };
 
   const getPlatformLogo = (platformName) => {
@@ -427,7 +451,6 @@ export default function Publications() {
     if (platformName.toLowerCase() === 'email_bridge') {
       return 'EMAIL BRIDGE';
     }
-    // Capitalize first letter of each word
     return platformName
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -644,8 +667,8 @@ export default function Publications() {
         <AnalyticEcommerce
           title="Failed"
           count={metrics.totalFailed.toLocaleString()}
-          percentage={metrics.totalFailed === 0 ? null : metrics.percentages.totalFailed}
-          isLoss={!metrics.isHigher.totalFailed}
+          // percentage={metrics.totalFailed === 0 ? null : metrics.percentages.totalFailed}
+          isLoss={metrics.isHigher.totalFailed}
           extra="Failed Publications"
         />
       </Grid>
@@ -828,8 +851,10 @@ export default function Publications() {
                     <TableBody>
                       {tableData.map((row) => (
                         <TableRow key={row.id}>
-                          <TableCell>{row.id}</TableCell>
-                          <TableCell>{formatDateToGMTPlus1(row.date_created)}</TableCell>
+                          <TableCell sx={{ width: '8%', fontSize: '0.80rem', padding: '8px' }}>{row.id}</TableCell>
+                          <TableCell sx={{ width: '28%', fontSize: '0.80rem', padding: '8px', whiteSpace: 'nowrap' }}>
+                            {formatDateToGMTPlus1(row.date_created)}
+                          </TableCell>
                           <TableCell
                             onClick={() => {
                               if (row.country_code && row.country_code !== 'UNKNOWN') {
@@ -837,6 +862,9 @@ export default function Publications() {
                               }
                             }}
                             sx={{
+                              width: '20%',
+                              fontSize: '0.85rem',
+                              padding: '8px',
                               cursor: row.country_code && row.country_code !== 'UNKNOWN' ? 'pointer' : 'default',
                               '&:hover': {
                                 backgroundColor: row.country_code && row.country_code !== 'UNKNOWN' ? 'action.hover' : 'transparent'
@@ -848,7 +876,7 @@ export default function Publications() {
                             <span style={{ marginRight: 8 }}>{row.flag}</span>
                             {row.country ? row.country : 'No Country'}
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ width: '18%', fontSize: '0.75rem', padding: '8px' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <img
                                 src={getPlatformLogo(row.platform_name)}
@@ -867,8 +895,8 @@ export default function Publications() {
                               <span>{formatPlatformName(row.platform_name).toUpperCase()}</span>
                             </Box>
                           </TableCell>
-                          <TableCell>{row.source.toUpperCase()}</TableCell>
-                          <TableCell>{row.status.toUpperCase()}</TableCell>
+                          <TableCell sx={{ width: '13%', fontSize: '0.75rem', padding: '8px' }}>{row.source.toUpperCase()}</TableCell>
+                          <TableCell sx={{ width: '13%', fontSize: '0.75rem', padding: '8px' }}>{row.status.toUpperCase()}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

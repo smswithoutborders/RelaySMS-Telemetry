@@ -20,42 +20,31 @@
   "dependencies": {
     "@ant-design/colors": "7.2.0",
     "@ant-design/icons": "5.6.0",
-    "@emotion/cache": "11.14.0",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
     "@fontsource/inter": "5.1.1",
     "@fontsource/poppins": "5.1.1",
     "@fontsource/public-sans": "5.1.2",
     "@fontsource/roboto": "5.1.1",
-    "@mui/base": "5.0.0-beta.69",
-    "@mui/lab": "6.0.0-beta.24",
     "@mui/material": "6.4.1",
     "@mui/system": "6.4.1",
     "@mui/x-charts": "7.24.1",
-    "@mui/x-date-pickers": "^8.1.0",
-    "@vitejs/plugin-react": "4.3.4",
+    "@vitejs/plugin-react": "^5.1.1",
     "antd": "^5.27.6",
-    "axios": "^1.8.4",
+    "axios": "^1.13.2",
     "country-coords": "^1.0.0",
     "dayjs": "^1.11.13",
-    "formik": "2.4.6",
-    "framer-motion": "^12.9.2",
     "i18n-iso-countries": "^7.14.0",
     "libphonenumber-js": "^1.12.25",
     "lodash-es": "4.17.21",
-    "motion-dom": "^12.9.1",
     "react": "18.3.1",
     "react-device-detect": "2.2.3",
     "react-dom": "18.3.1",
-    "react-number-format": "5.4.3",
-    "react-router": "7.1.3",
     "react-router-dom": "7.1.3",
     "simplebar-react": "3.3.0",
     "swr": "2.3.0",
-    "vite": "6.0.11",
-    "vite-jsconfig-paths": "2.0.1",
-    "web-vitals": "4.2.4",
-    "yup": "1.6.1"
+    "vite": "^7.2.4",
+    "vite-jsconfig-paths": "2.0.1"
   },
   "eslintConfig": {
     "extends": [
@@ -86,10 +75,8 @@
     "eslint-plugin-prettier": "5.2.3",
     "eslint-plugin-react": "7.37.4",
     "eslint-plugin-react-hooks": "5.1.0",
-    "immutable": "4.3.7",
     "knip": "5.45.0",
-    "prettier": "3.4.2",
-    "prettier-eslint-cli": "8.0.1"
+    "prettier": "3.4.2"
   },
   "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b"
 }
