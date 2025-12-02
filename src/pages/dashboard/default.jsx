@@ -241,7 +241,7 @@ export default function DashboardDefault() {
         if (startDate && endDate) {
           return `${startDate.format('YYYY-MM-DD')} - ${endDate.format('YYYY-MM-DD')}`;
         }
-        return 'Custom Range';
+        return '2021-01-10 - Today';
       default:
         return 'Date Range Filter';
     }
@@ -525,7 +525,7 @@ export default function DashboardDefault() {
           <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
               <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                Users
+                Current Users
               </Typography>
               <Tooltip title="Users with accounts that have not been deleted" arrow>
                 <InfoCircleOutlined sx={{ fontSize: 18, color: 'text.secondary', cursor: 'help' }} />
