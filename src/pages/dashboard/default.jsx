@@ -61,7 +61,7 @@ const getDialingCode = (countryCode) => {
 export default function DashboardDefault() {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  const [category, setCategory] = useState('signup');
+  const [category, setCategory] = useState('all');
   const [granularity, setGranularity] = useState('day');
   const [groupBy, setGroupBy] = useState('date');
   const [countryCode, setCountryCode] = useState(null);
@@ -259,14 +259,13 @@ export default function DashboardDefault() {
     };
 
     setFiltersApplied(appliedFilters);
-    setPage(0);
   };
 
   const handleResetFilters = () => {
     const resetStartDate = dayjs('2021-01-01');
     const resetEndDate = dayjs();
 
-    setCategory('signup');
+    setCategory('all');
     // setGranularity('month');
     // setGroupBy('country');
     setCountryCode(null);
@@ -276,7 +275,7 @@ export default function DashboardDefault() {
     setShowCustomDatePickers(false);
 
     setFiltersApplied({
-      category: 'signup',
+      category: 'all',
       startDate: resetStartDate.format('YYYY-MM-DD'),
       endDate: resetEndDate.format('YYYY-MM-DD')
       // granularity: 'month',
@@ -427,8 +426,15 @@ export default function DashboardDefault() {
           }
         });
 
-        const effectiveCategory = filtersApplied.category || 'signup';
-        const countryCodes = effectiveCategory === 'signup' ? data.signup_countries || [] : data.retained_countries || [];
+        const effectiveCategory = filtersApplied.category || 'all';
+        let countryCodes = [];
+        if (effectiveCategory === 'all') {
+          const signupCountries = data.signup_countries || [];
+          const retainedCountries = data.retained_countries || [];
+          countryCodes = Array.from(new Set([...signupCountries, ...retainedCountries]));
+        } else {
+          countryCodes = effectiveCategory === 'signup' ? data.signup_countries || [] : data.retained_countries || [];
+        }
         const countryOptions = countryCodes
           .map((code) => {
             const upperCode = typeof code === 'string' ? code.toUpperCase() : undefined;
@@ -538,25 +544,25 @@ export default function DashboardDefault() {
                   count={metrics.totalUsers === 0 ? '-' : metrics.totalUsers.toLocaleString()}
                   percentage={metrics.totalUsers === 0 ? null : metrics.percentages.totalUsers}
                   isLoss={!metrics.isHigher.totalUsers}
-                  extra="Total retained users"
+                  extra="Total current users"
                 />
               </Grid>
               <Grid size={12}>
                 <AnalyticEcommerce
-                  title="Retained Countries"
+                  title="Current Countries"
                   count={metrics.totalRetainedCountries === 0 ? '-' : metrics.totalRetainedCountries.toLocaleString()}
                   percentage={metrics.totalRetainedCountries === 0 ? null : metrics.percentages.totalRetainedCountries}
                   isLoss={!metrics.isHigher.totalRetainedCountries}
-                  extra="Countries with retained users"
+                  extra="Countries with current users"
                 />
               </Grid>
               <Grid size={12}>
                 <AnalyticEcommerce
-                  title="Email Retained"
+                  title="Email Current Users"
                   count={metrics.totalEmailRetained === 0 ? '-' : metrics.totalEmailRetained.toLocaleString()}
                   percentage={metrics.totalEmailRetained === 0 ? null : metrics.percentages.totalEmailRetained}
                   isLoss={!metrics.isHigher.totalEmailRetained}
-                  extra="Retained from email signups"
+                  extra="Current from email signups"
                 />
               </Grid>
             </Grid>
@@ -610,8 +616,9 @@ export default function DashboardDefault() {
                 placeholder="Select Category"
                 value={category}
                 onChange={(value) => setCategory(value)}
-                style={{ width: '100%' }}
+                style={{ width: '120px' }}
                 options={[
+                  { value: 'all', label: 'All' },
                   { value: 'signup', label: 'Sign-up Users' },
                   { value: 'retained', label: 'Users' }
                 ]}
@@ -682,11 +689,11 @@ export default function DashboardDefault() {
       {/* row 2: Combined Chart and Map */}
       <Grid size={12}>
         <MainCard>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
+          <Grid container spacing={1}>
+            <Grid size={{ xs: 12, md: 7, lg: 8 }}>
               <CountryMap filters={filtersApplied} selectedCountry={selectedCountry} onCountrySelect={setSelectedCountry} />
             </Grid>
-            <Grid size={{ xs: 12, md: 5, lg: 3.5 }}>
+            <Grid size={{ xs: 12, md: 5, lg: 4 }}>
               <CountryTable filters={filtersApplied} onCountryClick={setSelectedCountry} selectedCountry={selectedCountry} />
             </Grid>
           </Grid>
@@ -696,11 +703,11 @@ export default function DashboardDefault() {
       {/* row 3: Country Table and User Table */}
       <Grid size={12} sx={{ mb: 4 }}>
         <MainCard>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 5, lg: 3.5 }}>
+          <Grid container spacing={1}>
+            <Grid size={{ xs: 12, md: 5, lg: 4 }}>
               <UserTable filters={filtersApplied} />
             </Grid>
-            <Grid size={{ xs: 12, md: 7, lg: 8.5 }}>
+            <Grid size={{ xs: 12, md: 7, lg: 8 }}>
               <CombinedChartCard filters={filtersApplied} />
             </Grid>
           </Grid>
