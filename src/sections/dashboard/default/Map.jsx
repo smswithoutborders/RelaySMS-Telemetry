@@ -34,49 +34,118 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
   const effectiveStartDate = filters?.startDate || '2020-01-10';
   const effectiveEndDate = filters?.endDate || today.toISOString().split('T')[0];
   const effectiveGranularity = filters?.granularity || 'day';
-  const effectiveCategory = filters?.category || 'signup';
+  const effectiveCategory = filters?.category || 'all';
 
-  const userLabel = effectiveCategory === 'signup' ? 'Signed Up Users' : 'Active Users';
+  const userLabel = effectiveCategory === 'signup' ? 'Signed Up Users' : effectiveCategory === 'retained' ? 'Active Users' : 'Total Users';
 
   const fetchCountryData = useCallback(async () => {
     setLoading(true);
     try {
       const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
-      const response = await axios.get(
-        `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}`
-      );
 
-      const categoryKey = effectiveCategory.includes('retained') ? 'retained' : 'signup';
-      const countryStats = response.data[categoryKey]?.data || [];
+      if (effectiveCategory === 'all') {
+        const [signupResponse, retainedResponse] = await Promise.all([
+          axios.get(
+            `${import.meta.env.VITE_APP_TELEMETRY_API}signup?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}`
+          ),
+          axios.get(
+            `${import.meta.env.VITE_APP_TELEMETRY_API}retained?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}`
+          )
+        ]);
 
-      const formatted = countryStats
-        .map((item) => {
+        const signupStats = signupResponse.data.signup?.data || [];
+        const retainedStats = retainedResponse.data.retained?.data || [];
+
+        const countryMap = new Map();
+
+        signupStats.forEach((item) => {
           const rawCode = item?.country_code;
           const code = typeof rawCode === 'string' ? rawCode.toUpperCase() : undefined;
-          const isValidCode = code && countries.isValid(code, 'en');
-          const name = isValidCode ? countries.getName(code, 'en') : 'Unknown';
-          const count = item.signup_users ?? item.retained_users ?? 0;
-
-          if (isValidCode) {
-            try {
-              const countryInfo = coordsByCountry.get(code);
-              if (countryInfo && countryInfo.latitude !== undefined && countryInfo.longitude !== undefined) {
-                return {
-                  country: name || code || 'Unknown',
-                  countryCode: code,
-                  users: count,
-                  position: { lat: countryInfo.latitude, lng: countryInfo.longitude }
-                };
-              }
-            } catch (error) {
-              console.warn(`Could not get coordinates for country code: ${code}`, error);
-            }
+          if (code) {
+            countryMap.set(code, {
+              country_code: code,
+              signup_users: item.signup_users ?? 0,
+              retained_users: 0
+            });
           }
-          return null;
-        })
-        .filter((item) => item !== null);
+        });
 
-      setCountryData(formatted);
+        retainedStats.forEach((item) => {
+          const rawCode = item?.country_code;
+          const code = typeof rawCode === 'string' ? rawCode.toUpperCase() : undefined;
+          if (code) {
+            const existing = countryMap.get(code) || { country_code: code, signup_users: 0, retained_users: 0 };
+            existing.retained_users = item.retained_users ?? 0;
+            countryMap.set(code, existing);
+          }
+        });
+
+        const formatted = Array.from(countryMap.values())
+          .map((item) => {
+            const code = item.country_code;
+            const isValidCode = code && countries.isValid(code, 'en');
+            const name = isValidCode ? countries.getName(code, 'en') : 'Unknown';
+            const totalUsers = item.signup_users + item.retained_users;
+
+            if (isValidCode) {
+              try {
+                const countryInfo = coordsByCountry.get(code);
+                if (countryInfo && countryInfo.latitude !== undefined && countryInfo.longitude !== undefined) {
+                  return {
+                    country: name || code || 'Unknown',
+                    countryCode: code,
+                    users: totalUsers,
+                    signupUsers: item.signup_users,
+                    retainedUsers: item.retained_users,
+                    position: { lat: countryInfo.latitude, lng: countryInfo.longitude }
+                  };
+                }
+              } catch (error) {
+                console.warn(`Could not get coordinates for country code: ${code}`, error);
+              }
+            }
+            return null;
+          })
+          .filter((item) => item !== null);
+
+        setCountryData(formatted);
+      } else {
+        const response = await axios.get(
+          `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}`
+        );
+
+        const categoryKey = effectiveCategory.includes('retained') ? 'retained' : 'signup';
+        const countryStats = response.data[categoryKey]?.data || [];
+
+        const formatted = countryStats
+          .map((item) => {
+            const rawCode = item?.country_code;
+            const code = typeof rawCode === 'string' ? rawCode.toUpperCase() : undefined;
+            const isValidCode = code && countries.isValid(code, 'en');
+            const name = isValidCode ? countries.getName(code, 'en') : 'Unknown';
+            const count = item.signup_users ?? item.retained_users ?? 0;
+
+            if (isValidCode) {
+              try {
+                const countryInfo = coordsByCountry.get(code);
+                if (countryInfo && countryInfo.latitude !== undefined && countryInfo.longitude !== undefined) {
+                  return {
+                    country: name || code || 'Unknown',
+                    countryCode: code,
+                    users: count,
+                    position: { lat: countryInfo.latitude, lng: countryInfo.longitude }
+                  };
+                }
+              } catch (error) {
+                console.warn(`Could not get coordinates for country code: ${code}`, error);
+              }
+            }
+            return null;
+          })
+          .filter((item) => item !== null);
+
+        setCountryData(formatted);
+      }
       setError('');
     } catch (err) {
       console.error('Error fetching country data:', err);
@@ -158,11 +227,18 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
 
         const countryDataMap = {};
         countryData.forEach((item) => {
-          countryDataMap[item.countryCode] = {
+          const mapData = {
             users: item.users,
             country: item.country,
             color: getColor(item.users)
           };
+
+          if (effectiveCategory === 'all') {
+            mapData.signupUsers = item.signupUsers;
+            mapData.retainedUsers = item.retainedUsers;
+          }
+
+          countryDataMap[item.countryCode] = mapData;
         });
 
         markersRef.current = [];
@@ -204,29 +280,41 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
                     originalOpacity: 0.7
                   });
 
-                  layer.bindTooltip(
-                    `<div style="text-align: start;">
-                      <h3>${countryInfo.country}</h3>
-                      <span style="font-size: 11px;">${countryInfo.users.toLocaleString()} ${userLabel.toLowerCase()}</span>
-                    </div>`,
-                    {
-                      direction: 'top',
-                      offset: [0, 0],
-                      opacity: 0.95,
-                      className: 'custom-tooltip'
-                    }
-                  );
+                  const tooltipContent =
+                    effectiveCategory === 'all' && countryInfo.signupUsers !== undefined && countryInfo.retainedUsers !== undefined
+                      ? `<div style="text-align: start;">
+                          <h3>${countryInfo.country}</h3>
+                          <span style="font-size: 11px;">Sign-up: ${countryInfo.signupUsers.toLocaleString()}</span><br/>
+                          <span style="font-size: 11px;">Current: ${countryInfo.retainedUsers.toLocaleString()}</span>
+                        </div>`
+                      : `<div style="text-align: start;">
+                          <h3>${countryInfo.country}</h3>
+                          <span style="font-size: 11px;">${countryInfo.users.toLocaleString()} ${userLabel.toLowerCase()}</span>
+                        </div>`;
 
-                  layer.bindPopup(
-                    `<div style="min-width: 150px; padding: 4px;">
-                      <strong style="font-size: 15px; color: ${countryInfo.color};">${countryInfo.country}</strong><br/>
-                      <span style="font-size: 13px; color: #666;">${userLabel}: <strong style="color: #333;">${countryInfo.users.toLocaleString()}</strong></span>
-                    </div>`,
-                    {
-                      maxWidth: 250,
-                      className: 'custom-popup'
-                    }
-                  );
+                  layer.bindTooltip(tooltipContent, {
+                    direction: 'top',
+                    offset: [0, 0],
+                    opacity: 0.95,
+                    className: 'custom-tooltip'
+                  });
+
+                  const popupContent =
+                    effectiveCategory === 'all' && countryInfo.signupUsers !== undefined && countryInfo.retainedUsers !== undefined
+                      ? `<div style="min-width: 150px; padding: 4px;">
+                          <strong style="font-size: 15px; color: ${countryInfo.color};">${countryInfo.country}</strong><br/>
+                          <span style="font-size: 13px; color: #666;">Sign-up Users: <strong style="color: #333;">${countryInfo.signupUsers.toLocaleString()}</strong></span><br/>
+                          <span style="font-size: 13px; color: #666;">Current Users: <strong style="color: #333;">${countryInfo.retainedUsers.toLocaleString()}</strong></span>
+                        </div>`
+                      : `<div style="min-width: 150px; padding: 4px;">
+                          <strong style="font-size: 15px; color: ${countryInfo.color};">${countryInfo.country}</strong><br/>
+                          <span style="font-size: 13px; color: #666;">${userLabel}: <strong style="color: #333;">${countryInfo.users.toLocaleString()}</strong></span>
+                        </div>`;
+
+                  layer.bindPopup(popupContent, {
+                    maxWidth: 250,
+                    className: 'custom-popup'
+                  });
 
                   layer.on('click', function () {
                     onCountrySelect?.(countryCode === selectedCountry ? null : countryCode);

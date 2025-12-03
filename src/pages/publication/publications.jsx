@@ -852,7 +852,7 @@ export default function Publications() {
                       {tableData.map((row) => (
                         <TableRow key={row.id}>
                           <TableCell sx={{ width: '8%', fontSize: '0.80rem', padding: '8px' }}>{row.id}</TableCell>
-                          <TableCell sx={{ width: '28%', fontSize: '0.80rem', padding: '8px', whiteSpace: 'nowrap' }}>
+                          <TableCell sx={{ width: '8%', fontSize: '0.80rem', padding: '8px', whiteSpace: 'nowrap' }}>
                             {formatDateToGMTPlus1(row.date_created)}
                           </TableCell>
                           <TableCell
@@ -862,7 +862,7 @@ export default function Publications() {
                               }
                             }}
                             sx={{
-                              width: '20%',
+                              width: '28%',
                               fontSize: '0.85rem',
                               padding: '8px',
                               cursor: row.country_code && row.country_code !== 'UNKNOWN' ? 'pointer' : 'default',

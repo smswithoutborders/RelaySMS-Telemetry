@@ -21,17 +21,23 @@ import enLocale from 'i18n-iso-countries/langs/en.json';
 
 // components
 import Loader from 'components/Loader';
+import { fontSize } from '@mui/system';
 
 countries.registerLocale(enLocale);
 
-function CountryTableHead({ order, orderBy, userLabel }) {
-  const headCells = useMemo(
-    () => [
-      { id: 'date', align: 'left', label: 'Country' },
-      { id: 'users', align: 'right', label: userLabel }
-    ],
-    [userLabel]
-  );
+function CountryTableHead({ order, orderBy, category }) {
+  const headCells =
+    category === 'all'
+      ? [
+          { id: 'country', align: 'left', label: 'Country' },
+          { id: 'signupUsers', align: 'right', label: 'Sign-up Users' },
+          { id: 'currentUsers', align: 'right', label: 'Current Users' }
+        ]
+      : [
+          { id: 'country', align: 'left', label: 'Country' },
+          { id: 'users', align: 'right', label: category === 'signup' ? 'Signed Up Users' : 'Active Users' }
+        ];
+
   return (
     <TableHead sx={{ backgroundColor: 'background.default', position: 'sticky', top: 0, zIndex: 1 }}>
       <TableRow>
@@ -48,7 +54,7 @@ function CountryTableHead({ order, orderBy, userLabel }) {
 CountryTableHead.propTypes = {
   order: PropTypes.any,
   orderBy: PropTypes.string,
-  userLabel: PropTypes.string.isRequired
+  category: PropTypes.string.isRequired
 };
 
 export default function CountryTable({ filters, onCountryClick, selectedCountry }) {
@@ -65,9 +71,7 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
   const effectiveStartDate = filters?.startDate || '2020-01-10';
   const effectiveEndDate = filters?.endDate || today.toISOString().split('T')[0];
   const effectiveGranularity = filters?.granularity || 'day';
-  const effectiveCategory = filters?.category || 'signup';
-
-  const userLabel = effectiveCategory === 'signup' ? 'Signed Up Users' : 'Active Users';
+  const effectiveCategory = filters?.category || 'all';
 
   const countryCodeToEmojiFlag = (code) => {
     if (!code) return '';
@@ -79,32 +83,100 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
       setLoading(true);
       try {
         const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
-        const response = await axios.get(
-          `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
-        );
 
-        const categoryKey = effectiveCategory.includes('retained') ? 'retained' : 'signup';
-        const countryStats = response.data[categoryKey]?.data || [];
+        if (effectiveCategory === 'all') {
+          const [signupResponse, retainedResponse] = await Promise.all([
+            axios.get(
+              `${import.meta.env.VITE_APP_TELEMETRY_API}signup?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
+            ),
+            axios.get(
+              `${import.meta.env.VITE_APP_TELEMETRY_API}retained?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
+            )
+          ]);
 
-        const formatted = countryStats.map((item) => {
-          const rawCode = item?.country_code;
-          const code = typeof rawCode === 'string' ? rawCode.toUpperCase() : undefined;
-          const isValidCode = code && countries.isValid(code, 'en');
-          const name = isValidCode ? countries.getName(code, 'en') : 'Unknown';
-          const flag = isValidCode ? countryCodeToEmojiFlag(code) : '';
+          const signupStats = signupResponse.data.signup?.data || [];
+          const retainedStats = retainedResponse.data.retained?.data || [];
 
-          const count = item.signup_users ?? item.retained_users ?? 0;
+          const countryMap = new Map();
 
-          return {
-            country: name || code || 'Unknown',
-            countryCode: code,
-            users: count,
-            flag: flag || ''
-          };
-        });
+          signupStats.forEach((item) => {
+            const rawCode = item?.country_code;
+            const code = typeof rawCode === 'string' ? rawCode.toUpperCase() : undefined;
+            if (code) {
+              countryMap.set(code, {
+                country_code: code,
+                signup_users: item.signup_users ?? 0,
+                retained_users: 0
+              });
+            }
+          });
 
-        setCountryData(formatted);
-        setTotalRows(response.data[categoryKey]?.pagination?.total_records || 0);
+          retainedStats.forEach((item) => {
+            const rawCode = item?.country_code;
+            const code = typeof rawCode === 'string' ? rawCode.toUpperCase() : undefined;
+            if (code) {
+              const existing = countryMap.get(code) || { country_code: code, signup_users: 0, retained_users: 0 };
+              existing.retained_users = item.retained_users ?? 0;
+              countryMap.set(code, existing);
+            }
+          });
+
+          const formatted = Array.from(countryMap.values()).map((item) => {
+            const code = item.country_code;
+            const isValidCode = code && countries.isValid(code, 'en');
+            const name = isValidCode ? countries.getName(code, 'en') : 'Unknown';
+            const flag = isValidCode ? countryCodeToEmojiFlag(code) : '';
+
+            return {
+              country: name || code || 'Unknown',
+              countryCode: code,
+              signupUsers: item.signup_users,
+              retainedUsers: item.retained_users,
+              flag: flag || ''
+            };
+          });
+
+          formatted.sort((a, b) => {
+            const totalA = a.signupUsers + a.retainedUsers;
+            const totalB = b.signupUsers + b.retainedUsers;
+            return totalB - totalA;
+          });
+
+          setCountryData(formatted);
+          setTotalRows(
+            Math.max(
+              signupResponse.data.signup?.pagination?.total_records || 0,
+              retainedResponse.data.retained?.pagination?.total_records || 0
+            )
+          );
+        } else {
+          const response = await axios.get(
+            `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
+          );
+
+          const categoryKey = effectiveCategory.includes('retained') ? 'retained' : 'signup';
+          const countryStats = response.data[categoryKey]?.data || [];
+
+          const formatted = countryStats.map((item) => {
+            const rawCode = item?.country_code;
+            const code = typeof rawCode === 'string' ? rawCode.toUpperCase() : undefined;
+            const isValidCode = code && countries.isValid(code, 'en');
+            const name = isValidCode ? countries.getName(code, 'en') : 'Unknown';
+            const flag = isValidCode ? countryCodeToEmojiFlag(code) : '';
+
+            const count = item.signup_users ?? item.retained_users ?? 0;
+
+            return {
+              country: name || code || 'Unknown',
+              countryCode: code,
+              users: count,
+              flag: flag || ''
+            };
+          });
+
+          setCountryData(formatted);
+          setTotalRows(response.data[categoryKey]?.pagination?.total_records || 0);
+        }
         setError('');
       } catch (err) {
         console.error('Error fetching country data:', err);
@@ -141,7 +213,7 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
 
           {!loading && !error && (
             <Table>
-              <CountryTableHead order={order} orderBy={orderBy} userLabel={userLabel} />
+              <CountryTableHead order={order} orderBy={orderBy} category={effectiveCategory} />
               <TableBody>
                 {countryData.length > 0 ? (
                   countryData.map((row, index) => (
@@ -161,12 +233,19 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
                         <span style={{ marginRight: 8 }}>{row.flag}</span>
                         {row.country}
                       </TableCell>
-                      <TableCell align="right">{row.users}</TableCell>
+                      {effectiveCategory === 'all' ? (
+                        <>
+                          <TableCell align="right">{row.signupUsers}</TableCell>
+                          <TableCell align="right">{row.retainedUsers}</TableCell>
+                        </>
+                      ) : (
+                        <TableCell align="right">{row.users}</TableCell>
+                      )}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={2} align="center">
+                    <TableCell colSpan={effectiveCategory === 'all' ? 3 : 2} align="center">
                       No data available
                     </TableCell>
                   </TableRow>

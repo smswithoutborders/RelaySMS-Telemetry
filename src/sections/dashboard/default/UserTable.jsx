@@ -20,12 +20,19 @@ import Loader from 'components/Loader';
 import ErrorDisplay from 'components/ErrorDisplay';
 import { fontSize } from '@mui/system';
 
-const headCells = [
-  { id: 'date', align: 'left', label: 'Date' },
-  { id: 'users', align: 'right', label: 'Users' }
-];
+function UserTableHead({ order, orderBy, category }) {
+  const headCells =
+    category === 'all'
+      ? [
+          { id: 'date', align: 'left', label: 'Date' },
+          { id: 'signupUsers', align: 'right', label: 'Sign-up Users' },
+          { id: 'currentUsers', align: 'right', label: 'Current Users' }
+        ]
+      : [
+          { id: 'date', align: 'left', label: 'Date' },
+          { id: 'users', align: 'right', label: category === 'signup' ? 'Sign-up Users' : 'Users' }
+        ];
 
-function UserTableHead({ order, orderBy }) {
   return (
     <TableHead sx={{ backgroundColor: 'background.default', position: 'sticky', top: 0, zIndex: 1 }}>
       <TableRow>
@@ -41,7 +48,8 @@ function UserTableHead({ order, orderBy }) {
 
 UserTableHead.propTypes = {
   order: PropTypes.any,
-  orderBy: PropTypes.string
+  orderBy: PropTypes.string,
+  category: PropTypes.string.isRequired
 };
 
 export default function UserTable({ filters }) {
@@ -61,31 +69,81 @@ export default function UserTable({ filters }) {
   const effectiveStartDate = filters?.startDate || defaultStartDate;
   const effectiveEndDate = filters?.endDate || defaultEndDate;
   const groupBy = filters?.groupBy || 'date';
-  const effectiveCategory = filters?.category || 'signup';
+  const effectiveCategory = filters?.category || 'all';
 
   useEffect(() => {
     const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
-    const apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`;
 
     setLoading(true);
     setError('');
-    fetch(apiUrl)
-      .then((res) => res.json())
-      .then((response) => {
-        const categoryData = response[effectiveCategory]?.data || [];
-        const formattedData = categoryData.map((item) => ({
-          date: item.timeframe,
-          users: item[`${effectiveCategory}_users`] || item.users || 0
-        }));
 
-        setData(formattedData);
-        setTotalRows(response[effectiveCategory]?.pagination?.total_records || 0);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError('Unable to load data');
-      })
-      .finally(() => setLoading(false));
+    if (effectiveCategory === 'all') {
+      Promise.all([
+        fetch(
+          `${import.meta.env.VITE_APP_TELEMETRY_API}signup?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
+        ),
+        fetch(
+          `${import.meta.env.VITE_APP_TELEMETRY_API}retained?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
+        )
+      ])
+        .then(([signupRes, retainedRes]) => Promise.all([signupRes.json(), retainedRes.json()]))
+        .then(([signupResponse, retainedResponse]) => {
+          const signupData = signupResponse.signup?.data || [];
+          const retainedData = retainedResponse.retained?.data || [];
+
+          const dateMap = new Map();
+
+          signupData.forEach((item) => {
+            dateMap.set(item.timeframe, {
+              date: item.timeframe,
+              signupUsers: item.signup_users || 0,
+              retainedUsers: 0
+            });
+          });
+
+          retainedData.forEach((item) => {
+            const existing = dateMap.get(item.timeframe) || {
+              date: item.timeframe,
+              signupUsers: 0,
+              retainedUsers: 0
+            };
+            existing.retainedUsers = item.retained_users || 0;
+            dateMap.set(item.timeframe, existing);
+          });
+
+          const formattedData = Array.from(dateMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+          setData(formattedData);
+          setTotalRows(
+            Math.max(signupResponse.signup?.pagination?.total_records || 0, retainedResponse.retained?.pagination?.total_records || 0)
+          );
+        })
+        .catch((err) => {
+          console.error(err);
+          setError('Unable to load data');
+        })
+        .finally(() => setLoading(false));
+    } else {
+      const apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`;
+
+      fetch(apiUrl)
+        .then((res) => res.json())
+        .then((response) => {
+          const categoryData = response[effectiveCategory]?.data || [];
+          const formattedData = categoryData.map((item) => ({
+            date: item.timeframe,
+            users: item[`${effectiveCategory}_users`] || item.users || 0
+          }));
+
+          setData(formattedData);
+          setTotalRows(response[effectiveCategory]?.pagination?.total_records || 0);
+        })
+        .catch((err) => {
+          console.error(err);
+          setError('Unable to load data');
+        })
+        .finally(() => setLoading(false));
+    }
   }, [
     filters?.startDate,
     filters?.endDate,
@@ -108,7 +166,6 @@ export default function UserTable({ filters }) {
   const handleRetry = () => {
     setError('');
     setLoading(true);
-    // Trigger re-fetch by updating a dependency
     setPage(0);
   };
 
@@ -154,12 +211,19 @@ export default function UserTable({ filters }) {
 
           {!loading && !error && (
             <Table aria-labelledby="tableTitle">
-              <UserTableHead order={order} orderBy={orderBy} />
+              <UserTableHead order={order} orderBy={orderBy} category={effectiveCategory} />
               <TableBody>
                 {data.map((row, index) => (
                   <TableRow key={index} hover>
                     <TableCell>{formatDate(row.date)}</TableCell>
-                    <TableCell align="right">{row.users}</TableCell>
+                    {effectiveCategory === 'all' ? (
+                      <>
+                        <TableCell align="right">{row.signupUsers}</TableCell>
+                        <TableCell align="right">{row.retainedUsers}</TableCell>
+                      </>
+                    ) : (
+                      <TableCell align="right">{row.users}</TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
