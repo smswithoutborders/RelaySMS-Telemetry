@@ -72,6 +72,10 @@ export default function UserTable({ filters }) {
   const effectiveCategory = filters?.category || 'all';
 
   useEffect(() => {
+    setPage(0);
+  }, [effectiveStartDate, effectiveEndDate, effectiveCategory, filters?.countryCode]);
+
+  useEffect(() => {
     const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
 
     setLoading(true);
