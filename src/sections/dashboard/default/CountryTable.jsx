@@ -1,27 +1,12 @@
-// (imports same as before)
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Box,
-  Typography,
-  TablePagination,
-  Button,
-  Stack,
-  Paper
-} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Typography, TablePagination, Paper } from '@mui/material';
 import axios from 'axios';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 
 // components
 import Loader from 'components/Loader';
-import { fontSize } from '@mui/system';
 
 countries.registerLocale(enLocale);
 
@@ -79,23 +64,43 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
   };
 
   useEffect(() => {
+    setPage(0);
+  }, [effectiveStartDate, effectiveEndDate, effectiveCategory, effectiveGranularity, filters?.countryCode]);
+
+  useEffect(() => {
     const fetchCountryData = async () => {
       setLoading(true);
       try {
         const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
 
         if (effectiveCategory === 'all') {
-          const [signupResponse, retainedResponse] = await Promise.all([
-            axios.get(
-              `${import.meta.env.VITE_APP_TELEMETRY_API}signup?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
-            ),
-            axios.get(
-              `${import.meta.env.VITE_APP_TELEMETRY_API}retained?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
-            )
-          ]);
+          const fetchAllPages = async (endpoint) => {
+            let allData = [];
+            let currentPage = 1;
+            let totalPages = 1;
 
-          const signupStats = signupResponse.data.signup?.data || [];
-          const retainedStats = retainedResponse.data.retained?.data || [];
+            do {
+              const response = await axios.get(
+                `${import.meta.env.VITE_APP_TELEMETRY_API}${endpoint}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${currentPage}&page_size=25${countryParam}`
+              );
+
+              const categoryKey = endpoint.includes('retained') ? 'retained' : 'signup';
+              const data = response.data[categoryKey]?.data || [];
+              const pagination = response.data[categoryKey]?.pagination;
+
+              allData = allData.concat(data);
+
+              if (pagination) {
+                totalPages = pagination.total_pages || 1;
+              }
+
+              currentPage++;
+            } while (currentPage <= totalPages);
+
+            return allData;
+          };
+
+          const [signupStats, retainedStats] = await Promise.all([fetchAllPages('signup'), fetchAllPages('retained')]);
 
           const countryMap = new Map();
 
@@ -121,7 +126,7 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
             }
           });
 
-          const formatted = Array.from(countryMap.values()).map((item) => {
+          const allCountries = Array.from(countryMap.values()).map((item) => {
             const code = item.country_code;
             const isValidCode = code && countries.isValid(code, 'en');
             const name = isValidCode ? countries.getName(code, 'en') : 'Unknown';
@@ -136,19 +141,15 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
             };
           });
 
-          formatted.sort((a, b) => {
-            const totalA = a.signupUsers + a.retainedUsers;
-            const totalB = b.signupUsers + b.retainedUsers;
-            return totalB - totalA;
-          });
+          allCountries.sort((a, b) => b.signupUsers - a.signupUsers);
 
-          setCountryData(formatted);
-          setTotalRows(
-            Math.max(
-              signupResponse.data.signup?.pagination?.total_records || 0,
-              retainedResponse.data.retained?.pagination?.total_records || 0
-            )
-          );
+          setTotalRows(allCountries.length);
+
+          const startIndex = page * rowsPerPage;
+          const endIndex = startIndex + rowsPerPage;
+          const paginatedData = allCountries.slice(startIndex, endIndex);
+
+          setCountryData(paginatedData);
         } else {
           const response = await axios.get(
             `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
