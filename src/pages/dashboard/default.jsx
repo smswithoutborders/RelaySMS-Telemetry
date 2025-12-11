@@ -15,6 +15,7 @@ import ErrorDisplay from 'components/ErrorDisplay';
 
 import CombinedChartCard from 'sections/dashboard/default/CombinedChartCard';
 import UserTable from 'sections/dashboard/default/UserTable';
+import UserRetentionMetrics from 'sections/dashboard/default/UserRetentionMetrics';
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -712,6 +713,11 @@ export default function DashboardDefault() {
             </Grid>
           </Grid>
         </MainCard>
+      </Grid>
+
+      {/* row 4: User Retention Metrics */}
+      <Grid size={12} sx={{ mb: 4 }}>
+        <UserRetentionMetrics filters={filtersApplied} />
       </Grid>
     </Grid>
   );

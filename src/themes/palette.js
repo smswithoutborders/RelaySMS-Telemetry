@@ -14,9 +14,9 @@ export default function Palette(mode, presetColor) {
 
   // Custom blue color palette based on #336AFF for primary color
   const customBlue = [
-    '#EEF3FF', // 0 - lightest
-    '#D6E4FF', // 1
-    '#ADC8FF', // 2
+    '#d8e3fcff', // 0 - lightest
+    '#bfd4fdff', // 1
+    '#a2c1fdff', // 2
     '#85ACFF', // 3 - light
     '#5C8FFF', // 4
     '#336AFF', // 5 - main
