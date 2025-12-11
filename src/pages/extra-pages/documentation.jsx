@@ -424,6 +424,41 @@ export default function Documentation() {
               </ListItem>
               <ListItem>
                 <ListItemText
+                  primary={<strong>User Retention Metrics:</strong>}
+                  secondary={
+                    <span>
+                      Cohort analysis showing how well you retain users over time. This powerful feature helps you understand user loyalty
+                      and engagement:
+                      <ul style={{ marginTop: '8px', marginBottom: '8px' }}>
+                        <li>
+                          <strong>Monthly Cohorts</strong> - Groups users by their signup month
+                        </li>
+                        <li>
+                          <strong>Cohort Table View</strong> - Shows retention percentages for each cohort over 7 periods (0-6 months).
+                          Period 0 is the signup month (always 100%), and subsequent periods show how many users from that cohort are still
+                          active.
+                        </li>
+                        <li>
+                          <strong>Retention Curves View</strong> - Line chart visualizing retention trends over time for multiple cohorts
+                        </li>
+                        <li>
+                          <strong>Color Coding</strong> - Green (80%+ retention) indicates excellent retention, yellow (40-80%) shows
+                          moderate retention, and red (below 40%) highlights areas needing attention
+                        </li>
+                        <li>
+                          <strong>Key Metrics</strong> - Average Day 1, Month 3, and Month 6 retention rates at a glance
+                        </li>
+                      </ul>
+                      <strong>How to Read It:</strong> If the January 2024 cohort shows 85% at +1, it means 85% of users who signed up in
+                      January were still active one month later (February). Use this to identify which cohorts had better retention and
+                      understand what factors contributed to their success. Look for patterns: Are recent cohorts retaining better than
+                      older ones? Is there a consistent drop-off point (e.g., after Month 2)?
+                    </span>
+                  }
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
                   primary="Download Data"
                   secondary="Export all current dashboard data as a JSON file for offline analysis or reporting."
                 />
@@ -482,6 +517,83 @@ export default function Documentation() {
                 <ListItemText
                   primary={<strong>Platform Distribution Chart:</strong>}
                   secondary="Pie or bar chart showing which platforms (Gmail, Twitter, Telegram, Mastodon, etc.) receive the most publications."
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary={<strong>Peak Usage Hours Heatmap:</strong>}
+                  secondary={
+                    <span>
+                      A weekly pattern visualization showing when users are most active throughout the week. The heatmap displays:
+                      <ul style={{ marginTop: '8px', marginBottom: '8px' }}>
+                        <li>
+                          <strong>7 rows</strong> - Days of the week (Sunday through Saturday)
+                        </li>
+                        <li>
+                          <strong>24 columns</strong> - Hours of the day (0-23, representing midnight to 11 PM)
+                        </li>
+                        <li>
+                          <strong>Color intensity</strong> - Darker colors indicate higher publication activity
+                        </li>
+                      </ul>
+                      The heatmap aggregates ALL publications within your selected date range. For example, if you're viewing a full year of
+                      data, all Mondays at 2 PM are counted together, all Tuesdays at 9 AM together, etc. This reveals typical usage
+                      patterns: which day/hour combinations see the most activity. Hover over any cell to see the exact publication count
+                      for that day/hour combination. Use this to identify peak traffic times for capacity planning, optimal maintenance
+                      windows, and understanding user behavior across different time zones.
+                    </span>
+                  }
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary={<strong>Platform Success Rate Chart:</strong>}
+                  secondary={
+                    <span>
+                      A bar chart comparing the reliability of different platforms (Gmail, Twitter, Telegram, etc.). Shows:
+                      <ul style={{ marginTop: '8px', marginBottom: '8px' }}>
+                        <li>
+                          <strong>Success Rate Percentage</strong> - Calculated as (successful publications / total publications) × 100
+                        </li>
+                        <li>
+                          <strong>Platform Colors</strong> - Each platform displays in its brand color for easy identification
+                        </li>
+                        <li>
+                          <strong>Sorted by Performance</strong> - Platforms are ordered from highest to lowest success rate
+                        </li>
+                      </ul>
+                      Use this chart to quickly identify which platforms are most reliable and which may need attention. A sudden drop in
+                      success rate for a specific platform could indicate API changes, authentication issues, or service disruptions.
+                    </span>
+                  }
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary={<strong>Platform Performance Summary:</strong>}
+                  secondary={
+                    <span>
+                      Detailed performance cards showing comprehensive statistics for each platform:
+                      <ul style={{ marginTop: '8px', marginBottom: '8px' }}>
+                        <li>
+                          <strong>Platform Name</strong> - With brand color indicator
+                        </li>
+                        <li>
+                          <strong>Success Rate</strong> - Large percentage display (e.g., 98.5%)
+                        </li>
+                        <li>
+                          <strong>Success Count</strong> - Number of successful publications out of total attempts (e.g., 1,234 / 1,250
+                          successful)
+                        </li>
+                        <li>
+                          <strong>Failed Count</strong> - Number of failed publications (displayed in red if failures exist)
+                        </li>
+                      </ul>
+                      These cards provide at-a-glance metrics for each platform's reliability. Use them to monitor platform health, identify
+                      problematic platforms, and track improvements over time. The color-coded indicators make it easy to spot which
+                      platforms need investigation.
+                    </span>
+                  }
                 />
               </ListItem>
               <ListItem>

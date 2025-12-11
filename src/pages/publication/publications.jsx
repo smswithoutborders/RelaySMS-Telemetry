@@ -27,6 +27,8 @@ import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import PublicationChart from 'sections/publications/PublicationChart';
 import PlatformDistributionChart from 'sections/publications/PlatformDistributionChart';
 import PublicationMap from 'sections/publications/PublicationMap';
+import UsageHeatmap from 'sections/publications/UsageHeatmap';
+import PlatformSuccessRateChart, { PlatformSuccessRateSummary } from 'sections/publications/PlatformSuccessRateChart';
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -930,6 +932,29 @@ export default function Publications() {
               <PlatformDistributionChart filters={filtersApplied} />
             </Grid>
           </Grid>
+        </MainCard>
+      </Grid>
+      {/* Usage Heatmap */}
+      <Grid size={12}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <UsageHeatmap filters={filtersApplied} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <PlatformSuccessRateChart filters={filtersApplied} />
+          </Grid>
+        </Grid>
+      </Grid>
+      {/* Platform Success Rate Summary */}
+      <Grid size={12}>
+        <MainCard>
+          <Typography variant="h5" gutterBottom>
+            Platform Performance Summary
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Detailed success metrics by platform
+          </Typography>
+          <PlatformSuccessRateSummary filters={filtersApplied} />
         </MainCard>
       </Grid>
     </Grid>
