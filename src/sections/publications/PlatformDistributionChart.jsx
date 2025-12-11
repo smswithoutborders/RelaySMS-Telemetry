@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 // material-ui
@@ -27,15 +27,32 @@ export default function PlatformDistributionChart({ filters }) {
   const [loading, setLoading] = useState(true);
   const [highlightedItem, setHighlightedItem] = useState(null);
 
-  const colors = [
-    theme.palette.primary.main,
-    theme.palette.success.main,
-    theme.palette.warning.main,
-    theme.palette.error.main,
-    theme.palette.info.main,
-    theme.palette.secondary.main,
-    theme.palette.primary[700]
-  ];
+  // Platform-specific brand colors
+  const getPlatformColor = useCallback(
+    (platformName) => {
+      const platform = platformName.toLowerCase();
+      switch (platform) {
+        case 'gmail':
+          return '#34A853'; // Gmail green
+        case 'twitter':
+        case 'x':
+          return '#242424ff'; // X/Twitter black
+        case 'telegram':
+          return '#0088CC'; // Telegram blue
+        case 'bluesky':
+          return '#1185FE'; // Bluesky blue
+        case 'mastodon':
+          return '#6364FF'; // Mastodon purple
+        case 'slack':
+          return '#4A154B'; // Slack purple
+        case 'email_bridge':
+          return '#FFA726'; // Orange for email bridge
+        default:
+          return theme.palette.primary.main; // Fallback to theme primary
+      }
+    },
+    [theme.palette.primary.main]
+  );
 
   const handleLegendClick = (event, legendItem) => {
     const clickedIndex = data.findIndex((item) => item.label === legendItem.label);
@@ -97,7 +114,8 @@ export default function PlatformDistributionChart({ filters }) {
         const chartData = Object.entries(platformCounts).map(([platform, count], index) => ({
           id: index,
           value: count,
-          label: platform
+          label: platform,
+          color: getPlatformColor(platform)
         }));
 
         setData(chartData);
@@ -109,7 +127,7 @@ export default function PlatformDistributionChart({ filters }) {
     };
 
     fetchData();
-  }, [startDate, endDate, status, source, country]);
+  }, [startDate, endDate, status, source, country, getPlatformColor]);
 
   return (
     <>
@@ -159,7 +177,7 @@ export default function PlatformDistributionChart({ filters }) {
                     cy: 130
                   }
                 ]}
-                colors={colors}
+                colors={data.map((item) => item.color)}
                 height={370}
                 margin={{ top: 10, bottom: 80, left: 10, right: 10 }}
                 onItemClick={handleItemClick}

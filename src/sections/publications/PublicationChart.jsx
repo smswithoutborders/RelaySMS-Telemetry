@@ -41,7 +41,7 @@ export default function PublicationChart({ filters }) {
   const pageSize = 10;
   const [totalPages, setTotalPages] = useState(1);
 
-  const primaryColor = theme.palette.success.main;
+  const primaryColor = theme.palette.primary.main;
   const errorColor = theme.palette.error.main;
 
   useEffect(() => {
@@ -182,7 +182,7 @@ export default function PublicationChart({ filters }) {
                         p: 1.5,
                         border: 1,
                         borderColor: 'divider',
-                        borderRadius: 1,
+                        borderRadius: 0,
                         boxShadow: 2
                       }}
                     >

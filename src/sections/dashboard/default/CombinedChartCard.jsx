@@ -18,7 +18,7 @@ import UserBarChart from 'sections/dashboard/UserBarChart';
 
 export default function CombinedChartCard({ filters }) {
   const [view, setView] = useState('month');
-  const [chartType, setChartType] = useState('bar');
+  const [chartType, setChartType] = useState('area');
 
   const handleChartTypeChange = (event, newType) => {
     if (newType !== null) {
