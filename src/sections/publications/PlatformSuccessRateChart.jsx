@@ -69,11 +69,10 @@ const fetchPlatformData = async (startDate, endDate, source, country) => {
     return acc;
   }, {});
 
-  // Convert to chart data format
   const chartData = Object.entries(platformStats)
     .map(([platform, stats]) => ({
       platform,
-      successRate: stats.total > 0 ? ((stats.successful / stats.total) * 100).toFixed(2) : 0,
+      successRate: stats.total > 0 ? parseFloat(((stats.successful / stats.total) * 100).toFixed(2)) : 0,
       total: stats.total,
       successful: stats.successful,
       failed: stats.failed
