@@ -17,7 +17,7 @@ export default function PlatformDistributionChart({ filters }) {
   const today = new Date();
   const defaultEndDate = today.toISOString().split('T')[0];
 
-  const startDate = filters?.startDate || '2021-01-10';
+  const startDate = filters?.startDate || '2020-01-10';
   const endDate = filters?.endDate || defaultEndDate;
   const status = filters?.status || '';
   const source = filters?.source || '';

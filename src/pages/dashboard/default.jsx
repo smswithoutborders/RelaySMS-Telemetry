@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
 // ant design
-import { DatePicker, Select, Button, Dropdown, Switch } from 'antd';
+import { DatePicker, Select, Button, Dropdown, Switch, Radio } from 'antd';
 import 'antd/dist/reset.css';
 
 // project imports
@@ -16,6 +16,7 @@ import ErrorDisplay from 'components/ErrorDisplay';
 import CombinedChartCard from 'sections/dashboard/default/CombinedChartCard';
 import UserTable from 'sections/dashboard/default/UserTable';
 import UserRetentionMetrics from 'sections/dashboard/default/UserRetentionMetrics';
+import ShutdownEarlyWarning from 'sections/dashboard/default/ShutdownEarlyWarning';
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -66,12 +67,15 @@ export default function DashboardDefault() {
   const [granularity, setGranularity] = useState('day');
   const [groupBy, setGroupBy] = useState('date');
   const [countryCode, setCountryCode] = useState(null);
+  const [type, setType] = useState(null);
+  const [origin, setOrigin] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [dateRangeFilter, setDateRangeFilter] = useState('custom');
   const [showCustomDatePickers, setShowCustomDatePickers] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState(null);
   const [filtersApplied, setFiltersApplied] = useState({});
   const [availableCountries, setAvailableCountries] = useState([]);
@@ -242,7 +246,7 @@ export default function DashboardDefault() {
         if (startDate && endDate) {
           return `${startDate.format('YYYY-MM-DD')} - ${endDate.format('YYYY-MM-DD')}`;
         }
-        return '2021-01-10 - Today';
+        return '2020-01-10 - Today';
       default:
         return 'Date Range Filter';
     }
@@ -252,24 +256,28 @@ export default function DashboardDefault() {
     const today = new Date().toISOString().split('T')[0];
     const appliedFilters = {
       category,
-      startDate: startDate ? startDate.format('YYYY-MM-DD') : '2021-01-10',
+      startDate: startDate ? startDate.format('YYYY-MM-DD') : '2020-01-10',
       endDate: endDate ? endDate.format('YYYY-MM-DD') : today,
       granularity,
       // groupBy,
-      countryCode: countryCode || undefined
+      countryCode: countryCode || undefined,
+      type: type || undefined,
+      origin: origin || undefined
     };
 
     setFiltersApplied(appliedFilters);
   };
 
   const handleResetFilters = () => {
-    const resetStartDate = dayjs('2021-01-01');
+    const resetStartDate = dayjs('2020-01-01');
     const resetEndDate = dayjs();
 
     setCategory('all');
     // setGranularity('month');
     // setGroupBy('country');
     setCountryCode(null);
+    setType(null);
+    setOrigin(null);
     setStartDate(resetStartDate);
     setEndDate(resetEndDate);
     setDateRangeFilter('custom');
@@ -285,48 +293,152 @@ export default function DashboardDefault() {
   };
 
   const handleDownloadData = async () => {
+    setDownloading(true);
     try {
       const today = new Date().toISOString().split('T')[0];
-      const appliedStart = filtersApplied.startDate || '2021-01-10';
+      const appliedStart = filtersApplied.startDate || '2020-01-10';
       const appliedEnd = filtersApplied.endDate || today;
+      const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
 
-      let apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}summary?start_date=${appliedStart}&end_date=${appliedEnd}`;
+      const countryParam = filtersApplied.countryCode ? `&country_code=${filtersApplied.countryCode}` : '';
+      const typeParam = filtersApplied.type ? `&type=${filtersApplied.type}` : '';
+      const originParam = filtersApplied.origin ? `&origin=${filtersApplied.origin}` : '';
+      const currentCategory = filtersApplied.category || category;
 
+      const summaryUrl = `${baseUrl}summary?start_date=${appliedStart}&end_date=${appliedEnd}${countryParam}${typeParam}${originParam}`;
+      const summaryResponse = await axios.get(summaryUrl);
+      const summaryData = summaryResponse.data.summary;
+
+      const fetchAllPages = async (endpoint, category, groupBy = 'date') => {
+        const params = {
+          category,
+          start_date: appliedStart,
+          end_date: appliedEnd,
+          granularity: 'day',
+          group_by: groupBy,
+          page: 1,
+          page_size: 100
+        };
+
+        if (filtersApplied.countryCode) {
+          params.country_code = filtersApplied.countryCode;
+        }
+
+        if (filtersApplied.type) {
+          params.type = filtersApplied.type;
+        }
+
+        if (filtersApplied.origin) {
+          params.origin = filtersApplied.origin;
+        }
+
+        const firstResponse = await axios.get(`${baseUrl}${endpoint}`, { params });
+        const totalPages = firstResponse?.data?.[category]?.pagination?.total_pages || 1;
+        let allData = firstResponse?.data?.[category]?.data ?? [];
+
+        if (totalPages > 1) {
+          const pagePromises = [];
+          for (let page = 2; page <= totalPages; page++) {
+            pagePromises.push(axios.get(`${baseUrl}${endpoint}`, { params: { ...params, page } }));
+          }
+
+          const responses = await Promise.all(pagePromises);
+          responses.forEach((response) => {
+            const pageData = response?.data?.[category]?.data ?? [];
+            allData = [...allData, ...pageData];
+          });
+        }
+
+        return allData;
+      };
+
+      const signupByDate = await fetchAllPages('signup', 'signup', 'date');
+      const signupByCountry = await fetchAllPages('signup', 'signup', 'country');
+
+      const retainedByDate = await fetchAllPages('retained', 'retained', 'date');
+      const retainedByCountry = await fetchAllPages('retained', 'retained', 'country');
+
+      const pubParams = {
+        start_date: appliedStart,
+        end_date: appliedEnd,
+        page: 1,
+        page_size: 100
+      };
       if (filtersApplied.countryCode) {
-        apiUrl += `&country_code=${filtersApplied.countryCode}`;
+        pubParams.country_code = filtersApplied.countryCode;
+      }
+      if (filtersApplied.type) {
+        pubParams.type = filtersApplied.type;
+      }
+      if (filtersApplied.origin) {
+        pubParams.origin = filtersApplied.origin;
       }
 
-      const response = await axios.get(apiUrl);
-      const data = response.data.summary;
+      const firstPubResponse = await axios.get(`${baseUrl}publications`, { params: pubParams });
+      const totalPubPages = firstPubResponse?.data?.publications?.pagination?.total_pages || 1;
+      let allPublications = firstPubResponse?.data?.publications?.data ?? [];
+
+      if (totalPubPages > 1) {
+        const pubPagePromises = [];
+        for (let page = 2; page <= totalPubPages; page++) {
+          pubPagePromises.push(axios.get(`${baseUrl}publications`, { params: { ...pubParams, page } }));
+        }
+
+        const pubResponses = await Promise.all(pubPagePromises);
+        pubResponses.forEach((response) => {
+          const pageData = response?.data?.publications?.data ?? [];
+          allPublications = [...allPublications, ...pageData];
+        });
+      }
 
       const downloadData = {
         metadata: {
           exportDate: new Date().toISOString(),
           filters: {
-            category: filtersApplied.category || category,
+            category: currentCategory,
             startDate: appliedStart,
             endDate: appliedEnd,
-            countryCode: filtersApplied.countryCode || countryCode || 'All Countries'
+            countryCode: filtersApplied.countryCode || 'All Countries',
+            type: filtersApplied.type || 'All Types',
+            origin: filtersApplied.origin || 'All Origins'
+          },
+          recordCounts: {
+            signupByDate: signupByDate.length,
+            signupByCountry: signupByCountry.length,
+            retainedByDate: retainedByDate.length,
+            retainedByCountry: retainedByCountry.length,
+            publications: allPublications.length
           }
         },
         summary: {
           signup: {
-            total_signup_users: data.total_signup_users || 0,
-            total_signups_from_bridges: data.total_signups_from_bridges || 0,
-            signup_countries: data.signup_countries || [],
-            total_signup_countries: data.total_signup_countries || 0
+            total_signup_users: summaryData.total_signup_users || 0,
+            total_signups_from_bridges: summaryData.total_signups_from_bridges || 0,
+            signup_countries: summaryData.signup_countries || [],
+            total_signup_countries: summaryData.total_signup_countries || 0
           },
           retained: {
-            total_retained_users: data.total_retained_users || 0,
-            total_retained_users_with_tokens: data.total_retained_users_with_tokens || 0,
-            retained_countries: data.retained_countries || [],
-            total_retained_countries: data.total_retained_countries || 0
+            total_retained_users: summaryData.total_retained_users || 0,
+            total_retained_users_with_tokens: summaryData.total_retained_users_with_tokens || 0,
+            retained_countries: summaryData.retained_countries || [],
+            total_retained_countries: summaryData.total_retained_countries || 0
           },
           publications: {
-            total_publications: data.total_publications || 0
+            total_publications: summaryData.total_publications || 0
           }
         },
-        rawData: data
+        detailedData: {
+          signup: {
+            byDate: signupByDate,
+            byCountry: signupByCountry
+          },
+          retained: {
+            byDate: retainedByDate,
+            byCountry: retainedByCountry
+          },
+          publications: allPublications
+        },
+        rawSummary: summaryData
       };
 
       const jsonString = JSON.stringify(downloadData, null, 2);
@@ -337,7 +449,7 @@ export default function DashboardDefault() {
       link.href = url;
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-      link.download = `telemetry-dashboard-data-${timestamp}.json`;
+      link.download = `telemetry-dashboard-complete-${timestamp}.json`;
 
       document.body.appendChild(link);
       link.click();
@@ -347,6 +459,8 @@ export default function DashboardDefault() {
     } catch (error) {
       console.error('Error downloading data:', error);
       alert('Failed to download data. Please try again.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -355,7 +469,7 @@ export default function DashboardDefault() {
       setLoading(true);
       try {
         const today = new Date().toISOString().split('T')[0];
-        const appliedStart = filtersApplied.startDate || '2021-01-10';
+        const appliedStart = filtersApplied.startDate || '2020-01-10';
         const appliedEnd = filtersApplied.endDate || today;
 
         const startDateObj = dayjs(appliedStart);
@@ -371,6 +485,16 @@ export default function DashboardDefault() {
         if (filtersApplied.countryCode) {
           currentApiUrl += `&country_code=${filtersApplied.countryCode}`;
           previousApiUrl += `&country_code=${filtersApplied.countryCode}`;
+        }
+
+        if (filtersApplied.type) {
+          currentApiUrl += `&type=${filtersApplied.type}`;
+          previousApiUrl += `&type=${filtersApplied.type}`;
+        }
+
+        if (filtersApplied.origin) {
+          currentApiUrl += `&origin=${filtersApplied.origin}`;
+          previousApiUrl += `&origin=${filtersApplied.origin}`;
         }
 
         const [currentResponse, previousResponse] = await Promise.all([axios.get(currentApiUrl), axios.get(previousApiUrl)]);
@@ -666,6 +790,30 @@ export default function DashboardDefault() {
               />
             </Grid>
 
+            {/* Type Filter */}
+            <Grid xs={12} md={6} lg={3}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Type
+              </Typography>
+              <Radio.Group value={type} onChange={(e) => setType(e.target.value)} style={{ width: '100%' }}>
+                <Radio.Button value={null}>All</Radio.Button>
+                <Radio.Button value="phone_number">Phone</Radio.Button>
+                <Radio.Button value="email_address">Email</Radio.Button>
+              </Radio.Group>
+            </Grid>
+
+            {/* Origin Filter */}
+            <Grid xs={12} md={6} lg={3}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Origin
+              </Typography>
+              <Radio.Group value={origin} onChange={(e) => setOrigin(e.target.value)} style={{ width: '100%' }}>
+                <Radio.Button value={null}>All</Radio.Button>
+                <Radio.Button value="web">Web</Radio.Button>
+                <Radio.Button value="bridge">Bridge</Radio.Button>
+              </Radio.Group>
+            </Grid>
+
             {/* Buttons */}
             <Grid xs={12} md={3} lg={4} container spacing={1} sx={{ mt: { md: 3.5 } }}>
               <Grid xs={4} md={12} lg={4}>
@@ -679,8 +827,15 @@ export default function DashboardDefault() {
                 </Button>
               </Grid>
               <Grid xs={4} md={12} lg={4}>
-                <Button type="default" icon={<DownloadOutlined />} style={{ width: '100%' }} onClick={handleDownloadData}>
-                  Download Data
+                <Button
+                  type="default"
+                  icon={<DownloadOutlined />}
+                  style={{ width: '100%' }}
+                  onClick={handleDownloadData}
+                  loading={downloading}
+                  disabled={downloading}
+                >
+                  {downloading ? 'Downloading...' : 'Download Data'}
                 </Button>
               </Grid>
             </Grid>
@@ -718,6 +873,11 @@ export default function DashboardDefault() {
       {/* row 4: User Retention Metrics */}
       {/* <Grid size={12} sx={{ mb: 4 }}>
         <UserRetentionMetrics filters={filtersApplied} />
+      </Grid> */}
+
+      {/* row 5: Internet Shutdown Early Warning */}
+      {/* <Grid size={12} sx={{ mb: 4 }}>
+        <ShutdownEarlyWarning filters={filtersApplied} />
       </Grid> */}
     </Grid>
   );

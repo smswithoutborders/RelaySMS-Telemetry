@@ -65,7 +65,7 @@ export default function UserTable({ filters }) {
 
   const today = new Date();
   const defaultEndDate = today.toISOString().split('T')[0];
-  const defaultStartDate = '2021-01-10';
+  const defaultStartDate = '2020-01-10';
   const effectiveStartDate = filters?.startDate || defaultStartDate;
   const effectiveEndDate = filters?.endDate || defaultEndDate;
   const groupBy = filters?.groupBy || 'date';
@@ -73,10 +73,12 @@ export default function UserTable({ filters }) {
 
   useEffect(() => {
     setPage(0);
-  }, [effectiveStartDate, effectiveEndDate, effectiveCategory, filters?.countryCode]);
+  }, [effectiveStartDate, effectiveEndDate, effectiveCategory, filters?.countryCode, filters?.type, filters?.origin]);
 
   useEffect(() => {
     const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
+    const typeParam = filters?.type ? `&type=${filters.type}` : '';
+    const originParam = filters?.origin ? `&origin=${filters.origin}` : '';
 
     setLoading(true);
     setError('');
@@ -84,10 +86,10 @@ export default function UserTable({ filters }) {
     if (effectiveCategory === 'all') {
       Promise.all([
         fetch(
-          `${import.meta.env.VITE_APP_TELEMETRY_API}signup?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
+          `${import.meta.env.VITE_APP_TELEMETRY_API}signup?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}${typeParam}${originParam}`
         ),
         fetch(
-          `${import.meta.env.VITE_APP_TELEMETRY_API}retained?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
+          `${import.meta.env.VITE_APP_TELEMETRY_API}retained?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}${typeParam}${originParam}`
         )
       ])
         .then(([signupRes, retainedRes]) => Promise.all([signupRes.json(), retainedRes.json()]))
@@ -128,7 +130,7 @@ export default function UserTable({ filters }) {
         })
         .finally(() => setLoading(false));
     } else {
-      const apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`;
+      const apiUrl = `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${granularity}&group_by=date&page=${page + 1}&page_size=${rowsPerPage}${countryParam}${typeParam}${originParam}`;
 
       fetch(apiUrl)
         .then((res) => res.json())
@@ -152,6 +154,8 @@ export default function UserTable({ filters }) {
     filters?.startDate,
     filters?.endDate,
     filters?.countryCode,
+    filters?.type,
+    filters?.origin,
     groupBy,
     effectiveCategory,
     page,

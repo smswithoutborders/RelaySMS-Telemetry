@@ -88,7 +88,7 @@ export function PlatformSuccessRateSummary({ filters }) {
   const today = new Date();
   const defaultEndDate = today.toISOString().split('T')[0];
 
-  const startDate = filters?.startDate || '2021-01-10';
+  const startDate = filters?.startDate || '2020-01-10';
   const endDate = filters?.endDate || defaultEndDate;
   const source = filters?.source || '';
   const country = filters?.country || '';
@@ -188,7 +188,7 @@ export default function PlatformSuccessRateChart({ filters }) {
   const today = new Date();
   const defaultEndDate = today.toISOString().split('T')[0];
 
-  const startDate = filters?.startDate || '2021-01-10';
+  const startDate = filters?.startDate || '2020-01-10';
   const endDate = filters?.endDate || defaultEndDate;
   const source = filters?.source || '';
   const country = filters?.country || '';
