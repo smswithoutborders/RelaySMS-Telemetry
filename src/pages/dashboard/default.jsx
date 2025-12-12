@@ -716,9 +716,9 @@ export default function DashboardDefault() {
       </Grid>
 
       {/* row 4: User Retention Metrics */}
-      <Grid size={12} sx={{ mb: 4 }}>
+      {/* <Grid size={12} sx={{ mb: 4 }}>
         <UserRetentionMetrics filters={filtersApplied} />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 }
