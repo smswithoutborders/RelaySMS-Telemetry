@@ -1,0 +1,1 @@
+import{v as t,O as e,Q as o}from"./index-EJiCpkVe.js";function s(){return t.jsxs(e,{sx:{},children:[t.jsx(o,{variant:"h2",gutterBottom:!0,children:"OOPS!"}),t.jsx(o,{variant:"h5",gutterBottom:!0,children:"Seems the page you are looking for does not exist"})]})}export{s as default};
