@@ -31,7 +31,7 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
   const geoJsonLayerRef = useRef(null);
 
   const today = new Date().toISOString().split('T')[0];
-  const effectiveStartDate = filters?.startDate || '2021-01-10';
+  const effectiveStartDate = filters?.startDate || '2020-01-10';
   const effectiveEndDate = filters?.endDate || today;
   const effectivePlatform = filters?.platform || '';
   const effectiveStatus = filters?.status || '';

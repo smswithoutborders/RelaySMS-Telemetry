@@ -35,7 +35,7 @@ export default function UserRetentionMetrics({ filters }) {
   const [periodType, setPeriodType] = useState('month');
 
   const today = new Date().toISOString().split('T')[0];
-  const startDate = filters?.startDate || '2021-01-10';
+  const startDate = filters?.startDate || '2020-01-10';
   const endDate = filters?.endDate || today;
   const country = filters?.countryCode || '';
   const type = filters?.type || '';

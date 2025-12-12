@@ -134,7 +134,7 @@ export default function ReliabilityTable() {
       operator,
       operatorCode,
       reliability,
-      dateFilter: dateFilter ? dayjs(dateFilter).format('YYYY-MM-DD') : '2021-01-10'
+      dateFilter: dateFilter ? dayjs(dateFilter).format('YYYY-MM-DD') : '2020-01-10'
     };
     setFiltersApplied(appliedFilters);
     setPage(0);
@@ -153,7 +153,7 @@ export default function ReliabilityTable() {
 
   const handleDownloadData = async () => {
     try {
-      const appliedDate = filtersApplied.dateFilter || '2021-01-10';
+      const appliedDate = filtersApplied.dateFilter || '2020-01-10';
 
       const params = {
         date_filter: appliedDate,
@@ -261,7 +261,7 @@ export default function ReliabilityTable() {
       setLoading(true);
       setError(null);
       try {
-        const appliedDate = filtersApplied.dateFilter || '2021-01-10';
+        const appliedDate = filtersApplied.dateFilter || '2020-01-10';
 
         const params = {
           date_filter: appliedDate,
