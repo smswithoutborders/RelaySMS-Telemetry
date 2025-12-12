@@ -156,7 +156,7 @@ export function PlatformSuccessRateSummary({ filters }) {
               {platform.platform.toUpperCase()}
             </Typography>
           </Box>
-          <Typography variant="h5" color="success.dark" sx={{ mb: 0.5 }}>
+          <Typography variant="h5" sx={{ mb: 0.5 }}>
             {platform.successRate}%
           </Typography>
           <Typography variant="caption" color="text.secondary">
@@ -219,7 +219,7 @@ export default function PlatformSuccessRateChart({ filters }) {
           <Loader size={50} fullScreen={false} />
         </Box>
       ) : (
-        <Box sx={{ p: 2.5 }}>
+        <Box sx={{ p: 1.5 }}>
           <Typography variant="h5" gutterBottom>
             Platform Success Rates
           </Typography>
