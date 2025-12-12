@@ -424,6 +424,56 @@ export default function Documentation() {
               </ListItem>
               <ListItem>
                 <ListItemText
+                  primary={<strong>Internet Shutdown Early Warning System:</strong>}
+                  secondary={
+                    <span>
+                      Advanced anomaly detection that monitors signup patterns to identify potential internet shutdowns or spam attacks.
+                      This is a critical feature because RelaySMS is a preparedness tool - people sign up when they anticipate connectivity
+                      issues:
+                      <ul style={{ marginTop: '8px', marginBottom: '8px' }}>
+                        <li>
+                          <strong>Signup Spike Detection</strong> - Automatically detects when signups from a country increase by 200%+
+                          above the 7-day baseline
+                        </li>
+                        <li>
+                          <strong>Retention Validation</strong> - Distinguishes real shutdown preparation (high retention) from spam attacks
+                          (low retention)
+                        </li>
+                        <li>
+                          <strong>Alert Levels</strong>:
+                          <ul style={{ marginTop: '4px' }}>
+                            <li>
+                              <strong style={{ color: '#d32f2f' }}>Critical (Red)</strong> - Low retention (&lt;50%) indicates possible spam
+                              or bot attack. Requires investigation.
+                            </li>
+                            <li>
+                              <strong style={{ color: '#ed6c02' }}>High Risk (Orange)</strong> - High retention (≥70%) with major spike.
+                              Likely legitimate shutdown preparation.
+                            </li>
+                            <li>
+                              <strong style={{ color: '#0288d1' }}>Medium Risk (Blue)</strong> - Moderate retention (50-70%) with spike.
+                              Monitor situation closely.
+                            </li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>Confidence Score</strong> - Percentage indicating how certain the system is about the classification
+                        </li>
+                        <li>
+                          <strong>Timeline View</strong> - Visual charts showing signup trends by country over time to spot patterns
+                        </li>
+                      </ul>
+                      <strong>Understanding the Logic:</strong> When people expect internet shutdowns, they prepare by signing up for
+                      RelaySMS to maintain communication via SMS. A sudden spike in signups from a specific country, combined with high user
+                      retention (users actually using the service), strongly suggests an impending or ongoing shutdown. Conversely, a spike
+                      with low retention suggests fake accounts or spam. Use this tool to monitor high-risk regions, prepare infrastructure
+                      for increased load, and potentially alert advocacy groups about shutdowns.
+                    </span>
+                  }
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
                   primary="Download Data"
                   secondary="Export all current dashboard data as a JSON file for offline analysis or reporting."
                 />
