@@ -46,13 +46,15 @@ export default function UserBarChart({ view, filters }) {
       try {
         const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
         const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
+        const typeParam = filters?.type ? `&type=${filters.type}` : '';
+        const originParam = filters?.origin ? `&origin=${filters.origin}` : '';
 
         const signupResponse = await axios.get(
-          `${baseUrl}signup?category=signup&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}`
+          `${baseUrl}signup?category=signup&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}${typeParam}${originParam}`
         );
 
         const retainedResponse = await axios.get(
-          `${baseUrl}retained?category=retained&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}`
+          `${baseUrl}retained?category=retained&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}${typeParam}${originParam}`
         );
 
         const signup = signupResponse?.data?.signup?.data ?? [];
@@ -78,7 +80,7 @@ export default function UserBarChart({ view, filters }) {
     };
 
     fetchData();
-  }, [startDate, endDate, granularity, currentPage, filters?.countryCode]);
+  }, [startDate, endDate, granularity, currentPage, filters?.countryCode, filters?.type, filters?.origin]);
 
   const axisFontStyle = { fontSize: 10, fill: theme.palette.text.secondary };
 
@@ -100,7 +102,7 @@ export default function UserBarChart({ view, filters }) {
                 <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
                   User Data
                 </Typography>
-                <Typography variant="h5">Signups & Retained</Typography>
+                <Typography variant="h5">Signups & Current</Typography>
               </Box>
 
               <FormGroup>
@@ -123,7 +125,7 @@ export default function UserBarChart({ view, filters }) {
                         sx={{ '&.Mui-checked': { color: secondaryColor } }}
                       />
                     }
-                    label="Retained"
+                    label="Current"
                   />
                 </Stack>
               </FormGroup>
@@ -136,7 +138,7 @@ export default function UserBarChart({ view, filters }) {
               yAxis={[{ disableLine: true, disableTicks: true, tickLabelStyle: axisFontStyle }]}
               series={[
                 ...(showSignups ? [{ data: signupData, label: 'Signups', color: primaryColor, type: 'bar' }] : []),
-                ...(showRetained ? [{ data: retainedData, label: 'Retained', color: secondaryColor, type: 'bar' }] : [])
+                ...(showRetained ? [{ data: retainedData, label: 'Current', color: secondaryColor, type: 'bar' }] : [])
               ]}
               slotProps={{ legend: { hidden: true }, bar: { rx: 5, ry: 5 } }}
               axisHighlight={{ x: 'none' }}

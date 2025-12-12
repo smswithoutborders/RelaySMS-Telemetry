@@ -181,7 +181,7 @@ export default function Publications() {
   const handleApplyFilters = () => {
     const appliedFilters = {
       platform,
-      startDate: startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2021-01-10',
+      startDate: startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2020-01-10',
       endDate: endDate ? dayjs(endDate).format('YYYY-MM-DD') : today,
       status,
       source,
@@ -320,7 +320,7 @@ export default function Publications() {
         if (startDate && endDate) {
           return `${startDate.format('YYYY-MM-DD')} - ${endDate.format('YYYY-MM-DD')}`;
         }
-        return '2021-01-10 - Today';
+        return '2020-01-10 - Today';
       default:
         return 'Date Range Filter';
     }
@@ -342,7 +342,7 @@ export default function Publications() {
     setDownloading(true);
     try {
       const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
-      const appliedStart = filtersApplied.startDate || '2021-01-10';
+      const appliedStart = filtersApplied.startDate || '2020-01-10';
       const appliedEnd = filtersApplied.endDate || today;
 
       const params = {
@@ -467,7 +467,7 @@ export default function Publications() {
     const fetchMetrics = async () => {
       setLoading(true);
       try {
-        const appliedStart = startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2021-01-10';
+        const appliedStart = startDate ? dayjs(startDate).format('YYYY-MM-DD') : '2020-01-10';
         const appliedEnd = endDate ? dayjs(endDate).format('YYYY-MM-DD') : today;
 
         const startDateObj = dayjs(appliedStart);
@@ -604,7 +604,7 @@ export default function Publications() {
     const fetchAllCountries = async () => {
       try {
         const params = {
-          start_date: '2021-01-10',
+          start_date: '2020-01-10',
           end_date: new Date().toISOString().split('T')[0],
           page: 1,
           page_size: 100

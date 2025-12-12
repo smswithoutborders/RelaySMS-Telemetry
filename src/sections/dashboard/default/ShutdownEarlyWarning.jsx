@@ -45,27 +45,33 @@ export default function ShutdownEarlyWarning({ filters }) {
   const startDate = filters?.startDate || dayjs().subtract(30, 'day').format('YYYY-MM-DD');
   const endDate = filters?.endDate || today;
   const countryFilter = filters?.countryCode || '';
+  const typeFilter = filters?.type || '';
+  const originFilter = filters?.origin || '';
 
   const baselineStartDate = dayjs(startDate).subtract(7, 'day').format('YYYY-MM-DD');
   const baselineEndDate = dayjs(startDate).subtract(1, 'day').format('YYYY-MM-DD');
 
-  const fetchSignupData = useCallback(async (start, end, country = '') => {
+  const fetchSignupData = useCallback(async (start, end, country = '', type = '', origin = '') => {
     const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
     const countryParam = country ? `&country_code=${country}` : '';
+    const typeParam = type ? `&type=${type}` : '';
+    const originParam = origin ? `&origin=${origin}` : '';
 
     const response = await axios.get(
-      `${baseUrl}signup?category=signup&start_date=${start}&end_date=${end}&granularity=day&group_by=country&page=1&page_size=100${countryParam}`
+      `${baseUrl}signup?category=signup&start_date=${start}&end_date=${end}&granularity=day&group_by=country&page=1&page_size=100${countryParam}${typeParam}${originParam}`
     );
 
     return response?.data?.signup?.data ?? [];
   }, []);
 
-  const fetchRetainedData = useCallback(async (start, end, country = '') => {
+  const fetchRetainedData = useCallback(async (start, end, country = '', type = '', origin = '') => {
     const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
     const countryParam = country ? `&country_code=${country}` : '';
+    const typeParam = type ? `&type=${type}` : '';
+    const originParam = origin ? `&origin=${origin}` : '';
 
     const response = await axios.get(
-      `${baseUrl}retained?category=retained&start_date=${start}&end_date=${end}&granularity=day&group_by=country&page=1&page_size=100${countryParam}`
+      `${baseUrl}retained?category=retained&start_date=${start}&end_date=${end}&granularity=day&group_by=country&page=1&page_size=100${countryParam}${typeParam}${originParam}`
     );
 
     return response?.data?.retained?.data ?? [];
@@ -202,11 +208,11 @@ export default function ShutdownEarlyWarning({ filters }) {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const baselineSignups = await fetchSignupData(baselineStartDate, baselineEndDate, countryFilter);
+        const baselineSignups = await fetchSignupData(baselineStartDate, baselineEndDate, countryFilter, typeFilter, originFilter);
 
-        const currentSignups = await fetchSignupData(startDate, endDate, countryFilter);
+        const currentSignups = await fetchSignupData(startDate, endDate, countryFilter, typeFilter, originFilter);
 
-        const retainedUsers = await fetchRetainedData(startDate, endDate, countryFilter);
+        const retainedUsers = await fetchRetainedData(startDate, endDate, countryFilter, typeFilter, originFilter);
 
         const detectedAnomalies = detectAnomalies(baselineSignups, currentSignups, retainedUsers);
         setAlerts(detectedAnomalies);
@@ -226,6 +232,8 @@ export default function ShutdownEarlyWarning({ filters }) {
     startDate,
     endDate,
     countryFilter,
+    typeFilter,
+    originFilter,
     baselineStartDate,
     baselineEndDate,
     fetchSignupData,
