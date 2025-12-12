@@ -65,13 +65,15 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
 
   useEffect(() => {
     setPage(0);
-  }, [effectiveStartDate, effectiveEndDate, effectiveCategory, effectiveGranularity, filters?.countryCode]);
+  }, [effectiveStartDate, effectiveEndDate, effectiveCategory, effectiveGranularity, filters?.countryCode, filters?.type, filters?.origin]);
 
   useEffect(() => {
     const fetchCountryData = async () => {
       setLoading(true);
       try {
         const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
+        const typeParam = filters?.type ? `&type=${filters.type}` : '';
+        const originParam = filters?.origin ? `&origin=${filters.origin}` : '';
 
         if (effectiveCategory === 'all') {
           const fetchAllPages = async (endpoint) => {
@@ -81,7 +83,7 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
 
             do {
               const response = await axios.get(
-                `${import.meta.env.VITE_APP_TELEMETRY_API}${endpoint}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${currentPage}&page_size=25${countryParam}`
+                `${import.meta.env.VITE_APP_TELEMETRY_API}${endpoint}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${currentPage}&page_size=25${countryParam}${typeParam}${originParam}`
               );
 
               const categoryKey = endpoint.includes('retained') ? 'retained' : 'signup';
@@ -152,7 +154,7 @@ export default function CountryTable({ filters, onCountryClick, selectedCountry 
           setCountryData(paginatedData);
         } else {
           const response = await axios.get(
-            `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}`
+            `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=${page + 1}&page_size=${rowsPerPage}${countryParam}${typeParam}${originParam}`
           );
 
           const categoryKey = effectiveCategory.includes('retained') ? 'retained' : 'signup';

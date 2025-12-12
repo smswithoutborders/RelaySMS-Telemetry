@@ -42,14 +42,16 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
     setLoading(true);
     try {
       const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
+      const typeParam = filters?.type ? `&type=${filters.type}` : '';
+      const originParam = filters?.origin ? `&origin=${filters.origin}` : '';
 
       if (effectiveCategory === 'all') {
         const [signupResponse, retainedResponse] = await Promise.all([
           axios.get(
-            `${import.meta.env.VITE_APP_TELEMETRY_API}signup?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}`
+            `${import.meta.env.VITE_APP_TELEMETRY_API}signup?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}${typeParam}${originParam}`
           ),
           axios.get(
-            `${import.meta.env.VITE_APP_TELEMETRY_API}retained?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}`
+            `${import.meta.env.VITE_APP_TELEMETRY_API}retained?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}${typeParam}${originParam}`
           )
         ]);
 
@@ -111,7 +113,7 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
         setCountryData(formatted);
       } else {
         const response = await axios.get(
-          `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}`
+          `${import.meta.env.VITE_APP_TELEMETRY_API}${effectiveCategory}?start_date=${effectiveStartDate}&end_date=${effectiveEndDate}&granularity=${effectiveGranularity}&group_by=country&page=1&page_size=100${countryParam}${typeParam}${originParam}`
         );
 
         const categoryKey = effectiveCategory.includes('retained') ? 'retained' : 'signup';
@@ -153,7 +155,7 @@ export default function CountryMap({ filters, selectedCountry, onCountrySelect }
     } finally {
       setLoading(false);
     }
-  }, [effectiveCategory, effectiveStartDate, effectiveEndDate, effectiveGranularity, filters?.countryCode]);
+  }, [effectiveCategory, effectiveStartDate, effectiveEndDate, effectiveGranularity, filters?.countryCode, filters?.type, filters?.origin]);
 
   useEffect(() => {
     fetchCountryData();

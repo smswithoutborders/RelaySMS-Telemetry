@@ -38,6 +38,8 @@ export default function UserRetentionMetrics({ filters }) {
   const startDate = filters?.startDate || '2021-01-10';
   const endDate = filters?.endDate || today;
   const country = filters?.countryCode || '';
+  const type = filters?.type || '';
+  const origin = filters?.origin || '';
 
   const calculateFuturePeriod = useCallback((basePeriod, periodsAhead) => {
     const date = dayjs(basePeriod);
@@ -107,13 +109,15 @@ export default function UserRetentionMetrics({ filters }) {
       try {
         const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
         const countryParam = country ? `&country_code=${country}` : '';
+        const typeParam = type ? `&type=${type}` : '';
+        const originParam = origin ? `&origin=${origin}` : '';
 
         const signupResponse = await axios.get(
-          `${baseUrl}signup?category=signup&start_date=${startDate}&end_date=${endDate}&granularity=month&group_by=date&page=1&page_size=100${countryParam}`
+          `${baseUrl}signup?category=signup&start_date=${startDate}&end_date=${endDate}&granularity=month&group_by=date&page=1&page_size=100${countryParam}${typeParam}${originParam}`
         );
 
         const retainedResponse = await axios.get(
-          `${baseUrl}retained?category=retained&start_date=${startDate}&end_date=${endDate}&granularity=month&group_by=date&page=1&page_size=100${countryParam}`
+          `${baseUrl}retained?category=retained&start_date=${startDate}&end_date=${endDate}&granularity=month&group_by=date&page=1&page_size=100${countryParam}${typeParam}${originParam}`
         );
 
         const signupData = signupResponse?.data?.signup?.data ?? [];
@@ -132,7 +136,7 @@ export default function UserRetentionMetrics({ filters }) {
     };
 
     fetchRetentionData();
-  }, [startDate, endDate, country, processCohortData, processRetentionCurves]);
+  }, [startDate, endDate, country, type, origin, processCohortData, processRetentionCurves]);
 
   const getCellColor = (percentage) => {
     if (percentage >= 80) return theme.palette.success.dark;

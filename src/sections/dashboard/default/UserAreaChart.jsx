@@ -65,13 +65,15 @@ export default function UserAreaChart({ view, filters }) {
       try {
         const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
         const countryParam = filters?.countryCode ? `&country_code=${filters.countryCode}` : '';
+        const typeParam = filters?.type ? `&type=${filters.type}` : '';
+        const originParam = filters?.origin ? `&origin=${filters.origin}` : '';
 
         const signupResponse = await axios.get(
-          `${baseUrl}signup?category=signup&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}`
+          `${baseUrl}signup?category=signup&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}${typeParam}${originParam}`
         );
 
         const retainedResponse = await axios.get(
-          `${baseUrl}retained?category=retained&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}`
+          `${baseUrl}retained?category=retained&start_date=${startDate}&end_date=${endDate}&granularity=${granularity}&group_by=date&page=${currentPage + 1}&page_size=${pageSize}${countryParam}${typeParam}${originParam}`
         );
 
         const signup = signupResponse?.data?.signup?.data ?? [];
@@ -97,7 +99,7 @@ export default function UserAreaChart({ view, filters }) {
     };
 
     fetchData();
-  }, [startDate, endDate, granularity, currentPage, filters?.countryCode]);
+  }, [startDate, endDate, granularity, currentPage, filters?.countryCode, filters?.type, filters?.origin]);
 
   const toggleVisibility = (label) => {
     setVisibility((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -115,12 +117,12 @@ export default function UserAreaChart({ view, filters }) {
     },
     {
       data: retainedData,
-      label: 'Retained',
+      label: 'Current',
       showMark: false,
       area: true,
-      id: 'Retained',
+      id: 'Current',
       color: theme.palette.primary[700],
-      visible: visibility['Retained']
+      visible: visibility['Current']
     }
   ];
 
@@ -161,7 +163,7 @@ export default function UserAreaChart({ view, filters }) {
             slotProps={{ legend: { hidden: true } }}
             sx={{
               '& .MuiAreaElement-series-Signups': { fill: "url('#myGradient1')", strokeWidth: 2, opacity: 0.8 },
-              '& .MuiAreaElement-series-Retained': { fill: "url('#myGradient2')", strokeWidth: 2, opacity: 0.8 },
+              '& .MuiAreaElement-series-Current': { fill: "url('#myGradient2')", strokeWidth: 2, opacity: 0.8 },
               '& .MuiChartsAxis-directionX .MuiChartsAxis-tick': { stroke: theme.palette.divider }
             }}
           >
@@ -189,8 +191,6 @@ export default function UserAreaChart({ view, filters }) {
               <Typography variant="body2">Next</Typography> <RightOutlined />
             </Button>
           </Stack>
-
-          
         </>
       )}
     </>

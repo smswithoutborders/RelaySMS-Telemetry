@@ -246,7 +246,7 @@ export default function DashboardDefault() {
         if (startDate && endDate) {
           return `${startDate.format('YYYY-MM-DD')} - ${endDate.format('YYYY-MM-DD')}`;
         }
-        return '2021-01-10 - Today';
+        return '2020-01-10 - Today';
       default:
         return 'Date Range Filter';
     }
@@ -256,7 +256,7 @@ export default function DashboardDefault() {
     const today = new Date().toISOString().split('T')[0];
     const appliedFilters = {
       category,
-      startDate: startDate ? startDate.format('YYYY-MM-DD') : '2021-01-10',
+      startDate: startDate ? startDate.format('YYYY-MM-DD') : '2020-01-10',
       endDate: endDate ? endDate.format('YYYY-MM-DD') : today,
       granularity,
       // groupBy,
@@ -269,7 +269,7 @@ export default function DashboardDefault() {
   };
 
   const handleResetFilters = () => {
-    const resetStartDate = dayjs('2021-01-01');
+    const resetStartDate = dayjs('2020-01-01');
     const resetEndDate = dayjs();
 
     setCategory('all');
@@ -296,7 +296,7 @@ export default function DashboardDefault() {
     setDownloading(true);
     try {
       const today = new Date().toISOString().split('T')[0];
-      const appliedStart = filtersApplied.startDate || '2021-01-10';
+      const appliedStart = filtersApplied.startDate || '2020-01-10';
       const appliedEnd = filtersApplied.endDate || today;
       const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
 
@@ -469,7 +469,7 @@ export default function DashboardDefault() {
       setLoading(true);
       try {
         const today = new Date().toISOString().split('T')[0];
-        const appliedStart = filtersApplied.startDate || '2021-01-10';
+        const appliedStart = filtersApplied.startDate || '2020-01-10';
         const appliedEnd = filtersApplied.endDate || today;
 
         const startDateObj = dayjs(appliedStart);
