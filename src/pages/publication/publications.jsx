@@ -141,6 +141,7 @@ export default function Publications() {
   const [showCustomDatePickers, setShowCustomDatePickers] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState(null);
   const [filtersApplied, setFiltersApplied] = useState({});
   const [page, setPage] = useState(0);
@@ -338,6 +339,7 @@ export default function Publications() {
   };
 
   const handleDownloadData = async () => {
+    setDownloading(true);
     try {
       const baseUrl = import.meta.env.VITE_APP_TELEMETRY_API;
       const appliedStart = filtersApplied.startDate || '2021-01-10';
@@ -406,6 +408,8 @@ export default function Publications() {
     } catch (error) {
       console.error('Error downloading publications data:', error);
       alert('Failed to download data. Please try again.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -641,8 +645,8 @@ export default function Publications() {
       <Grid size={12}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h5">Publications</Typography>
-          <Button type="default" icon={<DownloadOutlined />} onClick={handleDownloadData}>
-            Download Data
+          <Button type="default" icon={<DownloadOutlined />} onClick={handleDownloadData} loading={downloading} disabled={downloading}>
+            {downloading ? 'Downloading...' : 'Download Data'}
           </Button>
         </Box>
       </Grid>
