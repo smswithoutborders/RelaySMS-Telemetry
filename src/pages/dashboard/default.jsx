@@ -876,9 +876,9 @@ export default function DashboardDefault() {
       </Grid> */}
 
       {/* row 5: Internet Shutdown Early Warning */}
-      <Grid size={12} sx={{ mb: 4 }}>
+      {/* <Grid size={12} sx={{ mb: 4 }}>
         <ShutdownEarlyWarning filters={filtersApplied} />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 }
