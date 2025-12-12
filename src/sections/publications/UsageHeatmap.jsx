@@ -10,6 +10,7 @@ import timezone from 'dayjs/plugin/timezone';
 // components
 import MainCard from 'components/MainCard';
 import Loader from 'components/Loader';
+import { height } from '@mui/system';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -151,7 +152,7 @@ export default function UsageHeatmap({ filters }) {
   }
 
   return (
-    <MainCard>
+    <MainCard sx={{ height: 446, p: 1 }}>
       <Typography variant="h5" gutterBottom>
         Peak Usage Hours
       </Typography>
@@ -160,7 +161,7 @@ export default function UsageHeatmap({ filters }) {
       </Typography>
 
       <Box sx={{ overflowX: 'auto' }}>
-        <Box sx={{ minWidth: 700 }}>
+        <Box sx={{ minWidth: 600 }}>
           {/* Hour labels */}
           <Box sx={{ display: 'flex', mb: 1, ml: 6 }}>
             {hoursOfDay.map((hour) => (

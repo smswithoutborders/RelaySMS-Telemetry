@@ -424,41 +424,6 @@ export default function Documentation() {
               </ListItem>
               <ListItem>
                 <ListItemText
-                  primary={<strong>User Retention Metrics:</strong>}
-                  secondary={
-                    <span>
-                      Cohort analysis showing how well you retain users over time. This powerful feature helps you understand user loyalty
-                      and engagement:
-                      <ul style={{ marginTop: '8px', marginBottom: '8px' }}>
-                        <li>
-                          <strong>Monthly Cohorts</strong> - Groups users by their signup month
-                        </li>
-                        <li>
-                          <strong>Cohort Table View</strong> - Shows retention percentages for each cohort over 7 periods (0-6 months).
-                          Period 0 is the signup month (always 100%), and subsequent periods show how many users from that cohort are still
-                          active.
-                        </li>
-                        <li>
-                          <strong>Retention Curves View</strong> - Line chart visualizing retention trends over time for multiple cohorts
-                        </li>
-                        <li>
-                          <strong>Color Coding</strong> - Green (80%+ retention) indicates excellent retention, yellow (40-80%) shows
-                          moderate retention, and red (below 40%) highlights areas needing attention
-                        </li>
-                        <li>
-                          <strong>Key Metrics</strong> - Average Day 1, Month 3, and Month 6 retention rates at a glance
-                        </li>
-                      </ul>
-                      <strong>How to Read It:</strong> If the January 2024 cohort shows 85% at +1, it means 85% of users who signed up in
-                      January were still active one month later (February). Use this to identify which cohorts had better retention and
-                      understand what factors contributed to their success. Look for patterns: Are recent cohorts retaining better than
-                      older ones? Is there a consistent drop-off point (e.g., after Month 2)?
-                    </span>
-                  }
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
                   primary="Download Data"
                   secondary="Export all current dashboard data as a JSON file for offline analysis or reporting."
                 />
