@@ -31,7 +31,7 @@
     "@mui/x-charts": "7.24.1",
     "@vitejs/plugin-react": "^5.1.1",
     "antd": "^5.27.6",
-    "axios": "^1.14.0",
+    "axios": "^1.15.0",
     "country-coords": "^1.0.0",
     "dayjs": "^1.11.13",
     "i18n-iso-countries": "^7.14.0",
