@@ -7,6 +7,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    // Served from the root unless VITE_BASE_PATH is set; also the router basename (import.meta.env.BASE_URL).
+    base: env.VITE_BASE_PATH || '/',
     server: {
       // this ensures that the browser opens upon server start
       open: true,

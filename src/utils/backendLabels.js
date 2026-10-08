@@ -21,16 +21,18 @@ export const PROTOCOLS = {
 };
 
 // platform_name → display name and logo (files in /public). `invertInDark` turns a black logo white in dark mode.
+const publicFile = (name) => `${import.meta.env.BASE_URL}${name}`;
+
 export const PLATFORMS = {
-  gmail: { name: 'Gmail', logo: '/Gmail_icon.svg' },
-  twitter: { name: 'Twitter', logo: '/x-twitter-brands-solid.svg', invertInDark: true },
-  x: { name: 'X', logo: '/x-twitter-brands-solid.svg', invertInDark: true },
-  telegram: { name: 'Telegram', logo: '/telegram.png' },
-  bluesky: { name: 'Bluesky', logo: '/Bluesky_Logo.svg' },
-  mastodon: { name: 'Mastodon', logo: '/mastodon.svg' },
-  slack: { name: 'Slack', logo: '/slack.png' },
+  gmail: { name: 'Gmail', logo: publicFile('Gmail_icon.svg') },
+  twitter: { name: 'Twitter', logo: publicFile('x-twitter-brands-solid.svg'), invertInDark: true },
+  x: { name: 'X', logo: publicFile('x-twitter-brands-solid.svg'), invertInDark: true },
+  telegram: { name: 'Telegram', logo: publicFile('telegram.png') },
+  bluesky: { name: 'Bluesky', logo: publicFile('Bluesky_Logo.svg') },
+  mastodon: { name: 'Mastodon', logo: publicFile('mastodon.svg') },
+  slack: { name: 'Slack', logo: publicFile('slack.png') },
   // RelaySMS's own email bridge, so it uses the RelaySMS logo.
-  email_bridge: { name: 'Email Bridge', logo: '/logo.svg' }
+  email_bridge: { name: 'Email Bridge', logo: publicFile('logo.svg') }
 };
 
 // platform_name is null when a publication failed before the platform was known.

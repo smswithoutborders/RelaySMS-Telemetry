@@ -1,6 +1,6 @@
 // ==============================|| MAP - CARTO LABEL TILES ||============================== //
 
-const CARTO_BASEMAPS_KEY = import.meta.env.VITE_APP_CARTO_BASEMAPS_KEY;
+const CARTO_BASEMAPS_KEY = import.meta.env.VITE_CARTO_BASEMAPS_KEY;
 
 export default function addLabelTiles(L, map, isDarkMode) {
   if (!CARTO_BASEMAPS_KEY) return;

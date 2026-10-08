@@ -1,0 +1,78 @@
+name: Deploy RelaySMS Telemetry Dashboard on Server (preview)
+
+on:
+  push:
+    branches:
+      - preview
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: https://preview-8.relaysms.afkanerd.de
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enable Corepack and Use Latest Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@stable --activate
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build application
+        env:
+          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH }}
+          VITE_ADMIN_API_URL: ${{ vars.VITE_ADMIN_API_URL }}
+          VITE_CARTO_BASEMAPS_KEY: ${{ vars.VITE_CARTO_BASEMAPS_KEY }}
+        run: yarn build
+
+      - name: Clean remote target directory
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            find "${{ secrets.BUILD_PATH }}" -mindepth 1 -delete
+
+      - name: Copy build artifacts to server
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "./dist/*"
+          target: ${{ secrets.BUILD_PATH }}
+          strip_components: 1
+          rm: false
+
+      - name: Run remote deploy script
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            echo "::group::Deploying preview build"
+            ${{ secrets.BUILD_CMD }}
+            echo "Deploy command finished successfully."
+            echo "::endgroup::"

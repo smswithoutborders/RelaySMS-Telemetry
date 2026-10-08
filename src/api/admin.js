@@ -3,7 +3,7 @@ import axios from 'axios';
 // ==============================|| ADMIN API CLIENT ||============================== //
 
 const adminApi = axios.create({
-  baseURL: import.meta.env.VITE_APP_ADMIN_API || '/v1/',
+  baseURL: import.meta.env.VITE_ADMIN_API_URL || '/v1/',
   withCredentials: true,
   // FastAPI reads repeated keys for list params, e.g. group_by=status&group_by=platform_name.
   paramsSerializer: { indexes: null }
