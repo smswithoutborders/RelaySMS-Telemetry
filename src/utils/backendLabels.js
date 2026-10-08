@@ -28,7 +28,7 @@ export const PLATFORMS = {
   twitter: { name: 'Twitter', logo: publicFile('x-twitter-brands-solid.svg'), invertInDark: true },
   x: { name: 'X', logo: publicFile('x-twitter-brands-solid.svg'), invertInDark: true },
   telegram: { name: 'Telegram', logo: publicFile('telegram.png') },
-  bluesky: { name: 'Bluesky', logo: publicFile('Bluesky_Logo.svg') },
+  bluesky: { name: 'Bluesky', logo: publicFile('Bluesky_Logo.png') },
   mastodon: { name: 'Mastodon', logo: publicFile('mastodon.svg') },
   slack: { name: 'Slack', logo: publicFile('slack.png') },
   // RelaySMS's own email bridge, so it uses the RelaySMS logo.
