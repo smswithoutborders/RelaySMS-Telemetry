@@ -7,6 +7,7 @@ import { useTheme } from '@mui/material/styles';
 
 // project imports
 import { useThemeCustomization } from '../../../../themes';
+import Profile from './Profile';
 // project import
 import { GithubOutlined, SunFilled, SunOutlined } from '@ant-design/icons';
 
@@ -52,6 +53,8 @@ export default function HeaderContent() {
       >
         {isDarkMode ? <SunOutlined /> : <SunFilled />}
       </IconButton>
+
+      <Profile />
     </>
   );
 }

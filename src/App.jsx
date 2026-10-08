@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import router from 'routes';
 import ThemeCustomization from 'themes';
 import ErrorBoundary from 'components/ErrorBoundary';
+import { AuthProvider } from 'contexts/AuthContext';
 
 import ScrollTop from 'components/ScrollTop';
 
@@ -22,18 +23,21 @@ function AppContent() {
         token: {
           colorPrimary: theme.palette.primary.main,
           borderRadius: 4,
-          colorBgContainer: isDarkMode ? '#1e293b' : '#ffffff',
-          colorBorder: isDarkMode ? '#334155' : '#d9d9d9',
-          colorText: isDarkMode ? '#e2e8f0' : 'rgba(0, 0, 0, 0.88)',
-          colorTextSecondary: isDarkMode ? '#94a3b8' : 'rgba(0, 0, 0, 0.65)',
-          colorBgElevated: isDarkMode ? '#0f172a' : '#ffffff',
-          colorBgLayout: isDarkMode ? '#0a1929' : '#f5f5f5'
+          fontSize: 15,
+          colorBgContainer: isDarkMode ? '#202020' : '#ffffff',
+          colorBorder: isDarkMode ? '#3a3a3a' : '#d9d9d9',
+          colorText: isDarkMode ? '#d9d9d9' : 'rgba(0, 0, 0, 0.88)',
+          colorTextSecondary: isDarkMode ? '#a6a6a6' : 'rgba(0, 0, 0, 0.65)',
+          colorBgElevated: isDarkMode ? '#222222' : '#ffffff',
+          colorBgLayout: isDarkMode ? '#0b0b0b' : '#f3f4f7'
         }
       }}
     >
-      <ScrollTop>
-        <RouterProvider router={router} />
-      </ScrollTop>
+      <AuthProvider>
+        <ScrollTop>
+          <RouterProvider router={router} />
+        </ScrollTop>
+      </AuthProvider>
     </ConfigProvider>
   );
 }

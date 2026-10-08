@@ -1,53 +1,79 @@
 import { lazy } from 'react';
+import { Navigate } from 'react-router-dom';
 
 // project imports
 import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
+import RequireAuth from './RequireAuth';
+import RequireScope from './RequireScope';
+import { SCOPES } from 'utils/scopes';
 
-// render- Dashboard
-const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
-
-// render - color
-const Color = Loadable(lazy(() => import('pages/component-overview/color')));
-const Typography = Loadable(lazy(() => import('pages/component-overview/typography')));
-const Shadow = Loadable(lazy(() => import('pages/component-overview/shadows')));
-
-// render - sample page
-const Documentation = Loadable(lazy(() => import('pages/extra-pages/documentation')));
+// render - pages
 const Publications = Loadable(lazy(() => import('pages/publication/publications')));
-const ReliabilityTable = Loadable(lazy(() => import('pages/reliability/reliabilityTable')));
-const TestDetails = Loadable(lazy(() => import('pages/reliability/TestDetails')));
+const PublicationLog = Loadable(lazy(() => import('pages/publication/PublicationLog')));
+const Platforms = Loadable(lazy(() => import('pages/platforms/Platforms')));
+const GatewayClients = Loadable(lazy(() => import('pages/gateway-clients/GatewayClients')));
+const Credentials = Loadable(lazy(() => import('pages/credentials/Credentials')));
+const Logs = Loadable(lazy(() => import('pages/logs/Logs')));
 const NotFound = Loadable(lazy(() => import('pages/extra-pages/notfound')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
   path: '/',
-  element: <DashboardLayout />,
+  element: (
+    <RequireAuth>
+      <DashboardLayout />
+    </RequireAuth>
+  ),
   children: [
     {
       path: '/',
-      element: <DashboardDefault />
+      element: (
+        <RequireScope scope={SCOPES.STATS_READ}>
+          <Publications />
+        </RequireScope>
+      )
     },
     {
-      path: 'open-telemetry',
-      element: <DashboardDefault />
+      path: 'publications/log',
+      element: (
+        <RequireScope scope={SCOPES.STATS_READ}>
+          <PublicationLog />
+        </RequireScope>
+      )
+    },
+    // Old bookmarks.
+    { path: 'publications', element: <Navigate to="/" replace /> },
+    { path: 'open-telemetry', element: <Navigate to="/" replace /> },
+    { path: 'reliability', element: <Navigate to="/routing-numbers" replace /> },
+    { path: 'gateway-clients', element: <Navigate to="/routing-numbers" replace /> },
+    { path: 'credentials', element: <Navigate to="/users" replace /> },
+    { path: 'documentation', element: <Navigate to="/" replace /> },
+    { path: 'support', element: <Navigate to="/" replace /> },
+    {
+      path: 'platforms',
+      element: <Platforms />
     },
     {
-      path: 'publications',
-      element: <Publications />
+      path: 'routing-numbers',
+      element: <GatewayClients />
     },
     {
-      path: 'reliability',
-      element: <ReliabilityTable />
+      path: 'users',
+      element: (
+        <RequireScope scope={SCOPES.CREDS_READ}>
+          <Credentials />
+        </RequireScope>
+      )
     },
     {
-      path: 'tests/:msisdn',
-      element: <TestDetails />
-    },
-    {
-      path: 'documentation',
-      element: <Documentation />
+      path: 'logs',
+      element: (
+        <RequireScope scope={SCOPES.AUDIT_READ}>
+          <Logs />
+        </RequireScope>
+      )
     },
     {
       path: '*',

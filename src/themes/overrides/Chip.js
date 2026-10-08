@@ -1,3 +1,6 @@
+// material-ui
+import { alpha } from '@mui/material/styles';
+
 // project imports
 import getColors from 'utils/getColors';
 
@@ -17,13 +20,17 @@ function getColor({ color, theme }) {
 
 function getColorStyle({ color, theme }) {
   const colors = getColors(theme, color);
-  const { light, lighter, main, darker } = colors;
+  const { light, lighter, main } = colors;
 
   return {
     color: main,
     backgroundColor: lighter,
     borderColor: light,
-    ...theme.applyStyles('dark', { color: darker }),
+    ...theme.applyStyles('dark', {
+      color: color === 'secondary' ? theme.palette.grey[300] : light,
+      backgroundColor: alpha(color === 'secondary' ? theme.palette.grey[300] : main, 0.14),
+      borderColor: alpha(color === 'secondary' ? theme.palette.grey[300] : light, 0.3)
+    }),
     '& .MuiChip-deleteIcon': {
       color: main,
       '&:hover': {

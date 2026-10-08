@@ -1,8 +1,7 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, IconButton, useTheme } from '@mui/material';
 import { FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
-import axios from 'axios';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 import countryCoords from 'country-coords';
@@ -10,18 +9,17 @@ import countryCoords from 'country-coords';
 // components
 import Loader from 'components/Loader';
 import ErrorDisplay from 'components/ErrorDisplay';
+import addLabelTiles from 'utils/addLabelTiles';
 
 countries.registerLocale(enLocale);
 
 const coordsByCountry = countryCoords.byCountry();
 
-export default function PublicationMap({ filters, selectedCountry, onCountrySelect }) {
+export default function PublicationMap({ data, loading = false, error = '', onRetry, selectedCountry, onCountrySelect }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  const [countryData, setCountryData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState('');
   const [selectedColor, setSelectedColor] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const mapRef = useRef(null);
@@ -30,90 +28,24 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
   const containerRef = useRef(null);
   const geoJsonLayerRef = useRef(null);
 
-  const today = new Date().toISOString().split('T')[0];
-  const effectiveStartDate = filters?.startDate || '2020-01-10';
-  const effectiveEndDate = filters?.endDate || today;
-  const effectivePlatform = filters?.platform || '';
-  const effectiveStatus = filters?.status || '';
-  const effectiveSource = filters?.source || '';
-  const effectiveCountry = filters?.country || '';
-
-  const fetchCountryData = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const params = {
-        start_date: effectiveStartDate,
-        end_date: effectiveEndDate,
-        page: 1,
-        page_size: 100
-      };
-
-      if (effectivePlatform) params.platform_name = effectivePlatform;
-      if (effectiveStatus) params.status = effectiveStatus;
-      if (effectiveSource) params.source = effectiveSource;
-      if (effectiveCountry) params.country_code = effectiveCountry;
-
-      const response = await axios.get(`${import.meta.env.VITE_APP_TELEMETRY_API}publications`, { params });
-
-      const publications = response.data.publications?.data || [];
-
-      if (!publications || publications.length === 0) {
-        setCountryData([]);
-        setError('');
-        setLoading(false);
-        return;
-      }
-
-      const countryMap = {};
-      publications.forEach((pub) => {
-        const countryCode = pub.country_code?.toUpperCase();
-        if (countryCode && countries.isValid(countryCode, 'en')) {
-          if (!countryMap[countryCode]) {
-            countryMap[countryCode] = {
-              countryCode: countryCode,
-              country: countries.getName(countryCode, 'en'),
-              publications: 0
-            };
-          }
-          countryMap[countryCode].publications += 1;
-        }
-      });
-
-      const formatted = Object.values(countryMap)
-        .map((item) => {
-          try {
-            const countryInfo = coordsByCountry.get(item.countryCode);
-            if (countryInfo && countryInfo.latitude !== undefined && countryInfo.longitude !== undefined) {
-              return {
-                country: item.country,
-                countryCode: item.countryCode,
-                publications: item.publications,
-                position: { lat: countryInfo.latitude, lng: countryInfo.longitude }
-              };
-            }
-          } catch (error) {
-            console.warn(`Could not get coordinates for country code: ${item.countryCode}`, error);
-          }
-          return null;
+  const countryData = useMemo(
+    () =>
+      (data || [])
+        .map(({ country_code: code, count }) => {
+          const countryCode = code?.toUpperCase();
+          if (!countryCode || !countries.isValid(countryCode)) return null;
+          const countryInfo = coordsByCountry.get(countryCode);
+          if (countryInfo?.latitude === undefined || countryInfo?.longitude === undefined) return null;
+          return {
+            country: countries.getName(countryCode, 'en'),
+            countryCode,
+            publications: count,
+            position: { lat: countryInfo.latitude, lng: countryInfo.longitude }
+          };
         })
-        .filter((item) => item !== null);
-
-      setCountryData(formatted);
-      setError('');
-    } catch (err) {
-      console.error('Error fetching country data:', err);
-      console.error('Error details:', err.response?.data || err.message);
-      setError('Unable to load map data');
-      setCountryData([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [effectiveStartDate, effectiveEndDate, effectivePlatform, effectiveStatus, effectiveSource, effectiveCountry]);
-
-  useEffect(() => {
-    fetchCountryData();
-  }, [fetchCountryData]);
+        .filter(Boolean),
+    [data]
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.L || !mapRef.current || countryData.length === 0) return;
@@ -134,8 +66,8 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
 
         const map = L.map(container, {
           center: [20, 0],
-          zoom: 0,
-          minZoom: 0,
+          zoom: 10,
+          minZoom: 1.4,
           maxZoom: 18,
           zoomControl: true,
           attributionControl: true,
@@ -151,20 +83,9 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
 
         mapInstanceRef.current = map;
 
-        const bgColor = isDarkMode ? '#0f0f0fff' : '#fafafa';
-        container.style.backgroundColor = bgColor;
+        container.style.backgroundColor = theme.palette.background.paper;
 
-        L.tileLayer(
-          isDarkMode
-            ? 'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
-          {
-            attribution: '',
-            subdomains: 'abcd',
-            maxZoom: 20,
-            pane: 'shadowPane'
-          }
-        ).addTo(map);
+        addLabelTiles(L, map, isDarkMode);
 
         const publicationCounts = countryData.map((d) => d.publications).sort((a, b) => a - b);
         const lowThreshold = publicationCounts[Math.floor(publicationCounts.length / 3)];
@@ -311,7 +232,7 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
         setMapLoaded(true);
       } catch (err) {
         console.error('Error initializing map:', err);
-        setError('Unable to initialize map');
+        setMapError('Unable to initialize map');
       }
     };
 
@@ -328,7 +249,7 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
 
   useEffect(() => {
     setMapLoaded(false);
-  }, [filters]);
+  }, [data]);
 
   useEffect(() => {
     if (!mapLoaded || markersRef.current.length === 0) return;
@@ -363,8 +284,8 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
   }, [selectedCountry, mapLoaded, isDarkMode]);
 
   const handleRetry = () => {
-    setError('');
-    fetchCountryData();
+    setMapError('');
+    onRetry?.();
   };
 
   const toggleFullscreen = () => {
@@ -520,14 +441,16 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
             <Loader size={50} fullScreen={false} />
           </Box>
         )}
-        {!loading && error && <ErrorDisplay onRetry={handleRetry} fullHeight />}
-        {!loading && !error && countryData.length > 0 && (
+        {!loading && (error || mapError) && <ErrorDisplay onRetry={handleRetry} message={error || mapError} fullHeight />}
+        {!loading && !error && !mapError && countryData.length > 0 && (
           <Box sx={{ position: 'relative', flex: 1, width: '100%', minHeight: 0 }}>
             <Box
               ref={mapRef}
               sx={{
                 height: '100%',
-                width: '100%'
+                width: '100%',
+                // Leaflet's own default is grey; match the card before the map draws too.
+                '&.leaflet-container': { bgcolor: 'background.paper' }
               }}
             />
             <IconButton
@@ -610,7 +533,7 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
             </Box>
           </Box>
         )}
-        {!loading && !error && countryData.length === 0 && (
+        {!loading && !error && !mapError && countryData.length === 0 && (
           <Box display="flex" justifyContent="center" alignItems="center" sx={{ flex: 1 }}>
             <Typography color="text.secondary">No country data available for the selected filters</Typography>
           </Box>
@@ -621,14 +544,10 @@ export default function PublicationMap({ filters, selectedCountry, onCountrySele
 }
 
 PublicationMap.propTypes = {
-  filters: PropTypes.shape({
-    startDate: PropTypes.string,
-    endDate: PropTypes.string,
-    platform: PropTypes.string,
-    status: PropTypes.string,
-    source: PropTypes.string,
-    country: PropTypes.string
-  }),
+  data: PropTypes.arrayOf(PropTypes.shape({ country_code: PropTypes.string, count: PropTypes.number })),
+  loading: PropTypes.bool,
+  error: PropTypes.string,
+  onRetry: PropTypes.func,
   selectedCountry: PropTypes.string,
   onCountrySelect: PropTypes.func
 };

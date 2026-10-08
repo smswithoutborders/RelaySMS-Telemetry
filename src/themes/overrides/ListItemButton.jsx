@@ -7,7 +7,7 @@ export default function ListItemButton(theme) {
         root: {
           '&.Mui-selected': {
             color: theme.palette.primary.main,
-            ...theme.applyStyles('dark', { color: theme.palette.primary.darker }),
+            ...theme.applyStyles('dark', { color: theme.palette.primary.light }),
             '& .MuiListItemIcon-root': {
               color: theme.palette.primary.main
             }

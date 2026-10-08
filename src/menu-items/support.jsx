@@ -1,43 +1,28 @@
 // assets
-import { QuestionOutlined, GithubOutlined, XOutlined } from '@ant-design/icons';
+import { GithubOutlined, DashboardOutlined } from '@ant-design/icons';
 
-// icons
-const icons = {
-  QuestionOutlined,
-  GithubOutlined,
-  XOutlined
-};
-
-// ==============================|| MENU ITEMS - SAMPLE PAGE & DOCUMENTATION ||============================== //
+// ==============================|| MENU ITEMS - MORE ||============================== //
 
 const support = {
-  id: 'support',
-  title: 'Support',
+  id: 'more',
+  title: 'More',
   type: 'group',
   children: [
-    {
-      id: 'documentation',
-      title: 'Documentation',
-      type: 'item',
-      url: '/documentation',
-      icon: icons.QuestionOutlined,
-      breadcrumbs: false
-    },
     {
       id: 'github',
       title: 'GitHub',
       type: 'item',
       url: 'https://github.com/smswithoutborders',
-      icon: icons.GithubOutlined,
+      icon: GithubOutlined,
       external: true,
       target: true
     },
     {
-      id: 'x',
-      title: 'X',
+      id: 'status',
+      title: 'Status',
       type: 'item',
-      url: 'https://x.com/RelaySMS',
-      icon: icons.XOutlined,
+      url: 'https://status.smswithoutborders.afkanerd.com/dashboard',
+      icon: DashboardOutlined,
       external: true,
       target: true
     }

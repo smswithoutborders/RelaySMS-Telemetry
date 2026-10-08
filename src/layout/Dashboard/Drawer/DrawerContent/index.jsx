@@ -1,6 +1,7 @@
 // project imports
 import NavCard from './NavCard';
 import Navigation from './Navigation';
+import NavUser from './NavUser';
 import SimpleBar from 'components/third-party/SimpleBar';
 import { useGetMenuMaster } from 'api/menu';
 
@@ -12,10 +13,11 @@ export default function DrawerContent() {
 
   return (
     <>
-      <SimpleBar sx={{ '& .simplebar-content': { display: 'flex', flexDirection: 'column' } }}>
+      <SimpleBar sx={{ flex: 1, minHeight: 0, '& .simplebar-content': { display: 'flex', flexDirection: 'column' } }}>
         <Navigation />
         {drawerOpen}
       </SimpleBar>
+      <NavUser />
     </>
   );
 }

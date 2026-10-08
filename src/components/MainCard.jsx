@@ -41,6 +41,7 @@ const MainCard = forwardRef(function MainCard(
       sx={[
         (theme) => ({
           position: 'relative',
+          bgcolor: 'background.paper',
           border: border ? '1px solid' : 'none',
           borderRadius: 1,
           borderColor: theme.palette.mode === 'dark' ? 'divider' : 'grey.A800',

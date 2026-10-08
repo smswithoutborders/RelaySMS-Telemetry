@@ -7,12 +7,18 @@ import Box from '@mui/material/Box';
 // project import
 import NavItem from './NavItem';
 import { useGetMenuMaster } from 'api/menu';
+import { useAuth } from 'contexts/AuthContext';
 
 export default function NavGroup({ item }) {
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
+  const { hasScope } = useAuth();
 
-  const navCollapse = item.children?.map((menuItem) => {
+  const visible = item.children?.filter((menuItem) => hasScope(menuItem.scope)) ?? [];
+  // A group with nothing the user can open isn't shown at all.
+  if (visible.length === 0) return null;
+
+  const navCollapse = visible.map((menuItem) => {
     switch (menuItem.type) {
       case 'collapse':
         return (
@@ -40,7 +46,6 @@ export default function NavGroup({ item }) {
             <Typography variant="subtitle2" color="textSecondary">
               {item.title}
             </Typography>
-            {/* only available in paid version */}
           </Box>
         )
       }
