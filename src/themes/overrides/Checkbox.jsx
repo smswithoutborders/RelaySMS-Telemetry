@@ -1,5 +1,8 @@
 import PropTypes from 'prop-types';
 
+// material-ui
+import { alpha } from '@mui/material/styles';
+
 // project imports
 import getColors from 'utils/getColors';
 
@@ -17,6 +20,7 @@ function getColorStyle({ color, theme }) {
   return {
     '&:hover': {
       backgroundColor: lighter,
+      ...theme.applyStyles('dark', { backgroundColor: alpha(main, 0.12) }),
       '& .icon': {
         borderColor: main
       }

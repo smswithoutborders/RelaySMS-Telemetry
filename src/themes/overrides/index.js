@@ -17,6 +17,7 @@ import Link from './Link';
 import ListItemButton from './ListItemButton';
 import ListItemIcon from './ListItemIcon';
 import OutlinedInput from './OutlinedInput';
+import Paper from './Paper';
 import Tab from './Tab';
 import TableBody from './TableBody';
 import TableCell from './TableCell';
@@ -45,6 +46,7 @@ export default function ComponentsOverrides(theme) {
     ListItemButton(theme),
     ListItemIcon(theme),
     OutlinedInput(theme),
+    Paper(theme),
     Tab(theme),
     TableBody(theme),
     TableCell(theme),

@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import { keyframes } from '@mui/material/styles';
 
 // assets
+import loaderIcon from '/RelaySMS-Icon-Default.png';
 
 // ==============================|| Loader ||============================== //
 
@@ -34,7 +35,7 @@ export default function Loader({ size = 40, fullScreen = true }) {
       >
         <Box
           component="img"
-          src="/RelaySMS-Icon-Default.png"
+          src={loaderIcon}
           alt="Loading..."
           sx={{
             width: size,
@@ -59,7 +60,7 @@ export default function Loader({ size = 40, fullScreen = true }) {
     >
       <Box
         component="img"
-        src="/RelaySMS-Icon-Default.png"
+        src={loaderIcon}
         alt="Loading..."
         sx={{
           width: size,

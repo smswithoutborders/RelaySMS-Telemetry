@@ -21,7 +21,7 @@ export default function DrawerHeader({ open }) {
       sx={{
         minHeight: '60px',
         width: 'initial',
-        paddingTop: '8px',
+        paddingTop: '18px',
         paddingBottom: '8px',
         paddingLeft: open ? '24px' : 0
       }}
@@ -30,8 +30,8 @@ export default function DrawerHeader({ open }) {
         src={open ? currentFullLogo : logo}
         alt="Logo"
         style={{
-          width: open ? 'auto' : 35,
-          height: 35
+          width: open ? 'auto' : 28,
+          height: 28
         }}
       />
     </DrawerHeaderStyled>

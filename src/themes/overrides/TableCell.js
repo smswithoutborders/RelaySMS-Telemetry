@@ -20,7 +20,7 @@ export default function TableCell(theme) {
     MuiTableCell: {
       styleOverrides: {
         root: {
-          fontSize: '0.875rem',
+          fontSize: '0.9375rem',
           padding: 12,
           borderColor: theme.palette.divider,
           '&.cell-right': {
@@ -47,13 +47,13 @@ export default function TableCell(theme) {
           padding: 8
         },
         head: {
-          fontSize: '0.75rem',
+          fontSize: '0.8125rem',
           fontWeight: 700,
           textTransform: 'uppercase',
           ...commonCell
         },
         footer: {
-          fontSize: '0.75rem',
+          fontSize: '0.8125rem',
           textTransform: 'uppercase',
           ...commonCell
         }

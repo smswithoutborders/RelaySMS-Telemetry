@@ -5,9 +5,17 @@ import { alpha } from '@mui/material/styles';
 import getColors from 'utils/getColors';
 import getShadow from 'utils/getShadow';
 
+function darkTextColors(theme, color) {
+  if (color === 'secondary') return { text: theme.palette.grey[300], hover: theme.palette.grey[200] };
+  const { light, lighter } = getColors(theme, color);
+  return { text: light, hover: lighter };
+}
+
 function getColorStyle({ variant, color, theme }) {
   const colors = getColors(theme, color);
   const { lighter, main, dark, darker, contrastText } = colors;
+  const darkText = darkTextColors(theme, color);
+  const darkTint = alpha(color === 'secondary' ? theme.palette.grey[300] : main, 0.12);
 
   const buttonShadow = `${color}Button`;
   const shadows = getShadow(theme, buttonShadow);
@@ -52,6 +60,11 @@ function getColorStyle({ variant, color, theme }) {
           backgroundColor: 'transparent',
           borderColor: dark
         },
+        ...theme.applyStyles('dark', {
+          color: darkText.text,
+          borderColor: darkText.text,
+          '&:hover': { color: darkText.hover, backgroundColor: darkTint, borderColor: darkText.hover }
+        }),
         ...commonShadow
       };
     case 'dashed':
@@ -63,6 +76,12 @@ function getColorStyle({ variant, color, theme }) {
           color: dark,
           borderColor: dark
         },
+        ...theme.applyStyles('dark', {
+          color: darkText.text,
+          borderColor: darkText.text,
+          backgroundColor: darkTint,
+          '&:hover': { color: darkText.hover, borderColor: darkText.hover }
+        }),
         ...commonShadow
       };
     case 'text':
@@ -73,6 +92,10 @@ function getColorStyle({ variant, color, theme }) {
           color: darker,
           backgroundColor: lighter
         },
+        ...theme.applyStyles('dark', {
+          color: darkText.text,
+          '&:hover': { color: darkText.hover, backgroundColor: darkTint }
+        }),
         ...commonShadow
       };
   }
@@ -84,11 +107,13 @@ export default function Button(theme) {
   const primaryDashed = getColorStyle({ variant: 'dashed', color: 'primary', theme });
   const primaryShadow = getColorStyle({ variant: 'shadow', color: 'primary', theme });
 
+  const disabledFill = theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.08) : theme.palette.grey[200];
   const disabledStyle = {
-    backgroundColor: theme.palette.grey[200],
+    backgroundColor: disabledFill,
     '&:hover': {
-      backgroundColor: theme.palette.grey[200]
-    }
+      backgroundColor: disabledFill
+    },
+    ...theme.applyStyles('dark', { color: theme.palette.text.disabled })
   };
   const iconStyle = {
     '&>*:nth-of-type(1)': {
@@ -135,7 +160,7 @@ export default function Button(theme) {
           '&.Mui-disabled': {
             ...disabledStyle,
             '&:hover': {
-              backgroundColor: theme.palette.grey[200],
+              backgroundColor: disabledFill,
               color: `${theme.palette.grey[300]} !important`,
               borderColor: 'inherit'
             }

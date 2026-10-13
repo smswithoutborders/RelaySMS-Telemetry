@@ -12,20 +12,14 @@ Welcome to the RelaySMS Telemetry Dashboard, a comprehensive OpenTelemetry dashb
 
 To get started with the RelaySMS Telemetry Dashboard, follow these simple steps:
 
-1. **Create .env File**: Create a `.env` file in the root directory of the project based on `.env.template`. Add the following variables:
+1. **Create .env File**: Copy `.env.example` to `.env` and fill in the values:
 
-```bash
-VITE_APP_VERSION = v0.2.0
-GENERATE_SOURCEMAP = false
-
-PUBLIC_URL = http://localhost
-VITE_APP_BASE_NAME = /dashboard
-VITE_APP_TELEMETRY_API = 
-VITE_APP_GATEWAY_SERVER_URL = 
-```
-
-> [!NOTE]
-> Please ensure to replace the URLs with your actual API endpoints.
+| Variable | Description |
+| --- | --- |
+| `VITE_BASE_PATH` | Path the dashboard is served under, e.g. `/dashboard`. Empty serves from the root. |
+| `VITE_ADMIN_API_URL` | Admin (Publisher REST) API base URL. Defaults to `/v1/`; keep it same-origin. |
+| `VITE_CARTO_BASEMAPS_KEY` | CARTO basemaps key for map labels. Optional. |
+| `ADMIN_API_PROXY_TARGET` | Dev server only: where `/v1` requests are proxied to. |
 
 2. **Install Dependencies**: Run the following command to install dependencies:
 
@@ -47,23 +41,14 @@ VITE_APP_GATEWAY_SERVER_URL =
    yarn build
    ```
 
-## Docker Deployment
+## Deployment
 
-The project includes Docker support for easy deployment:
+GitHub Actions builds the app and copies `dist/` to the server, where it is served by nginx:
 
-1. **Build and run with Docker Compose**:
+- Push to `preview` → `.github/workflows/deploy.preview.yml` (`preview` environment)
+- Push to `main` → `.github/workflows/deploy.production.yml` (`production` environment)
 
-   ```bash
-   docker compose -p staging-smswithoutborders up -d --build
-   ```
-
-2. **Required environment variables for Docker**:
-   - `PORT`: HTTP port (default: 80)
-   - `SSL_PORT`: HTTPS port (default: 443)
-   - `SERVER_NAME`: Server domain name (default: localhost)
-   - `SSL_CERTIFICATE_PATH`: Path to SSL certificate
-   - `SSL_KEY_PATH`: Path to SSL key
-   - `SSL_CHAIN_PATH`: Path to SSL certificate chain
+Each environment needs these secrets: `HOST`, `USER`, `SSH_KEY`, `BUILD_PATH`, `BUILD_CMD`, and these variables (as listed above): `VITE_BASE_PATH`, `VITE_ADMIN_API_URL`, `VITE_CARTO_BASEMAPS_KEY`.
 
 ## API Data Structure
 
@@ -133,12 +118,10 @@ This project uses **Yarn 4.9.4+** as the package manager. Make sure you have Yar
 
 - `yarn start`: Start the development server
 - `yarn build`: Build for production
-- `yarn build-stage`: Build for staging environment
 - `yarn preview`: Preview production build locally
 - `yarn lint`: Lint code
 - `yarn lint:fix`: Lint and auto-fix issues
 - `yarn prettier`: Format code with Prettier
-- `yarn knip`: Detect unused files and dependencies
 
 ## License
 

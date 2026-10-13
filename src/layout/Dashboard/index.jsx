@@ -38,6 +38,9 @@ export default function DashboardLayout() {
         <Box
           sx={{
             ...{ px: { xs: 0, sm: 2 } },
+            width: '100%',
+            maxWidth: 1440,
+            mx: 'auto',
             position: 'relative',
             minHeight: 'calc(100vh - 110px)',
             display: 'flex',

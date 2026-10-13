@@ -12,19 +12,19 @@ export default function Palette(mode, presetColor) {
   const colors = presetPalettes;
   const darkColors = presetDarkPalettes;
 
-  // Custom blue color palette based on #336AFF for primary color
+  // Custom blue color palette based on #1F4FFF for primary color
   const customBlue = [
     '#d8e3fcff', // 0 - lightest
     '#bfd4fdff', // 1
-    '#a2c1fdff', // 2
-    '#85ACFF', // 3 - light
-    '#5C8FFF', // 4
-    '#336AFF', // 5 - main
-    '#2952CC', // 6 - dark
-    '#1F3D99', // 7
-    '#142966', // 8 - darker
-    '#0A1433', // 9
-    '#050A1A' // 10 - darkest
+    '#C7D3FF', // 2
+    '#8FA7FF', // 3 - light
+    '#6384f9', // 4
+    '#577BFF', // 5 - main
+    '#0031E0', // 6 - dark
+    '#0024A8', // 7
+    '#001871', // 8 - darker
+    '#000158', // 9
+    '#000824' // 10 - darkest
   ];
 
   // Custom orange color palette based on #E66F00 for secondary/graph use
@@ -103,6 +103,12 @@ export default function Palette(mode, presetColor) {
 
   const paletteColor = ThemeOption(mode === 'dark' ? darkColors : colors, presetColor, mode);
 
+  // Softer status colours for published/failed, the same in both modes. Checked with the dataviz palette validator:
+  // passes on white and on the #181818 dark card, and stays apart for red-green colour blindness (ΔE 10.4).
+  // `dark` is the deeper shade for white text on solid chips (4.8:1 and 5.8:1).
+  paletteColor.success = { ...paletteColor.success, main: '#46AB7B', dark: '#2C8159' };
+  paletteColor.error = { ...paletteColor.error, main: '#BF4844', dark: '#B03F3C' };
+
   return createTheme({
     palette: {
       mode,
@@ -120,9 +126,10 @@ export default function Palette(mode, presetColor) {
         disabled: paletteColor.grey[mode === 'dark' ? 700 : 300]
       },
       divider: paletteColor.grey[mode === 'dark' ? 700 : 200],
+      // Enough gap between page and card that cards read as contained panels.
       background: {
-        paper: paletteColor.grey[mode === 'dark' ? 800 : 0],
-        default: paletteColor.grey[mode === 'dark' ? 900 : 'A50']
+        paper: mode === 'dark' ? '#181818' : paletteColor.grey[0],
+        default: mode === 'dark' ? '#0b0b0b' : '#f3f4f7'
       }
     }
   });
