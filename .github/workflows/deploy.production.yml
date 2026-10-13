@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://telemetry.smswithoutborders.com
+      url: https://console.smswithoutborders.afkanerd.com
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
