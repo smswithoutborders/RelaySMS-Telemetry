@@ -106,7 +106,7 @@ export default function Publications() {
 
   const { data, loading, error, reload } = usePublicationStats({ range, filters, withReasons });
   const options = useFilterOptions(range);
-  const isDarkMode = useTheme().palette.mode === 'dark';
+  // const isDarkMode = useTheme().palette.mode === 'dark';
   const logLink = `/publications/log${search}`;
 
   const totals = data?.totals;

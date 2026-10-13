@@ -18,7 +18,7 @@ import { RANGE_PRESETS, countryFlag, countryName, platformLabel, protocolLabel }
 
 export default function PublicationFilters({ value, options, onChange, onReset, onRefresh }) {
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
+  // const isDarkMode = theme.palette.mode === 'dark';
   const set = (key) => (next) => onChange({ ...value, [key]: next || '' });
 
   const withSelected = (list, selected) => (selected && !list.includes(selected) ? [selected, ...list] : list);
