@@ -29,7 +29,7 @@ import { ReloadOutlined, UserOutlined } from '@ant-design/icons';
 
 // project imports
 import MainCard from 'components/MainCard';
-import Loader from 'components/Loader';
+import LoadingOverlay from 'components/LoadingOverlay';
 import ErrorDisplay from 'components/ErrorDisplay';
 import { useAuth } from 'contexts/AuthContext';
 import { getErrorMessage } from 'api/admin';
@@ -355,48 +355,46 @@ export default function Logs() {
 
       <Grid size={12}>
         <MainCard content={false}>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>When</TableCell>
-                  <TableCell>Done by</TableCell>
-                  <TableCell>Action</TableCell>
-                  <TableCell>Done to</TableCell>
-                  <TableCell>Outcome</TableCell>
-                  <TableCell>Details</TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {loading ? (
+          <LoadingOverlay loading={loading}>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={7} sx={{ border: 0 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-                        <Loader size={40} fullScreen={false} />
-                      </Box>
-                    </TableCell>
+                    <TableCell>When</TableCell>
+                    <TableCell>Done by</TableCell>
+                    <TableCell>Action</TableCell>
+                    <TableCell>Done to</TableCell>
+                    <TableCell>Outcome</TableCell>
+                    <TableCell>Details</TableCell>
+                    <TableCell />
                   </TableRow>
-                ) : error ? (
-                  <TableRow>
-                    <TableCell colSpan={7} sx={{ border: 0 }}>
-                      <ErrorDisplay message={error} onRetry={() => setReloadKey((key) => key + 1)} />
-                    </TableCell>
-                  </TableRow>
-                ) : page.data.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} sx={{ border: 0 }}>
-                      <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-                        {filtered ? 'No events match these filters' : 'Nothing has been logged yet'}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  page.data.map((event) => <EventRow key={event.id} event={event} canOpenUsers={canOpenUsers} />)
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {error && !loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} sx={{ border: 0 }}>
+                        <ErrorDisplay message={error} onRetry={() => setReloadKey((key) => key + 1)} />
+                      </TableCell>
+                    </TableRow>
+                  ) : page.data.length === 0 && loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} sx={{ border: 0, height: 200 }} />
+                    </TableRow>
+                  ) : page.data.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} sx={{ border: 0 }}>
+                        <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+                          {filtered ? 'No events match these filters' : 'Nothing has been logged yet'}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    page.data.map((event) => <EventRow key={event.id} event={event} canOpenUsers={canOpenUsers} />)
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </LoadingOverlay>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'flex-end', gap: 2, py: 1.5, px: 2 }}>
             <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
               <Typography variant="body2" color="text.secondary">

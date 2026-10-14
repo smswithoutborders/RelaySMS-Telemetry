@@ -19,7 +19,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import Loader from 'components/Loader';
+import LoadingOverlay from 'components/LoadingOverlay';
 import ErrorDisplay from 'components/ErrorDisplay';
 import CountryFlag from 'components/CountryFlag';
 import PlatformLogo from 'components/PlatformLogo';
@@ -89,79 +89,77 @@ export default function PublicationTable({ filters, filtersKey, withReasons, pre
 
   return (
     <>
-      <TableContainer sx={{ maxHeight: preview ? 'none' : 560 }}>
-        <Table stickyHeader size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Time</TableCell>
-              <TableCell>Country</TableCell>
-              <TableCell>Platform</TableCell>
-              <TableCell>Protocol</TableCell>
-              <TableCell>Status</TableCell>
-              {withReasons && <TableCell>Failure reason</TableCell>}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
+      <LoadingOverlay loading={loading}>
+        <TableContainer sx={{ maxHeight: preview ? 'none' : 560 }}>
+          <Table stickyHeader size="small">
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={columns} sx={{ border: 0 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-                    <Loader size={40} fullScreen={false} />
-                  </Box>
-                </TableCell>
+                <TableCell>Time</TableCell>
+                <TableCell>Country</TableCell>
+                <TableCell>Platform</TableCell>
+                <TableCell>Protocol</TableCell>
+                <TableCell>Status</TableCell>
+                {withReasons && <TableCell>Failure reason</TableCell>}
               </TableRow>
-            ) : error ? (
-              <TableRow>
-                <TableCell colSpan={columns} sx={{ border: 0 }}>
-                  <ErrorDisplay message={error} onRetry={() => setReloadKey((key) => key + 1)} />
-                </TableCell>
-              </TableRow>
-            ) : page.data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns} sx={{ border: 0 }}>
-                  <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-                    No publications match these filters
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              page.data.map((row) => (
-                <TableRow key={row.id} hover>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }} title={row.created_at}>
-                    {dayjs(row.created_at).format('MMM D, YYYY HH:mm:ss')}
+            </TableHead>
+            <TableBody>
+              {error && !loading ? (
+                <TableRow>
+                  <TableCell colSpan={columns} sx={{ border: 0 }}>
+                    <ErrorDisplay message={error} onRetry={() => setReloadKey((key) => key + 1)} />
                   </TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-                      <CountryFlag code={row.country_code} size={20} />
-                      {row.country_code ? (
-                        countryName(row.country_code)
-                      ) : (
-                        <Typography variant="body2" color="text.secondary" component="span">
-                          Unknown
-                        </Typography>
-                      )}
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <PlatformCell name={row.platform_name} />
-                  </TableCell>
-                  <TableCell>{protocolLabel(row.protocol)}</TableCell>
-                  <TableCell>
-                    <StatusChip status={row.status} />
-                  </TableCell>
-                  {withReasons && (
-                    <TableCell sx={{ maxWidth: 320 }}>
-                      <Typography variant="body2" color="text.secondary" noWrap title={row.failure_reason || ''}>
-                        {row.failure_reason ? label.failureReason(row.failure_reason) : '—'}
-                      </Typography>
-                    </TableCell>
-                  )}
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : page.data.length === 0 && loading ? (
+                <TableRow>
+                  <TableCell colSpan={columns} sx={{ border: 0, height: 200 }} />
+                </TableRow>
+              ) : page.data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={columns} sx={{ border: 0 }}>
+                    <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+                      No publications match these filters
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                page.data.map((row) => (
+                  <TableRow key={row.id} hover>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }} title={row.created_at}>
+                      {dayjs(row.created_at).format('MMM D, YYYY HH:mm:ss')}
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                      <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+                        <CountryFlag code={row.country_code} size={20} />
+                        {row.country_code ? (
+                          countryName(row.country_code)
+                        ) : (
+                          <Typography variant="body2" color="text.secondary" component="span">
+                            Unknown
+                          </Typography>
+                        )}
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <PlatformCell name={row.platform_name} />
+                    </TableCell>
+                    <TableCell>{protocolLabel(row.protocol)}</TableCell>
+                    <TableCell>
+                      <StatusChip status={row.status} />
+                    </TableCell>
+                    {withReasons && (
+                      <TableCell sx={{ maxWidth: 320 }}>
+                        <Typography variant="body2" color="text.secondary" noWrap title={row.failure_reason || ''}>
+                          {row.failure_reason ? label.failureReason(row.failure_reason) : '—'}
+                        </Typography>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </LoadingOverlay>
 
       {!preview && (
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'flex-end', gap: 2, pt: 1.5, px: 1 }}>
