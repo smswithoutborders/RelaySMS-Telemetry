@@ -70,6 +70,11 @@ export function describeDetails(event) {
     case 'platforms.remove':
       if (typeof d.linked_accounts === 'number') parts.push(`${d.linked_accounts} linked account${d.linked_accounts === 1 ? '' : 's'}`);
       break;
+    case 'platforms.configure':
+    case 'platforms.setup':
+      // Only the names of the settings that changed; values (and secrets) are never logged.
+      if (Array.isArray(d.keys) && d.keys.length) parts.push(`Settings: ${d.keys.join(', ')}`);
+      break;
     case 'gateway_clients.create':
     case 'gateway_clients.delete':
       parts.push(

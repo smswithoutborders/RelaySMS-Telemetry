@@ -32,7 +32,7 @@ import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 
 // project imports
 import MainCard from 'components/MainCard';
-import Loader from 'components/Loader';
+import LoadingOverlay from 'components/LoadingOverlay';
 import ErrorDisplay from 'components/ErrorDisplay';
 import GatewayClientDialog from 'sections/gateway-clients/GatewayClientDialog';
 import { ConfirmDialog } from 'sections/credentials/CredentialDialogs';
@@ -370,119 +370,121 @@ export default function GatewayClients() {
 
       <Grid size={12}>
         <MainCard content={false}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-              <Loader size={40} fullScreen={false} />
-            </Box>
-          ) : error ? (
+          {error && !loading ? (
             <ErrorDisplay message={error} onRetry={() => setReloadKey((key) => key + 1)} />
           ) : (
-            <>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Number</TableCell>
-                      <TableCell>Country</TableCell>
-                      <TableCell>Operator</TableCell>
-                      <TableCell>Operator code</TableCell>
-                      <TableCell>Protocols</TableCell>
-                      {fromRegistry && <TableCell>Status</TableCell>}
-                      {fromRegistry && <TableCell>Last changed</TableCell>}
-                      {canManage && <TableCell />}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.length === 0 ? (
+            <LoadingOverlay loading={loading} minHeight={200}>
+              <>
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
                       <TableRow>
-                        <TableCell colSpan={columns} sx={{ border: 0 }}>
-                          <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-                            {clients.length === 0 ? 'No routing numbers are registered' : 'No routing numbers match these filters'}
-                          </Typography>
-                        </TableCell>
+                        <TableCell>Number</TableCell>
+                        <TableCell>Country</TableCell>
+                        <TableCell>Operator</TableCell>
+                        <TableCell>Operator code</TableCell>
+                        <TableCell>Protocols</TableCell>
+                        {fromRegistry && <TableCell>Status</TableCell>}
+                        {fromRegistry && <TableCell>Last changed</TableCell>}
+                        {canManage && <TableCell />}
                       </TableRow>
-                    ) : (
-                      rows.map((client) => (
-                        <TableRow key={client.id ?? client.msisdn} hover sx={{ opacity: client.enabled === false ? 0.6 : 1 }}>
-                          <TableCell sx={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{client.msisdn}</TableCell>
-                          <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                            <span style={{ marginRight: 8 }}>{countryFlag(countryCode(client.country))}</span>
-                            {countryLabel(client.country)}
+                    </TableHead>
+                    <TableBody>
+                      {rows.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={columns} sx={{ border: 0 }}>
+                            <Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+                              {loading
+                                ? ''
+                                : clients.length === 0
+                                  ? 'No routing numbers are registered'
+                                  : 'No routing numbers match these filters'}
+                            </Typography>
                           </TableCell>
-                          <TableCell>{client.operator || '—'}</TableCell>
-                          <TableCell sx={{ fontVariantNumeric: 'tabular-nums' }}>{client.operator_code || '—'}</TableCell>
-                          <TableCell>
-                            <Stack direction="row" sx={{ gap: 0.5, flexWrap: 'wrap' }}>
-                              {(client.protocols || []).map((name) => (
-                                <Chip key={name} size="small" variant="light" color="primary" label={protocolLabel(name)} />
-                              ))}
-                            </Stack>
-                          </TableCell>
-                          {fromRegistry && (
-                            <TableCell>
-                              <Chip
-                                size="small"
-                                label={client.enabled ? GATEWAY_CLIENT_STATUS.enabled : GATEWAY_CLIENT_STATUS.disabled}
-                                sx={{ bgcolor: client.enabled ? 'success.dark' : '#64748B', color: '#fff', fontWeight: 500 }}
-                              />
-                            </TableCell>
-                          )}
-                          {fromRegistry && (
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                              <Tooltip title={dayjs(client.updated_at).format('MMM D, YYYY HH:mm')}>
-                                <span>{dayjs(client.updated_at).fromNow()}</span>
-                              </Tooltip>
-                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                                by{' '}
-                                {client.updated_by ? (
-                                  canOpenUsers ? (
-                                    <Link
-                                      component={RouterLink}
-                                      to={`/users?user=${encodeURIComponent(client.updated_by)}`}
-                                      underline="hover"
-                                    >
-                                      {client.updated_by}
-                                    </Link>
-                                  ) : (
-                                    client.updated_by
-                                  )
-                                ) : (
-                                  // The registry leaves this empty for the CLI and for users removed since.
-                                  'the command line or a removed user'
-                                )}
-                              </Typography>
-                            </TableCell>
-                          )}
-                          {canManage && (
-                            <TableCell align="right">
-                              <IconButton
-                                size="small"
-                                aria-label={`Actions for ${client.msisdn}`}
-                                onClick={(event) => setMenu({ anchor: event.currentTarget, client })}
-                              >
-                                <MoreOutlined />
-                              </IconButton>
-                            </TableCell>
-                          )}
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                component="div"
-                count={filtered.length}
-                page={page}
-                onPageChange={(event, next) => setPage(next)}
-                rowsPerPage={rowsPerPage}
-                rowsPerPageOptions={[10, 25, 50, 100]}
-                onRowsPerPageChange={(event) => {
-                  setRowsPerPage(parseInt(event.target.value, 10));
-                  setPage(0);
-                }}
-              />
-            </>
+                      ) : (
+                        rows.map((client) => (
+                          <TableRow key={client.id ?? client.msisdn} hover sx={{ opacity: client.enabled === false ? 0.6 : 1 }}>
+                            <TableCell sx={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{client.msisdn}</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                              <span style={{ marginRight: 8 }}>{countryFlag(countryCode(client.country))}</span>
+                              {countryLabel(client.country)}
+                            </TableCell>
+                            <TableCell>{client.operator || '—'}</TableCell>
+                            <TableCell sx={{ fontVariantNumeric: 'tabular-nums' }}>{client.operator_code || '—'}</TableCell>
+                            <TableCell>
+                              <Stack direction="row" sx={{ gap: 0.5, flexWrap: 'wrap' }}>
+                                {(client.protocols || []).map((name) => (
+                                  <Chip key={name} size="small" variant="light" color="primary" label={protocolLabel(name)} />
+                                ))}
+                              </Stack>
+                            </TableCell>
+                            {fromRegistry && (
+                              <TableCell>
+                                <Chip
+                                  size="small"
+                                  label={client.enabled ? GATEWAY_CLIENT_STATUS.enabled : GATEWAY_CLIENT_STATUS.disabled}
+                                  sx={{ bgcolor: client.enabled ? 'success.dark' : '#64748B', color: '#fff', fontWeight: 500 }}
+                                />
+                              </TableCell>
+                            )}
+                            {fromRegistry && (
+                              <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                <Tooltip title={dayjs(client.updated_at).format('MMM D, YYYY HH:mm')}>
+                                  <span>{dayjs(client.updated_at).fromNow()}</span>
+                                </Tooltip>
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                  by{' '}
+                                  {client.updated_by ? (
+                                    canOpenUsers ? (
+                                      <Link
+                                        component={RouterLink}
+                                        to={`/users?user=${encodeURIComponent(client.updated_by)}`}
+                                        underline="hover"
+                                      >
+                                        {client.updated_by}
+                                      </Link>
+                                    ) : (
+                                      client.updated_by
+                                    )
+                                  ) : (
+                                    // The registry leaves this empty for the CLI and for users removed since.
+                                    'the command line or a removed user'
+                                  )}
+                                </Typography>
+                              </TableCell>
+                            )}
+                            {canManage && (
+                              <TableCell align="right">
+                                <IconButton
+                                  size="small"
+                                  aria-label={`Actions for ${client.msisdn}`}
+                                  onClick={(event) => setMenu({ anchor: event.currentTarget, client })}
+                                >
+                                  <MoreOutlined />
+                                </IconButton>
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={filtered.length}
+                  page={page}
+                  onPageChange={(event, next) => setPage(next)}
+                  rowsPerPage={rowsPerPage}
+                  rowsPerPageOptions={[10, 25, 50, 100]}
+                  onRowsPerPageChange={(event) => {
+                    setRowsPerPage(parseInt(event.target.value, 10));
+                    setPage(0);
+                  }}
+                />
+              </>
+            </LoadingOverlay>
           )}
         </MainCard>
       </Grid>

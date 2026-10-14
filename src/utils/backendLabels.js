@@ -32,7 +32,7 @@ export const PLATFORMS = {
   mastodon: { name: 'Mastodon', logo: publicFile('mastodon.svg') },
   slack: { name: 'Slack', logo: publicFile('slack.png') },
   // RelaySMS's own email bridge, so it uses the RelaySMS logo.
-  email_bridge: { name: 'Email Bridge', logo: publicFile('logo.svg') }
+  email_bridge: { name: 'Email Bridge', logo: publicFile('RelaySMS-Icon-Default.png') }
 };
 
 // platform_name is null when a publication failed before the platform was known.
@@ -46,7 +46,34 @@ export const FAILURE_REASONS = {
 // ---- Platforms: /v1/platforms (lib_relaysms_payload_specs: V1PayloadsSupportedProtocols, V1ContentCategories) ---- //
 
 export const PLATFORM_AUTH = { 0: 'OAuth 2.0', 1: 'Phone number' };
-export const PLATFORM_CATEGORIES = { 0: 'Email', 1: 'Message', 2: 'Text' };
+export const PLATFORM_CATEGORIES = { 0: 'Email', 1: 'Message', 2: 'Text', 3: 'Bridge' };
+
+// ---- Platform adapters: /v1/platforms/adapters (publisher/api/rest/v1/platform_adapters.py, platforms/adapter_config.py) ---- //
+
+export const ADAPTER_STATUS = {
+  enabled: 'Enabled',
+  disabled: 'Disabled',
+  configured: 'Ready',
+  unconfigured: 'Needs setup'
+};
+
+// Install and update jobs.
+export const ADAPTER_JOB_ACTIONS = { install: 'Install', update: 'Update' };
+export const ADAPTER_JOB_STATES = {
+  queued: { label: 'Waiting', color: '#64748B', done: false },
+  running: { label: 'Running', color: 'primary.main', done: false },
+  succeeded: { label: 'Done', color: 'success.dark', done: true },
+  failed: { label: 'Failed', color: 'error.dark', done: true }
+};
+
+// Setting and setup field types (FieldType): how each is entered.
+export const ADAPTER_FIELD_TYPES = {
+  string: 'Text',
+  integer: 'Whole number',
+  boolean: 'On or off',
+  list: 'Press Enter or type a comma after each one.',
+  file: 'File'
+};
 
 // ---- Routing numbers: /v1/gateway-clients/registry (publisher/gateway_clients/manager.py) ---- //
 
@@ -87,6 +114,8 @@ export const AUDIT_ACTIONS = {
   'platforms.remove': { label: 'Removed platform', area: 'platforms' },
   'platforms.enable': { label: 'Enabled platform', area: 'platforms' },
   'platforms.disable': { label: 'Disabled platform', area: 'platforms' },
+  'platforms.configure': { label: 'Changed platform settings', area: 'platforms' },
+  'platforms.setup': { label: 'Ran platform setup', area: 'platforms' },
   'gateway_clients.create': { label: 'Added routing number', area: 'gateway_clients' },
   'gateway_clients.update': { label: 'Changed routing number', area: 'gateway_clients' },
   'gateway_clients.enable': { label: 'Enabled routing number', area: 'gateway_clients' },
