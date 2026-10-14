@@ -28,7 +28,7 @@ import Typography from '@mui/material/Typography';
 
 // project imports
 import MainCard from 'components/MainCard';
-import Loader from 'components/Loader';
+import LoadingOverlay from 'components/LoadingOverlay';
 import ErrorDisplay from 'components/ErrorDisplay';
 import { useAuth } from 'contexts/AuthContext';
 import { getErrorMessage } from 'api/admin';
@@ -132,7 +132,6 @@ export default function Credentials() {
     load();
   }, [load]);
 
-  // The API refuses changes to yourself and to credentials holding scopes you lack.
   const lockReason = (credential) => {
     if (!canWrite) return 'You can view users but not change them';
     if (credential.username === me?.username) return "You can't change your own access. Ask another administrator.";
@@ -143,7 +142,6 @@ export default function Credentials() {
 
   const closeMenu = () => setMenu({ anchor: null, credential: null });
 
-  // Like attempt, but a conflict also reloads the list so the other admin's change shows once the dialog closes.
   const guard = (promise, fallback) =>
     attempt(promise, fallback).catch((err) => {
       if (err.conflict) load();
@@ -154,7 +152,6 @@ export default function Credentials() {
     if (form.credential) {
       const unchanged = scopes.length === form.credential.scopes.length && scopes.every((scope) => form.credential.scopes.includes(scope));
       if (unchanged) {
-        // Nothing edited, so nothing is sent (and no empty "Changed user" entry lands in Logs).
         setNotice(`No changes to save for ${form.credential.username}`);
       } else {
         await guard(updateCredential(form.credential.username, { scopes }, form.etag), "We couldn't save their access.");
@@ -294,7 +291,6 @@ export default function Credentials() {
             </Typography>
           </Box>
           <Stack direction="row" sx={{ gap: 1 }}>
-            {/* Picks up changes made elsewhere, e.g. by another admin or ./creds.sh, and fresh sign-in times. */}
             <Button color="secondary" startIcon={<ReloadOutlined spin={refreshing} />} onClick={load} disabled={refreshing}>
               {refreshing ? 'Refreshing…' : 'Refresh'}
             </Button>
@@ -325,105 +321,103 @@ export default function Credentials() {
 
       <Grid size={12}>
         <MainCard content={false}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-              <Loader size={40} fullScreen={false} />
-            </Box>
-          ) : error ? (
+          {error && !loading ? (
             <ErrorDisplay message={error} onRetry={load} />
           ) : (
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Username</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Role</TableCell>
-                    <TableCell>Last sign-in</TableCell>
-                    <TableCell align="right">Sessions</TableCell>
-                    <TableCell>Created</TableCell>
-                    <TableCell align="right" />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {credentials.map((credential) => {
-                    const locked = lockReason(credential);
-                    return (
-                      <TableRow
-                        key={credential.username}
-                        hover
-                        ref={(node) => {
-                          if (node && credential.username === focusUser && !node.dataset.scrolled) {
-                            node.dataset.scrolled = 'true';
-                            node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            <LoadingOverlay loading={loading || refreshing} minHeight={200}>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Username</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Role</TableCell>
+                      <TableCell>Last sign-in</TableCell>
+                      <TableCell align="right">Sessions</TableCell>
+                      <TableCell>Created</TableCell>
+                      <TableCell align="right" />
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {credentials.map((credential) => {
+                      const locked = lockReason(credential);
+                      return (
+                        <TableRow
+                          key={credential.username}
+                          hover
+                          ref={(node) => {
+                            if (node && credential.username === focusUser && !node.dataset.scrolled) {
+                              node.dataset.scrolled = 'true';
+                              node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                            }
+                          }}
+                          sx={
+                            credential.username === focusUser
+                              ? (theme) => ({
+                                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                  boxShadow: `inset 3px 0 0 ${theme.palette.primary.main}`
+                                })
+                              : undefined
                           }
-                        }}
-                        sx={
-                          credential.username === focusUser
-                            ? (theme) => ({
-                                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                boxShadow: `inset 3px 0 0 ${theme.palette.primary.main}`
-                              })
-                            : undefined
-                        }
-                      >
-                        <TableCell sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
-                          {credential.username}
-                          {credential.username === me?.username && (
-                            <Chip size="small" label="You" variant="outlined" sx={{ ml: 1, fontFamily: 'inherit' }} />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            size="small"
-                            label={credential.active ? CREDENTIAL_STATUS.active : CREDENTIAL_STATUS.disabled}
-                            sx={{ bgcolor: credential.active ? 'success.dark' : '#64748B', color: '#fff', fontWeight: 500 }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <RoleChip credential={credential} />
-                        </TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                          <When value={credential.last_login_at} />
-                        </TableCell>
-                        <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {credential.active_sessions}
-                        </TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                          <When value={credential.created_at} />
-                        </TableCell>
-                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                          {canViewLogs && (
-                            <Tooltip title="View activity in Logs">
-                              <IconButton
-                                size="small"
-                                component={RouterLink}
-                                to={`/logs?actor=${encodeURIComponent(credential.username)}`}
-                                aria-label={`Activity for ${credential.username}`}
-                              >
-                                <HistoryOutlined />
-                              </IconButton>
+                        >
+                          <TableCell sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
+                            {credential.username}
+                            {credential.username === me?.username && (
+                              <Chip size="small" label="You" variant="outlined" sx={{ ml: 1, fontFamily: 'inherit' }} />
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              size="small"
+                              label={credential.active ? CREDENTIAL_STATUS.active : CREDENTIAL_STATUS.disabled}
+                              sx={{ bgcolor: credential.active ? 'success.dark' : '#64748B', color: '#fff', fontWeight: 500 }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <RoleChip credential={credential} />
+                          </TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                            <When value={credential.last_login_at} />
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                            {credential.active_sessions}
+                          </TableCell>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                            <When value={credential.created_at} />
+                          </TableCell>
+                          <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                            {canViewLogs && (
+                              <Tooltip title="View activity in Logs">
+                                <IconButton
+                                  size="small"
+                                  component={RouterLink}
+                                  to={`/logs?actor=${encodeURIComponent(credential.username)}`}
+                                  aria-label={`Activity for ${credential.username}`}
+                                >
+                                  <HistoryOutlined />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            <Tooltip title={locked || ''}>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  aria-label={`Actions for ${credential.username}`}
+                                  disabled={Boolean(locked)}
+                                  onClick={(event) => setMenu({ anchor: event.currentTarget, credential })}
+                                >
+                                  <MoreOutlined />
+                                </IconButton>
+                              </span>
                             </Tooltip>
-                          )}
-                          <Tooltip title={locked || ''}>
-                            <span>
-                              <IconButton
-                                size="small"
-                                aria-label={`Actions for ${credential.username}`}
-                                disabled={Boolean(locked)}
-                                onClick={(event) => setMenu({ anchor: event.currentTarget, credential })}
-                              >
-                                <MoreOutlined />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </LoadingOverlay>
           )}
         </MainCard>
       </Grid>

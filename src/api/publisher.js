@@ -113,6 +113,73 @@ export async function listGatewayClients(config) {
   return data;
 }
 
+// ---- platform adapters ---- //
+
+// Every installed adapter, disabled ones included, with version and status. Needs platforms:read.
+export async function listPlatformAdapters(config) {
+  const { data } = await adminApi.get('platforms/adapters', config);
+  return data;
+}
+
+const adapterPath = (id) => `platforms/adapters/${encodeURIComponent(id)}`;
+
+// The adapter and its ETag (see the concurrency note above).
+export async function getPlatformAdapter(id, config) {
+  const response = await adminApi.get(adapterPath(id), config);
+  return { adapter: response.data, etag: response.headers.etag };
+}
+
+export async function setPlatformAdapterEnabled(id, enabled, etag) {
+  const { data } = await adminApi.patch(adapterPath(id), { enabled }, { headers: { 'If-Match': etag } });
+  return data;
+}
+
+// Refused (409) while accounts are linked through it.
+export async function uninstallPlatformAdapter(id, etag) {
+  await adminApi.delete(adapterPath(id), { headers: { 'If-Match': etag } });
+}
+
+// Install and update run as background jobs: these return the job, which getAdapterJob then polls. Administrators only.
+// (The Location header is an absolute URL on the Publisher's host, so poll by the job id instead.)
+export async function installPlatformAdapter({ source_url, tag }) {
+  const { data } = await adminApi.post('platforms/adapters', cleanParams({ source_url, tag }));
+  return data;
+}
+
+export async function updatePlatformAdapter(id, tag) {
+  const { data } = await adminApi.post(`${adapterPath(id)}/update`, cleanParams({ tag }));
+  return data;
+}
+
+export async function getAdapterJob(jobId, config) {
+  const { data } = await adminApi.get(`platforms/adapters/jobs/${encodeURIComponent(jobId)}`, config);
+  return data;
+}
+
+// The last 20 installs and updates, newest first.
+export async function listAdapterJobs(id, config) {
+  const { data } = await adminApi.get(`${adapterPath(id)}/jobs`, config);
+  return data;
+}
+
+// Settings and setup inputs, with the ETag to send back. Administrators only. Secret values are never returned.
+export async function getAdapterConfig(id, config) {
+  const response = await adminApi.get(`${adapterPath(id)}/config`, config);
+  return { config: response.data, etag: response.headers.etag };
+}
+
+// settings: only the ones to change; null removes one. Returns the new config; its ETag is in the response.
+export async function updateAdapterConfig(id, settings, etag) {
+  const response = await adminApi.patch(`${adapterPath(id)}/config`, { settings }, { headers: { 'If-Match': etag } });
+  return { config: response.data, etag: response.headers.etag };
+}
+
+// Runs the adapter's own setup with these inputs and replaces its settings.
+export async function runAdapterSetup(id, inputs, etag) {
+  const response = await adminApi.post(`${adapterPath(id)}/setup`, { inputs }, { headers: { 'If-Match': etag } });
+  return { config: response.data, etag: response.headers.etag };
+}
+
 // ---- credentials ---- //
 
 export async function listCredentials(config) {
