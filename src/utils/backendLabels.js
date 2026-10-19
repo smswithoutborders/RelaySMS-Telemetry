@@ -32,7 +32,9 @@ export const PLATFORMS = {
   mastodon: { name: 'Mastodon', logo: publicFile('mastodon.svg') },
   slack: { name: 'Slack', logo: publicFile('slack.png') },
   // RelaySMS's own email bridge, so it uses the RelaySMS logo.
-  email_bridge: { name: 'Email Bridge', logo: publicFile('RelaySMS-Icon-Default.png') }
+  email_bridge: { name: 'Email Bridge', logo: publicFile('RelaySMS-Icon-Default.png') },
+  // RelaySMS's own mail, for offline messages (publisher/publications.py OFFLINE_CONTENT_PLATFORM).
+  rmail: { name: 'Rmail', logo: publicFile('RelaySMS-Icon-Default.png') }
 };
 
 // platform_name is null when a publication failed before the platform was known.
