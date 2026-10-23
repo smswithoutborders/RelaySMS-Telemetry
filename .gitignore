@@ -110,3 +110,4 @@ dist
 .bak
 
 .env
+*.code-workspace

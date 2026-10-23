@@ -19,7 +19,6 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -34,6 +33,7 @@ import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import MainCard from 'components/MainCard';
 import LoadingOverlay from 'components/LoadingOverlay';
 import ErrorDisplay from 'components/ErrorDisplay';
+import RowActionButton from 'components/RowActionButton';
 import GatewayClientDialog from 'sections/gateway-clients/GatewayClientDialog';
 import { ConfirmDialog } from 'sections/credentials/CredentialDialogs';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
@@ -386,7 +386,7 @@ export default function GatewayClients() {
                         <TableCell>Protocols</TableCell>
                         {fromRegistry && <TableCell>Status</TableCell>}
                         {fromRegistry && <TableCell>Last changed</TableCell>}
-                        {canManage && <TableCell />}
+                        {canManage && <TableCell align="right">Actions</TableCell>}
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -456,13 +456,12 @@ export default function GatewayClients() {
                             )}
                             {canManage && (
                               <TableCell align="right">
-                                <IconButton
-                                  size="small"
+                                <RowActionButton
                                   aria-label={`Actions for ${client.msisdn}`}
                                   onClick={(event) => setMenu({ anchor: event.currentTarget, client })}
                                 >
                                   <MoreOutlined />
-                                </IconButton>
+                                </RowActionButton>
                               </TableCell>
                             )}
                           </TableRow>

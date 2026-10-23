@@ -11,7 +11,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -30,6 +29,7 @@ import Typography from '@mui/material/Typography';
 import MainCard from 'components/MainCard';
 import LoadingOverlay from 'components/LoadingOverlay';
 import ErrorDisplay from 'components/ErrorDisplay';
+import RowActionButton from 'components/RowActionButton';
 import { useAuth } from 'contexts/AuthContext';
 import { getErrorMessage } from 'api/admin';
 import {
@@ -335,7 +335,7 @@ export default function Credentials() {
                       <TableCell>Last sign-in</TableCell>
                       <TableCell align="right">Sessions</TableCell>
                       <TableCell>Created</TableCell>
-                      <TableCell align="right" />
+                      <TableCell align="right">Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -388,26 +388,24 @@ export default function Credentials() {
                           <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                             {canViewLogs && (
                               <Tooltip title="View activity in Logs">
-                                <IconButton
-                                  size="small"
+                                <RowActionButton
                                   component={RouterLink}
                                   to={`/logs?actor=${encodeURIComponent(credential.username)}`}
                                   aria-label={`Activity for ${credential.username}`}
                                 >
                                   <HistoryOutlined />
-                                </IconButton>
+                                </RowActionButton>
                               </Tooltip>
                             )}
                             <Tooltip title={locked || ''}>
                               <span>
-                                <IconButton
-                                  size="small"
+                                <RowActionButton
                                   aria-label={`Actions for ${credential.username}`}
                                   disabled={Boolean(locked)}
                                   onClick={(event) => setMenu({ anchor: event.currentTarget, credential })}
                                 >
                                   <MoreOutlined />
-                                </IconButton>
+                                </RowActionButton>
                               </span>
                             </Tooltip>
                           </TableCell>

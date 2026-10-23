@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 // project imports
 import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
+import RouteErrorPage from 'pages/extra-pages/error';
 import RequireAuth from './RequireAuth';
 import RequireScope from './RequireScope';
 import { SCOPES } from 'utils/scopes';
@@ -26,6 +27,7 @@ const MainRoutes = {
       <DashboardLayout />
     </RequireAuth>
   ),
+  errorElement: <RouteErrorPage />,
   children: [
     {
       path: '/',
