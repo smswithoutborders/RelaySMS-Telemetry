@@ -265,8 +265,8 @@ export default function Publications() {
           </Grid>
 
           <Grid size={12}>
-            <MainCard title="Countries" sx={{ opacity: loading ? 0.6 : 1 }}>
-              <Grid container spacing={3}>
+            <MainCard content={false} sx={{ opacity: loading ? 0.6 : 1 }}>
+              <Grid container>
                 <Grid size={{ xs: 12, md: 7, lg: 8.5 }} sx={{ height: { xs: 320, sm: 420 } }}>
                   <PublicationMap
                     data={data.countries}
@@ -275,7 +275,7 @@ export default function Publications() {
                     onRetry={reload}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, md: 5, lg: 3.5 }} sx={{ maxHeight: 420, overflowY: 'auto', overflowX: 'hidden', px: 1 }}>
+                <Grid size={{ xs: 12, md: 5, lg: 3.5 }} sx={{ maxHeight: 420, overflowY: 'auto', overflowX: 'hidden', p: 2 }}>
                   <BreakdownList
                     rows={countryRows}
                     selectedKey={filters.country_code || undefined}
@@ -322,7 +322,7 @@ export default function Publications() {
                 rows={data.platforms.map((row) => ({
                   ...row,
                   label: row.key ? platformLabel(row.key) : NO_PLATFORM.long,
-                  icon: <PlatformLogo name={row.key} tile />
+                  icon: <PlatformLogo size={24} name={row.key} />
                 }))}
                 selectedKey={filters.platform_name || undefined}
                 onSelect={setDimension('platform_name')}

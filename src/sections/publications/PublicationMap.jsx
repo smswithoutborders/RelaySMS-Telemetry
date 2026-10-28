@@ -27,6 +27,9 @@ export default function PublicationMap({ data, loading = false, error = '', onRe
   const markersRef = useRef([]);
   const containerRef = useRef(null);
   const geoJsonLayerRef = useRef(null);
+  const legendRef = useRef(null);
+  const legendDragRef = useRef(null);
+  const [legendOffset, setLegendOffset] = useState({ x: 0, y: 0 });
 
   const countryData = useMemo(
     () =>
@@ -66,8 +69,8 @@ export default function PublicationMap({ data, loading = false, error = '', onRe
 
         const map = L.map(container, {
           center: [20, 0],
-          zoom: 10,
-          minZoom: 1.4,
+          zoom: 20,
+          minZoom: 1.5,
           maxZoom: 18,
           zoomControl: true,
           attributionControl: true,
@@ -339,6 +342,51 @@ export default function PublicationMap({ data, loading = false, error = '', onRe
     }
   };
 
+  // The legend can be dragged anywhere inside the map. A press that barely moves still counts as a click on a legend item.
+  const handleLegendPointerDown = (event) => {
+    if (event.button !== 0) return;
+    const legend = legendRef.current;
+    const bounds = legend.parentElement.getBoundingClientRect();
+    const rect = legend.getBoundingClientRect();
+    legendDragRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      origin: legendOffset,
+      // how far the legend may travel from where it is now, so it stays inside the map
+      minX: legendOffset.x - (rect.left - bounds.left),
+      maxX: legendOffset.x + (bounds.right - rect.right),
+      minY: legendOffset.y - (rect.top - bounds.top),
+      maxY: legendOffset.y + (bounds.bottom - rect.bottom),
+      moved: false
+    };
+  };
+
+  const handleLegendPointerMove = (event) => {
+    const drag = legendDragRef.current;
+    if (!drag) return;
+    const dx = event.clientX - drag.startX;
+    const dy = event.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+    if (!drag.moved) {
+      drag.moved = true;
+      legendRef.current.setPointerCapture(event.pointerId);
+    }
+    setLegendOffset({
+      x: Math.min(drag.maxX, Math.max(drag.minX, drag.origin.x + dx)),
+      y: Math.min(drag.maxY, Math.max(drag.minY, drag.origin.y + dy))
+    });
+  };
+
+  const handleLegendPointerUp = (event) => {
+    const drag = legendDragRef.current;
+    legendDragRef.current = null;
+    if (drag?.moved) {
+      legendRef.current.releasePointerCapture(event.pointerId);
+      // swallow the click that follows a drag so it doesn't toggle a filter
+      legendRef.current.addEventListener('click', (e) => e.stopPropagation(), { capture: true, once: true });
+    }
+  };
+
   return (
     <>
       <style>
@@ -472,17 +520,29 @@ export default function PublicationMap({ data, loading = false, error = '', onRe
               {isFullscreen ? <FullscreenExitOutlined style={{ fontSize: '18px' }} /> : <FullscreenOutlined style={{ fontSize: '18px' }} />}
             </IconButton>
             <Box
-              sx={(theme) => ({
+              ref={legendRef}
+              title="Drag to move"
+              onPointerDown={handleLegendPointerDown}
+              onPointerMove={handleLegendPointerMove}
+              onPointerUp={handleLegendPointerUp}
+              onPointerCancel={handleLegendPointerUp}
+              sx={{
                 position: 'absolute',
                 bottom: { xs: 10, sm: 20 },
                 left: { xs: 10, sm: 20 },
-                backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                transform: `translate(${legendOffset.x}px, ${legendOffset.y}px)`,
+                backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.65)',
+                backdropFilter: 'blur(6px)',
                 padding: { xs: '8px 12px', sm: '12px 16px' },
-                borderRadius: '4px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 zIndex: 1000,
-                maxWidth: { xs: '140px', sm: 'none' }
-              })}
+                maxWidth: { xs: '140px', sm: 'none' },
+                cursor: 'grab',
+                touchAction: 'none',
+                userSelect: 'none',
+                '&:active': { cursor: 'grabbing' }
+              }}
             >
               <Typography
                 variant="subtitle2"

@@ -22,7 +22,7 @@ function AppContent() {
         algorithm: isDarkMode ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: {
           colorPrimary: theme.palette.primary.main,
-          borderRadius: 4,
+          borderRadius: 8,
           fontSize: 15,
           colorBgContainer: isDarkMode ? '#202020' : '#ffffff',
           colorBorder: isDarkMode ? '#3a3a3a' : '#d9d9d9',

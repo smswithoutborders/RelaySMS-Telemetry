@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
 // material-ui
 import { alpha, useTheme } from '@mui/material/styles';
@@ -128,6 +128,8 @@ export default function PublicationTrendChart({ range, filters }) {
   const mode = theme.palette.mode;
   const status = filters.status;
   const [prefs, setPrefs] = useState(loadPrefs);
+  // useId has colons, which break url(#…) references
+  const gradientId = `trend-fill-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const [hidden, setHidden] = useState(() => new Set());
 
   const periodCount = (step) => listPeriods(range, step).length;
@@ -305,11 +307,28 @@ export default function PublicationTrendChart({ range, filters }) {
             data,
             valueFormatter,
             curve: 'monotoneX',
-            showMark: labels.length <= 31
+            showMark: labels.length <= 31,
+            area: true
           }))}
           slotProps={{ tooltip: { trigger: 'axis' } }}
-          sx={{ ...chartProps.sx, '& .MuiLineElement-root': { strokeWidth: 2 } }}
-        />
+          sx={{
+            ...chartProps.sx,
+            '& .MuiLineElement-root': { strokeWidth: 2 },
+            ...Object.fromEntries(
+              visible.map((s, i) => [`& .MuiAreaElement-root[data-series="${s.id}"]`, { fill: `url(#${gradientId}-${i})` }])
+            )
+          }}
+        >
+          {/* each series fades from its colour to transparent at the baseline */}
+          <defs>
+            {visible.map((s, i) => (
+              <linearGradient key={s.id} id={`${gradientId}-${i}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={s.color} stopOpacity={theme.palette.mode === 'dark' ? 0.3 : 0.22} />
+                <stop offset="100%" stopColor={s.color} stopOpacity={0} />
+              </linearGradient>
+            ))}
+          </defs>
+        </LineChart>
       ) : (
         <BarChart
           {...chartProps}

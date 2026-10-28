@@ -44,6 +44,7 @@ const MainCard = forwardRef(function MainCard(
           bgcolor: 'background.paper',
           border: border ? '1px solid' : 'none',
           borderRadius: 1,
+          ...(!content && { overflow: 'hidden' }),
           borderColor: theme.palette.mode === 'dark' ? 'divider' : 'grey.A800',
           boxShadow: boxShadow && !border ? shadow || theme.customShadows.z1 : 'inherit',
           ':hover': {
