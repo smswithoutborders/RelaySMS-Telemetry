@@ -40,7 +40,7 @@ export default function ThemeCustomization({ children }) {
   };
 
   const theme = Palette(mode, 'default');
-  const themeTypography = Typography('Public Sans', 'sans-serif');
+  const themeTypography = Typography("'Mona Sans Variable', sans-serif", "'Unbounded Variable', sans-serif");
   const themeCustomShadows = useMemo(() => CustomShadows(theme), [theme]);
 
   const themeOptions = useMemo(
@@ -61,6 +61,9 @@ export default function ThemeCustomization({ children }) {
           paddingTop: 8,
           paddingBottom: 8
         }
+      },
+      shape: {
+        borderRadius: 8
       },
       palette: theme.palette,
       customShadows: themeCustomShadows,

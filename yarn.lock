@@ -864,6 +864,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/mona-sans@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/mona-sans@npm:5.3.0"
+  checksum: 10c0/0be6f5ea39d60267568a519ece0fe6af057a344007e982f9cf3ce5d7d7f407b27259a824903ed1812f92a8d929d25f059aab452e7d47b24e9d8bef07dee193b7
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/unbounded@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/unbounded@npm:5.3.0"
+  checksum: 10c0/81571c2a37fc48ab587e66bbc0aaca35d815a80b6e6c55e91fc0a5202af91cd44b8c7b0d2c4181a0836fa7b876b04eabffc757af7e50ff1fbb076bab32848984
+  languageName: node
+  linkType: hard
+
 "@fontsource/inter@npm:5.3.0":
   version: 5.3.0
   resolution: "@fontsource/inter@npm:5.3.0"
@@ -5177,6 +5191,8 @@ __metadata:
     "@eslint/compat": "npm:1.4.1"
     "@eslint/eslintrc": "npm:^3.3.7"
     "@eslint/js": "npm:9.39.5"
+    "@fontsource-variable/mona-sans": "npm:^5.3.0"
+    "@fontsource-variable/unbounded": "npm:^5.3.0"
     "@fontsource/inter": "npm:5.3.0"
     "@fontsource/poppins": "npm:5.3.0"
     "@fontsource/public-sans": "npm:5.3.0"

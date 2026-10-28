@@ -13,13 +13,18 @@ import Loader from 'components/Loader';
 import Breadcrumbs from 'components/@extended/Breadcrumbs';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import { DRAWER_WIDTH } from 'config';
+
+const CORNER_RADIUS = 14;
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
 export default function DashboardLayout() {
   const { pathname } = useLocation();
-  const { menuMasterLoading } = useGetMenuMaster();
+  const { menuMaster, menuMasterLoading } = useGetMenuMaster();
   const downXL = useMediaQuery((theme) => theme.breakpoints.down('xl'));
+  const downLG = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+  const drawerOpen = menuMaster?.isDashboardDrawerOpened;
 
   // set media wise responsive drawer
   useEffect(() => {
@@ -32,6 +37,36 @@ export default function DashboardLayout() {
     <Box sx={{ display: 'flex', width: '100%' }}>
       <Header />
       <Drawer />
+
+      {/* rounded inner corner where the header and drawer borders meet */}
+      {drawerOpen && !downLG && (
+        <Box
+          aria-hidden
+          sx={(theme) => ({
+            position: 'fixed',
+            top: theme.mixins.toolbar.minHeight,
+            left: DRAWER_WIDTH - 1,
+            width: CORNER_RADIUS,
+            height: CORNER_RADIUS,
+            overflow: 'hidden',
+            pointerEvents: 'none',
+            zIndex: 1200,
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: CORNER_RADIUS * 2,
+              height: CORNER_RADIUS * 2,
+              borderTopLeftRadius: CORNER_RADIUS,
+              borderTop: '1px solid',
+              borderLeft: '1px solid',
+              borderColor: 'divider',
+              boxShadow: `0 0 0 ${CORNER_RADIUS}px ${theme.palette.background.paper}`
+            }
+          })}
+        />
+      )}
 
       <Box component="main" sx={{ width: 'calc(100% - 260px)', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
         <Toolbar sx={{ mt: 'inherit' }} />
