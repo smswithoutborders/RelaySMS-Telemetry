@@ -106,7 +106,7 @@ export default function Palette(mode, presetColor) {
   // Softer status colours for published/failed, the same in both modes. Checked with the dataviz palette validator:
   // passes on white and on the #181818 dark card, and stays apart for red-green colour blindness (ΔE 10.4).
   // `dark` is the deeper shade for white text on solid chips (4.8:1 and 5.8:1).
-  paletteColor.success = { ...paletteColor.success, main: '#46AB7B', dark: '#2C8159' };
+  paletteColor.success = { ...paletteColor.success, main: '#2d6a4f', dark: 'rgb(32, 96, 66)' };
   paletteColor.error = { ...paletteColor.error, main: '#BF4844', dark: '#B03F3C' };
 
   return createTheme({

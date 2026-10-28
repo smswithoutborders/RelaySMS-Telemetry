@@ -90,7 +90,7 @@ export default function BreakdownList({ rows, emptyText = 'No data in this perio
                         {row.failed > 0 && <Box sx={{ flex: row.failed, bgcolor: 'error.main' }} />}
                       </>
                     ) : (
-                      <Box sx={{ flex: 1, bgcolor: 'primary.main' }} />
+                      <Box sx={(theme) => ({ flex: 1, bgcolor: '#bfbfbf', ...theme.applyStyles('dark', { bgcolor: '#595959' }) })} />
                     )}
                   </Box>
                 </Tooltip>

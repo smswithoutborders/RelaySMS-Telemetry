@@ -1,6 +1,6 @@
 // ==============================|| DEFAULT THEME - TYPOGRAPHY ||============================== //
 
-export default function Typography(fontFamily) {
+export default function Typography(fontFamily, headingFontFamily = fontFamily) {
   return {
     htmlFontSize: 16,
     fontFamily,
@@ -9,26 +9,31 @@ export default function Typography(fontFamily) {
     fontWeightMedium: 500,
     fontWeightBold: 600,
     h1: {
+      fontFamily: headingFontFamily,
       fontWeight: 600,
       fontSize: '2.5rem',
       lineHeight: 1.21
     },
     h2: {
+      fontFamily: headingFontFamily,
       fontWeight: 600,
       fontSize: '2rem',
       lineHeight: 1.27
     },
     h3: {
+      fontFamily: headingFontFamily,
       fontWeight: 600,
       fontSize: '1.625rem',
       lineHeight: 1.33
     },
     h4: {
+      fontFamily: headingFontFamily,
       fontWeight: 600,
       fontSize: '1.375rem',
       lineHeight: 1.4
     },
     h5: {
+      fontFamily: headingFontFamily,
       fontWeight: 600,
       fontSize: '1.125rem',
       lineHeight: 1.5
