@@ -7,12 +7,15 @@ import { previousRange } from 'utils/publications';
 
 // ==============================|| PUBLICATION STATS ||============================== //
 
+const STATUSES = ['published', 'rejected', 'failed'];
+const REASON_STATUSES = ['failed', 'rejected'];
+const emptyCounts = () => ({ total: 0, published: 0, rejected: 0, failed: 0 });
+
 function countByStatus(groups) {
-  const totals = { total: 0, published: 0, failed: 0 };
+  const totals = emptyCounts();
   groups.forEach(({ status, count }) => {
     totals.total += count;
-    if (status === 'published') totals.published += count;
-    else if (status === 'failed') totals.failed += count;
+    if (STATUSES.includes(status)) totals[status] += count;
   });
   return totals;
 }
@@ -21,10 +24,9 @@ export function foldByStatus(groups, key) {
   const rows = new Map();
   groups.forEach((group) => {
     const id = group[key] ?? null;
-    const row = rows.get(id) || { key: id, total: 0, published: 0, failed: 0 };
+    const row = rows.get(id) || { key: id, ...emptyCounts() };
     row.total += group.count;
-    if (group.status === 'published') row.published += group.count;
-    else if (group.status === 'failed') row.failed += group.count;
+    if (STATUSES.includes(group.status)) row[group.status] += group.count;
     rows.set(id, row);
   });
   return [...rows.values()].sort((a, b) => b.total - a.total);
@@ -36,12 +38,14 @@ export default function usePublicationStats({ range, filters, withReasons }) {
   const reload = useCallback(() => setReloadKey((key) => key + 1), []);
   const sinceMs = range.since.valueOf();
   const untilMs = range.until.valueOf();
+  const filtersKey = JSON.stringify(filters);
 
   useEffect(() => {
     const controller = new AbortController();
     const config = { signal: controller.signal };
     const current = { ...filters, since: range.since, until: range.until };
     const previous = { ...filters, ...previousRange(range) };
+    const reasonStatuses = (filters.status.length ? filters.status : REASON_STATUSES).filter((status) => REASON_STATUSES.includes(status));
 
     setState((prev) => ({ ...prev, loading: true, error: '' }));
 
@@ -51,8 +55,8 @@ export default function usePublicationStats({ range, filters, withReasons }) {
       getPublicationSummary({ groupBy: ['platform_name', 'status'], filters: current }, config),
       getPublicationSummary({ groupBy: ['protocol', 'status'], filters: current }, config),
       getPublicationSummary({ groupBy: ['country_code'], filters: current }, config),
-      withReasons && filters.status !== 'published'
-        ? getPublicationSummary({ groupBy: ['failure_reason'], filters: { ...current, status: 'failed' } }, config)
+      withReasons && reasonStatuses.length
+        ? getPublicationSummary({ groupBy: ['status', 'failure_reason'], filters: { ...current, status: reasonStatuses } }, config)
         : Promise.resolve(null)
     ])
       .then(([totals, previousTotals, platforms, protocols, countries, reasons]) => {
@@ -76,7 +80,7 @@ export default function usePublicationStats({ range, filters, withReasons }) {
 
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sinceMs, untilMs, filters.status, filters.platform_name, filters.protocol, filters.country_code, withReasons, reloadKey]);
+  }, [sinceMs, untilMs, filtersKey, withReasons, reloadKey]);
 
   return { ...state, reload };
 }
@@ -85,6 +89,7 @@ export function useTrendStats({ range, filters, interval }) {
   const [state, setState] = useState({ loading: true, error: '', data: null });
   const sinceMs = range.since.valueOf();
   const untilMs = range.until.valueOf();
+  const filtersKey = JSON.stringify(filters);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -105,7 +110,7 @@ export function useTrendStats({ range, filters, interval }) {
       });
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sinceMs, untilMs, interval, filters.status, filters.platform_name, filters.protocol, filters.country_code]);
+  }, [sinceMs, untilMs, interval, filtersKey]);
 
   return state;
 }

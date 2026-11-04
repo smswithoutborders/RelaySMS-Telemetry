@@ -48,7 +48,7 @@ export function PlatformCell({ name }) {
 PlatformCell.propTypes = { name: PropTypes.string };
 
 export function StatusChip({ status }) {
-  const fill = status === 'published' ? 'success.dark' : status === 'failed' ? 'error.dark' : 'secondary.main';
+  const fill = { published: 'success.dark', rejected: 'rejected.dark', failed: 'error.dark' }[status] ?? 'secondary.main';
   return <Chip size="small" label={label.status(status)} sx={{ bgcolor: fill, color: '#fff', fontWeight: 500 }} />;
 }
 
@@ -99,7 +99,7 @@ export default function PublicationTable({ filters, filtersKey, withReasons, pre
                 <TableCell>Platform</TableCell>
                 <TableCell>Protocol</TableCell>
                 <TableCell>Status</TableCell>
-                {withReasons && <TableCell>Failure reason</TableCell>}
+                {withReasons && <TableCell>Reason</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>

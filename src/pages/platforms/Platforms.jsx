@@ -181,14 +181,14 @@ function PlatformCard({ platform, usage, onMenu, canOpenUsers }) {
             Changed {dayjs(platform.updated_at).fromNow()} by{' '}
             {platform.updated_by ? (
               canOpenUsers ? (
-                <Link component={RouterLink} to={`/users?user=${encodeURIComponent(platform.updated_by)}`} underline="hover">
+                <Link component={RouterLink} to={`/managers?manager=${encodeURIComponent(platform.updated_by)}`} underline="hover">
                   {platform.updated_by}
                 </Link>
               ) : (
                 platform.updated_by
               )
             ) : (
-              'the command line or a removed user'
+              'the command line or a removed manager'
             )}
           </Typography>
         </Stack>
@@ -304,7 +304,7 @@ export default function Platforms() {
             setConfirm({
               title: `Disable ${adapter.display_name || adapter.name}?`,
               message:
-                'It is hidden from users, so no one can link it or publish through it. It still revokes tokens for accounts already linked. You can enable it again any time.',
+                'It is hidden from RelaySMS users, so no one can link it or publish through it. It still revokes tokens for accounts already linked. You can enable it again any time.',
               confirmLabel: 'Disable',
               danger: true,
               run: async () => {

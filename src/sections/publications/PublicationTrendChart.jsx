@@ -52,7 +52,6 @@ const STEP_NOTE = {
 };
 const NO_GROUPS = [];
 
-// Remembers this viewer's last view and style; storage can be unavailable, so it's best effort.
 function loadPrefs() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -128,17 +127,14 @@ export default function PublicationTrendChart({ range, filters }) {
   const mode = theme.palette.mode;
   const status = filters.status;
   const [prefs, setPrefs] = useState(loadPrefs);
-  // useId has colons, which break url(#…) references
   const gradientId = `trend-fill-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const [hidden, setHidden] = useState(() => new Set());
 
   const periodCount = (step) => listPeriods(range, step).length;
   const stepAllowed = (step) => periodCount(step) >= 2 && periodCount(step) <= MAX_PERIODS;
-  // The remembered step if it suits this range, otherwise the one the range calls for (day, week or month).
   const step = prefs.step && stepAllowed(prefs.step) ? prefs.step : pickInterval(range);
 
   const { data: trend, loading, error } = useTrendStats({ range, filters, interval: step });
-  // Until the new step's data arrives, keep drawing the old data with its own step and range.
   const interval = trend?.interval ?? step;
   const periodsRange = trend?.range ?? range;
   const groups = trend?.byStatus ?? NO_GROUPS;
@@ -163,15 +159,10 @@ export default function PublicationTrendChart({ range, filters }) {
 
     if (prefs.view === 'status') {
       const data = seriesData(periods, groups, interval, (group) => group.status);
-      const list = [
-        status !== 'failed' && {
-          id: 'published',
-          label: PUBLICATION_STATUS.published,
-          color: theme.palette.success.main,
-          data: data('published')
-        },
-        status !== 'published' && { id: 'failed', label: PUBLICATION_STATUS.failed, color: theme.palette.error.main, data: data('failed') }
-      ].filter(Boolean);
+      const colors = { published: theme.palette.success.main, rejected: theme.palette.rejected.main, failed: theme.palette.error.main };
+      const list = Object.keys(colors)
+        .filter((id) => !status.length || status.includes(id))
+        .map((id) => ({ id, label: PUBLICATION_STATUS[id], color: colors[id], data: data(id) }));
       return { labels: periods.map((key) => formatPeriod(key, interval)), series: list.map((s) => ({ ...s, valueFormatter })) };
     }
 
@@ -319,7 +310,6 @@ export default function PublicationTrendChart({ range, filters }) {
             )
           }}
         >
-          {/* each series fades from its colour to transparent at the baseline */}
           <defs>
             {visible.map((s, i) => (
               <linearGradient key={s.id} id={`${gradientId}-${i}`} x1="0" y1="0" x2="0" y2="1">

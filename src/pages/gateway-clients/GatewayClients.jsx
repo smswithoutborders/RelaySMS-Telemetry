@@ -163,7 +163,6 @@ export default function GatewayClients() {
   const columns = (fromRegistry ? 7 : 5) + (canManage ? 1 : 0);
   const reload = () => setReloadKey((key) => key + 1);
 
-  // Like attempt, but a conflict also reloads the list so the other admin's change shows once the dialog closes.
   const guard = (promise, fallback) =>
     attempt(promise, fallback).catch((err) => {
       if (err.conflict) reload();
@@ -439,7 +438,7 @@ export default function GatewayClients() {
                                     canOpenUsers ? (
                                       <Link
                                         component={RouterLink}
-                                        to={`/users?user=${encodeURIComponent(client.updated_by)}`}
+                                        to={`/managers?manager=${encodeURIComponent(client.updated_by)}`}
                                         underline="hover"
                                       >
                                         {client.updated_by}
@@ -449,7 +448,7 @@ export default function GatewayClients() {
                                     )
                                   ) : (
                                     // The registry leaves this empty for the CLI and for users removed since.
-                                    'the command line or a removed user'
+                                    'the command line or a removed manager'
                                   )}
                                 </Typography>
                               </TableCell>

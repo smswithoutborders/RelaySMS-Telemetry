@@ -13,9 +13,6 @@ import { SCOPES } from 'utils/scopes';
 
 // ==============================|| MENU ITEMS - DASHBOARD ||============================== //
 
-// Grouped by job: watching delivery, the delivery network, and who has access.
-// `scope` hides an item from users without it; a group with no visible items is hidden.
-
 export const analytics = {
   id: 'group-analytics',
   title: 'Analytics',
@@ -72,10 +69,10 @@ export const administration = {
   type: 'group',
   children: [
     {
-      id: 'users',
-      title: 'Users',
+      id: 'managers',
+      title: 'Managers',
       type: 'item',
-      url: '/users',
+      url: '/managers',
       icon: TeamOutlined,
       breadcrumbs: false,
       scope: SCOPES.CREDS_READ

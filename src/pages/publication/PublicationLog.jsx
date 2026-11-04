@@ -26,7 +26,7 @@ import ArrowLeftOutlined from '@ant-design/icons/ArrowLeftOutlined';
 export default function PublicationLog() {
   const { hasScope } = useAuth();
   const withReasons = hasScope(SCOPES.STATS_REASONS);
-  const { filterValue, setFilterValue, reset, refresh, range, listFilters, filtersKey, search } = usePublicationFilters();
+  const { filterValue, setFilterValue, pending, reset, refresh, range, listFilters, filtersKey, search } = usePublicationFilters();
   const options = useFilterOptions(range);
 
   return (
@@ -49,7 +49,14 @@ export default function PublicationLog() {
       </Grid>
 
       <Grid size={12}>
-        <PublicationFilters value={filterValue} options={options} onChange={setFilterValue} onReset={reset} onRefresh={refresh} />
+        <PublicationFilters
+          value={filterValue}
+          options={options}
+          onChange={setFilterValue}
+          onReset={reset}
+          onRefresh={refresh}
+          busy={pending}
+        />
       </Grid>
 
       <Grid size={12}>

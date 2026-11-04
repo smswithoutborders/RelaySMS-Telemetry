@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 // project imports
 import Loadable from 'components/Loadable';
@@ -17,6 +17,11 @@ const GatewayClients = Loadable(lazy(() => import('pages/gateway-clients/Gateway
 const Credentials = Loadable(lazy(() => import('pages/credentials/Credentials')));
 const Logs = Loadable(lazy(() => import('pages/logs/Logs')));
 const NotFound = Loadable(lazy(() => import('pages/extra-pages/notfound')));
+
+function RedirectKeepingQuery({ to }) {
+  const { search } = useLocation();
+  return <Navigate to={`${to}${search}`} replace />;
+}
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -50,7 +55,8 @@ const MainRoutes = {
     { path: 'open-telemetry', element: <Navigate to="/" replace /> },
     { path: 'reliability', element: <Navigate to="/routing-numbers" replace /> },
     { path: 'gateway-clients', element: <Navigate to="/routing-numbers" replace /> },
-    { path: 'credentials', element: <Navigate to="/users" replace /> },
+    { path: 'credentials', element: <RedirectKeepingQuery to="/managers" /> },
+    { path: 'users', element: <RedirectKeepingQuery to="/managers" /> },
     { path: 'documentation', element: <Navigate to="/" replace /> },
     { path: 'support', element: <Navigate to="/" replace /> },
     {
@@ -62,7 +68,7 @@ const MainRoutes = {
       element: <GatewayClients />
     },
     {
-      path: 'users',
+      path: 'managers',
       element: (
         <RequireScope scope={SCOPES.CREDS_READ}>
           <Credentials />

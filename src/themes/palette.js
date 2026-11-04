@@ -108,6 +108,9 @@ export default function Palette(mode, presetColor) {
   // `dark` is the deeper shade for white text on solid chips (4.8:1 and 5.8:1).
   paletteColor.success = { ...paletteColor.success, main: '#2d6a4f', dark: 'rgb(32, 96, 66)' };
   paletteColor.error = { ...paletteColor.error, main: '#BF4844', dark: '#B03F3C' };
+  // Rejected publications: an amber between the two, kept apart from the red (ΔE 15.2 normal, 11.4 deutan).
+  // `dark` takes white chip text at 5.1:1.
+  paletteColor.rejected = { main: '#C7820F', dark: '#9A6200', contrastText: '#fff' };
 
   return createTheme({
     palette: {
