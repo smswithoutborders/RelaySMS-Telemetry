@@ -25,7 +25,6 @@ import { ALL_SCOPES, PERMISSION_GROUPS, withRequiredScopes, withoutOrphanedScope
 import CopyOutlined from '@ant-design/icons/CopyOutlined';
 import CheckOutlined from '@ant-design/icons/CheckOutlined';
 
-// Matches the Publisher's username rule.
 const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._-]{2,31}$/;
 const CANT_GRANT = "You can't give access you don't have yourself";
 
@@ -60,7 +59,7 @@ export function PermissionPicker({ value, onChange, grantable, disabled }) {
             Permissions
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {isAdmin ? 'Full access: this user will be an administrator.' : 'Managing something includes viewing it.'}
+            {isAdmin ? 'Full access: this manager will be an administrator.' : 'Managing something includes viewing it.'}
           </Typography>
         </Box>
         {!isAdmin && !canGrantAdmin ? (
@@ -119,7 +118,7 @@ PermissionPicker.propTypes = {
   disabled: PropTypes.bool
 };
 
-// ==============================|| ADD / EDIT USER ||============================== //
+// ==============================|| ADD / EDIT MANAGER ||============================== //
 
 export function CredentialFormDialog({ open, credential, grantable, onClose, onSubmit }) {
   const editing = Boolean(credential);
@@ -156,7 +155,7 @@ export function CredentialFormDialog({ open, credential, grantable, onClose, onS
     <Dialog open={open} onClose={submitting ? undefined : onClose} maxWidth="sm" fullWidth scroll="paper">
       <form onSubmit={handleSubmit} style={{ display: 'contents' }}>
         <DialogTitle>
-          {editing ? `Change access for ${credential.username}` : 'Add a user'}
+          {editing ? `Change access for ${credential.username}` : 'Add a manager'}
           {/* {!editing && (
             <Typography component="span" variant="body2" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
               They get a password to sign in to this dashboard. You&apos;ll see it once, after adding them.
@@ -192,7 +191,7 @@ export function CredentialFormDialog({ open, credential, grantable, onClose, onS
               Cancel
             </Button>
             <Button type="submit" variant="contained" disabled={!canSubmit}>
-              {submitting ? 'Saving…' : editing ? 'Save access' : 'Add user'}
+              {submitting ? 'Saving…' : editing ? 'Save access' : 'Add manager'}
             </Button>
           </Stack>
         </DialogActions>

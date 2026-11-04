@@ -15,7 +15,6 @@ function cleanParams(params) {
 
 // ---- publication stats ---- //
 
-// filters: { since, until, status, platform_name, protocol, country_code }
 export async function getPublicationSummary({ groupBy = ['status'], interval, filters = {} } = {}, config) {
   const { data } = await adminApi.get('stats/publications/summary', {
     ...config,
@@ -85,10 +84,6 @@ export async function createGatewayClient(client) {
   return data;
 }
 
-// Concurrency: changes send If-Match with the ETag of the version the user was shown. Read it with the record when
-// opening the dialog or action, not right before sending, or another admin's change in between is silently overwritten.
-// A mismatch comes back as 412.
-
 // The current registry entry and its ETag.
 export async function getGatewayClient(id, config) {
   const response = await adminApi.get(`gateway-clients/registry/${encodeURIComponent(id)}`, config);
@@ -139,8 +134,6 @@ export async function uninstallPlatformAdapter(id, etag) {
   await adminApi.delete(adapterPath(id), { headers: { 'If-Match': etag } });
 }
 
-// Install and update run as background jobs: these return the job, which getAdapterJob then polls. Administrators only.
-// (The Location header is an absolute URL on the Publisher's host, so poll by the job id instead.)
 export async function installPlatformAdapter({ source_url, tag }) {
   const { data } = await adminApi.post('platforms/adapters', cleanParams({ source_url, tag }));
   return data;

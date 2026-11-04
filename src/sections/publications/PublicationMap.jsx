@@ -15,7 +15,27 @@ countries.registerLocale(enLocale);
 
 const coordsByCountry = countryCoords.byCountry();
 
-export default function PublicationMap({ data, loading = false, error = '', onRetry, selectedCountry, onCountrySelect }) {
+// Country borders for the map. A large file, so it's downloaded and parsed once per page load and reused each time
+// the map redraws with new data. A failed load is forgotten so the next draw tries again.
+const COUNTRY_SHAPES_URL = 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson';
+let countryShapes = null;
+function loadCountryShapes() {
+  if (!countryShapes) {
+    countryShapes = fetch(COUNTRY_SHAPES_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .catch((error) => {
+        countryShapes = null;
+        throw error;
+      });
+  }
+  return countryShapes;
+}
+
+// selectedCountries: the countries in the filter. onCountrySelect(code) toggles one.
+export default function PublicationMap({ data, loading = false, error = '', onRetry, selectedCountries = [], onCountrySelect }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -116,9 +136,10 @@ export default function PublicationMap({ data, loading = false, error = '', onRe
 
         markersRef.current = [];
 
-        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
-          .then((response) => response.json())
+        loadCountryShapes()
           .then((data) => {
+            // The map was replaced while the shapes loaded.
+            if (mapInstanceRef.current !== map) return;
             const geoJsonLayer = L.geoJSON(data, {
               style: (feature) => {
                 const countryCode = feature.properties['ISO3166-1-Alpha-2'];
@@ -178,7 +199,7 @@ export default function PublicationMap({ data, loading = false, error = '', onRe
                   );
 
                   layer.on('click', function () {
-                    onCountrySelect?.(countryCode === selectedCountry ? null : countryCode);
+                    onCountrySelect?.(countryCode);
                   });
 
                   layer.on('mouseover', function (e) {
@@ -257,19 +278,17 @@ export default function PublicationMap({ data, loading = false, error = '', onRe
   useEffect(() => {
     if (!mapLoaded || markersRef.current.length === 0) return;
 
+    const selected = new Set(selectedCountries);
+    const chosen = [];
     markersRef.current.forEach(({ layer, color, countryCode, originalOpacity }) => {
-      if (selectedCountry && countryCode === selectedCountry) {
+      if (selected.has(countryCode)) {
         layer.setStyle({
           fillOpacity: 1,
           weight: 3,
           color: '#f1a35aff'
         });
-        layer.openPopup();
-        if (mapInstanceRef.current) {
-          const bounds = layer.getBounds();
-          mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 0.5 });
-        }
-      } else if (selectedCountry) {
+        chosen.push(layer);
+      } else if (selected.size) {
         layer.setStyle({
           fillOpacity: 0.3,
           weight: 1,
@@ -284,7 +303,15 @@ export default function PublicationMap({ data, loading = false, error = '', onRe
         layer.closePopup();
       }
     });
-  }, [selectedCountry, mapLoaded, isDarkMode]);
+    // One country: open its popup. Several: fit the view around all of them.
+    if (chosen.length === 1) chosen[0].openPopup();
+    else chosen.forEach((layer) => layer.closePopup());
+    if (chosen.length && mapInstanceRef.current) {
+      const bounds = chosen.reduce((all, layer) => all.extend(layer.getBounds()), chosen[0].getBounds().pad(0));
+      mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 0.5 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCountries.join(','), mapLoaded, isDarkMode]);
 
   const handleRetry = () => {
     setMapError('');
@@ -608,6 +635,6 @@ PublicationMap.propTypes = {
   loading: PropTypes.bool,
   error: PropTypes.string,
   onRetry: PropTypes.func,
-  selectedCountry: PropTypes.string,
+  selectedCountries: PropTypes.arrayOf(PropTypes.string),
   onCountrySelect: PropTypes.func
 };
