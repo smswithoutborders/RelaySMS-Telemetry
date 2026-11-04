@@ -125,12 +125,11 @@ DebouncedInput.propTypes = { value: PropTypes.string, onCommit: PropTypes.func }
 
 // ==============================|| CELLS ||============================== //
 
-// A username that opens that user on the Users page, for viewers who can see users.
 function UserLink({ username, canOpen }) {
   if (!canOpen) return <span>{username}</span>;
   return (
-    <Tooltip title="Show in Users">
-      <Link component={RouterLink} to={`/users?user=${encodeURIComponent(username)}`} underline="hover" sx={{ fontWeight: 500 }}>
+    <Tooltip title="Show in Managers">
+      <Link component={RouterLink} to={`/managers?manager=${encodeURIComponent(username)}`} underline="hover" sx={{ fontWeight: 500 }}>
         {username}
       </Link>
     </Tooltip>
@@ -333,7 +332,12 @@ export default function Logs() {
               onCommit={set('actor')}
               style={{ width: 200 }}
             />
-            <DebouncedInput placeholder="Done to (user or platform)" value={value.target} onCommit={set('target')} style={{ width: 220 }} />
+            <DebouncedInput
+              placeholder="Done to (manager or platform)"
+              value={value.target}
+              onCommit={set('target')}
+              style={{ width: 220 }}
+            />
             <Button
               type="text"
               icon={<ReloadOutlined />}

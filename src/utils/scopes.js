@@ -27,7 +27,7 @@ export const PERMISSION_GROUPS = [
       {
         scope: SCOPES.STATS_REASONS,
         short: 'Failure reasons',
-        label: 'See why publications failed',
+        label: 'See why publications failed or were rejected',
         hint: 'Shows failure reasons in charts, the list and exports'
       }
     ]
@@ -51,16 +51,16 @@ export const PERMISSION_GROUPS = [
     ]
   },
   {
-    id: 'users',
-    title: 'Users',
+    id: 'managers',
+    title: 'Managers',
     description: 'Who can sign in to this dashboard and the API',
     permissions: [
-      { scope: SCOPES.CREDS_READ, short: 'View', label: 'View users', hint: 'See users, their access and when they last signed in' },
+      { scope: SCOPES.CREDS_READ, short: 'View', label: 'View managers', hint: 'See managers, their access and when they last signed in' },
       {
         scope: SCOPES.CREDS_WRITE,
         short: 'Manage',
-        label: 'Manage users',
-        hint: 'Add and remove users, change their access, reset passwords and sign them out'
+        label: 'Manage managers',
+        hint: 'Add and remove managers, change their access, reset passwords and sign them out'
       }
     ]
   },
@@ -73,7 +73,7 @@ export const PERMISSION_GROUPS = [
         scope: SCOPES.AUDIT_READ,
         short: 'View',
         label: 'View logs',
-        hint: 'See sign-ins and changes, for the areas they can view (users, routing numbers, platforms)'
+        hint: 'See sign-ins and changes, for the areas they can view (managers, routing numbers, platforms)'
       }
     ]
   }

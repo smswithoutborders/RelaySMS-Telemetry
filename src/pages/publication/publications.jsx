@@ -40,6 +40,10 @@ import ArrowRightOutlined from '@ant-design/icons/ArrowRightOutlined';
 
 const PREVIEW_ROWS = 8;
 
+// The Platforms and reasons lists: a fixed height so the two cards match, scrolling when the list is longer.
+// The side padding keeps the rows' hover background, which bleeds 8px past the text, from being clipped.
+const SCROLL_LIST_SX = { height: 360, overflowY: 'auto', mx: -1, px: 1, scrollbarWidth: 'thin' };
+
 // Tooltip body for a total: what it counts, then how its trend is worked out with the numbers on screen.
 function TileHelp({ what, steps }) {
   return (
@@ -101,10 +105,23 @@ export default function Publications() {
   const { hasScope } = useAuth();
   const withReasons = hasScope(SCOPES.STATS_REASONS);
 
-  const { filterValue, setFilterValue, setDimension, reset, refresh, range, filters, listFilters, filtersKey, search } =
-    usePublicationFilters();
+  const {
+    filterValue,
+    setFilterValue,
+    setDimension,
+    excludeCountry,
+    pending,
+    reset,
+    refresh,
+    range,
+    filters,
+    listFilters,
+    filtersKey,
+    search
+  } = usePublicationFilters();
 
   const { data, loading, error, reload } = usePublicationStats({ range, filters, withReasons });
+  const busy = loading || pending;
   const options = useFilterOptions(range);
   // const isDarkMode = useTheme().palette.mode === 'dark';
   const logLink = `/publications/log${search}`;
@@ -149,6 +166,7 @@ export default function Publications() {
           options={options}
           onChange={setFilterValue}
           onReset={reset}
+          busy={busy}
           onRefresh={() => {
             refresh();
             reload();
@@ -179,7 +197,7 @@ export default function Publications() {
           )}
 
           <Grid size={12}>
-            <SummaryRow sx={{ opacity: loading ? 0.6 : 1 }}>
+            <SummaryRow columns={5} sx={{ opacity: busy ? 0.6 : 1 }}>
               <ChangeTile
                 title="Publications"
                 value={totals.total}
@@ -187,7 +205,7 @@ export default function Publications() {
                 extra="vs previous period"
                 info={
                   <TileHelp
-                    what="Every publish attempt in the selected dates and filters, published or failed."
+                    what="Every publish attempt in the selected dates and filters: published, rejected or failed."
                     steps={changeSteps(totals.total, previousTotals.total, previousLabel)}
                   />
                 }
@@ -205,6 +223,19 @@ export default function Publications() {
                 }
               />
               <ChangeTile
+                title="Rejected"
+                value={totals.rejected}
+                previous={previousTotals.rejected}
+                extra="Refused before sending"
+                increaseIsBad
+                info={
+                  <TileHelp
+                    what="Attempts the offline publishing settings refused, such as a protocol that isn't allowed or a missing or invalid offline tag. They were never sent to the platform."
+                    steps={changeSteps(totals.rejected, previousTotals.rejected, previousLabel)}
+                  />
+                }
+              />
+              <ChangeTile
                 title="Failed"
                 value={totals.failed}
                 previous={previousTotals.failed}
@@ -212,7 +243,7 @@ export default function Publications() {
                 increaseIsBad
                 info={
                   <TileHelp
-                    what="Attempts that didn't reach the platform. More failures is bad, so a rise shows in red."
+                    what="Attempts that were sent but didn't reach the platform. More failures is bad, so a rise shows in red."
                     steps={changeSteps(totals.failed, previousTotals.failed, previousLabel)}
                   />
                 }
@@ -227,7 +258,7 @@ export default function Publications() {
                 }
                 info={
                   <TileHelp
-                    what="Out of every 100 attempts, how many were published. Published ÷ all attempts × 100."
+                    what="Out of every 100 attempts, how many were published. Published ÷ all attempts × 100, so rejected and failed attempts both lower it."
                     steps={[
                       successRate === null
                         ? 'No attempts in these dates yet.'
@@ -265,12 +296,12 @@ export default function Publications() {
           </Grid>
 
           <Grid size={12}>
-            <MainCard content={false} sx={{ opacity: loading ? 0.6 : 1 }}>
+            <MainCard content={false} sx={{ opacity: busy ? 0.6 : 1 }}>
               <Grid container>
                 <Grid size={{ xs: 12, md: 7, lg: 8.5 }} sx={{ height: { xs: 320, sm: 420 } }}>
                   <PublicationMap
                     data={data.countries}
-                    selectedCountry={filters.country_code || null}
+                    selectedCountries={filters.country_code}
                     onCountrySelect={setDimension('country_code')}
                     onRetry={reload}
                   />
@@ -278,8 +309,9 @@ export default function Publications() {
                 <Grid size={{ xs: 12, md: 5, lg: 3.5 }} sx={{ maxHeight: 420, overflowY: 'auto', overflowX: 'hidden', p: 2 }}>
                   <BreakdownList
                     rows={countryRows}
-                    selectedKey={filters.country_code || undefined}
+                    selectedKeys={filters.country_code}
                     onSelect={setDimension('country_code')}
+                    onExclude={excludeCountry}
                   />
                 </Grid>
               </Grid>
@@ -287,18 +319,18 @@ export default function Publications() {
           </Grid>
 
           <Grid size={{ xs: 12, lg: 8 }}>
-            <MainCard title="Publications over time" sx={{ height: '100%', opacity: loading ? 0.6 : 1 }}>
+            <MainCard title="Publications over time" sx={{ height: '100%', opacity: busy ? 0.6 : 1 }}>
               <PublicationTrendChart range={range} filters={filters} />
             </MainCard>
           </Grid>
           <Grid size={{ xs: 12, lg: 4 }}>
-            <MainCard title="Protocols" sx={{ height: '100%', opacity: loading ? 0.6 : 1 }}>
+            <MainCard title="Protocols" sx={{ height: '100%', opacity: busy ? 0.6 : 1 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 How messages reached the Publisher. Click one to filter.
               </Typography>
               <BreakdownList
                 rows={data.protocols.map((row) => ({ ...row, label: protocolLabel(row.key) }))}
-                selectedKey={filters.protocol || undefined}
+                selectedKeys={filters.protocol}
                 onSelect={setDimension('protocol')}
               />
               {data.protocols.length > 0 && (
@@ -314,36 +346,49 @@ export default function Publications() {
           </Grid>
 
           <Grid size={{ xs: 12, lg: withReasons ? 6 : 12 }}>
-            <MainCard title="Platforms" sx={{ height: '100%', opacity: loading ? 0.6 : 1 }}>
+            <MainCard title="Platforms" sx={{ height: '100%', opacity: busy ? 0.6 : 1 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Publications per platform, split into published and failed. Click one to filter.
+                Publications per platform, split into published, rejected and failed. Click one to filter.
               </Typography>
-              <BreakdownList
-                rows={data.platforms.map((row) => ({
-                  ...row,
-                  label: row.key ? platformLabel(row.key) : NO_PLATFORM.long,
-                  icon: <PlatformLogo size={24} name={row.key} />
-                }))}
-                selectedKey={filters.platform_name || undefined}
-                onSelect={setDimension('platform_name')}
-              />
+              <Box sx={SCROLL_LIST_SX}>
+                <BreakdownList
+                  rows={data.platforms.map((row) => ({
+                    ...row,
+                    label: row.key ? platformLabel(row.key) : NO_PLATFORM.long,
+                    icon: <PlatformLogo size={24} name={row.key} />
+                  }))}
+                  selectedKeys={filters.platform_name}
+                  onSelect={setDimension('platform_name')}
+                />
+              </Box>
             </MainCard>
           </Grid>
           {withReasons && (
             <Grid size={{ xs: 12, lg: 6 }}>
-              <MainCard title="Failure reasons" sx={{ height: '100%', opacity: loading ? 0.6 : 1 }}>
+              <MainCard title="Failure and rejection reasons" sx={{ height: '100%', opacity: busy ? 0.6 : 1 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Why failed publications didn&apos;t go through.
+                  Why publications didn&apos;t go through. Amber bars were rejected, red bars failed.
                 </Typography>
-                <BreakdownList
-                  rows={(data.reasons || []).map(({ failure_reason: reason, count }) => ({
-                    key: reason,
-                    label: label.failureReason(reason),
-                    total: count
-                  }))}
-                  emptyText={filters.status === 'published' ? 'Clear the Published filter to see failures' : 'No failures in this period'}
-                  maxRows={12}
-                />
+                <Box sx={SCROLL_LIST_SX}>
+                  <BreakdownList
+                    rows={(data.reasons || [])
+                      .map(({ status, failure_reason: reason, count }) => ({
+                        key: `${status}:${reason}`,
+                        label: label.failureReason(reason),
+                        total: count,
+                        published: 0,
+                        rejected: status === 'rejected' ? count : 0,
+                        failed: status === 'failed' ? count : 0
+                      }))
+                      .sort((a, b) => b.total - a.total)}
+                    emptyText={
+                      filters.status.length && !filters.status.some((status) => status !== 'published')
+                        ? 'Add Failed or Rejected to the status filter to see reasons'
+                        : 'Nothing failed or was rejected in this period'
+                    }
+                    showRate={false}
+                  />
+                </Box>
               </MainCard>
             </Grid>
           )}

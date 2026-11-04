@@ -66,7 +66,9 @@ async function attempt(promise, fallback) {
   } catch (error) {
     // 412: the user changed after this dialog loaded them (If-Match no longer matches).
     if (error.response?.status === 412) {
-      const conflict = new Error('Someone else changed this user while you had this open. Close it to see their change, then try again.');
+      const conflict = new Error(
+        'Someone else changed this manager while you had this open. Close it to see their change, then try again.'
+      );
       conflict.conflict = true;
       throw conflict;
     }
@@ -92,7 +94,7 @@ function When({ value, empty = 'Never' }) {
 
 When.propTypes = { value: PropTypes.string, empty: PropTypes.string };
 
-// ==============================|| USERS ||============================== //
+// ==============================|| MANAGERS ||============================== //
 
 export default function Credentials() {
   const { credential: me, hasScope } = useAuth();
@@ -109,9 +111,8 @@ export default function Credentials() {
   const [notice, setNotice] = useState('');
 
   const [refreshing, setRefreshing] = useState(false);
-  // ?user=jane (e.g. from a name in Logs) scrolls to and highlights that user.
   const [searchParams, setSearchParams] = useSearchParams();
-  const focusUser = searchParams.get('user');
+  const focusUser = searchParams.get('manager') ?? searchParams.get('user');
   const canViewLogs = hasScope(SCOPES.AUDIT_READ);
   const focusMissing = Boolean(focusUser) && !loading && !error && !credentials.some((c) => c.username === focusUser);
 
@@ -121,7 +122,7 @@ export default function Credentials() {
     try {
       setCredentials(await listCredentials());
     } catch (err) {
-      setError(getErrorMessage(err, "We couldn't load users."));
+      setError(getErrorMessage(err, "We couldn't load managers."));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -133,10 +134,10 @@ export default function Credentials() {
   }, [load]);
 
   const lockReason = (credential) => {
-    if (!canWrite) return 'You can view users but not change them';
+    if (!canWrite) return 'You can view managers but not change them';
     if (credential.username === me?.username) return "You can't change your own access. Ask another administrator.";
     if (credential.scopes.some((scope) => !myScopes.includes(scope)))
-      return "This user has access you don't have, so only an administrator can change them";
+      return "This manager has access you don't have, so only an administrator can change them";
     return null;
   };
 
@@ -158,7 +159,7 @@ export default function Credentials() {
         setNotice(`Access for ${form.credential.username} saved`);
       }
     } else {
-      const created = await attempt(createCredential({ username, scopes }), "We couldn't add the user.");
+      const created = await attempt(createCredential({ username, scopes }), "We couldn't add the manager.");
       setPassword({ username: created.username, password: created.password });
     }
     setForm({ open: false, credential: null });
@@ -185,7 +186,7 @@ export default function Credentials() {
               confirmLabel: 'Disable',
               danger: true,
               run: async () => {
-                await guard(updateCredential(credential.username, { active: false }, etag), "We couldn't disable this user.");
+                await guard(updateCredential(credential.username, { active: false }, etag), "We couldn't disable this manager.");
                 setNotice(`${credential.username} disabled`);
                 load();
               }
@@ -197,7 +198,7 @@ export default function Credentials() {
           icon: <CheckCircleOutlined />,
           onClick: async () => {
             try {
-              await guard(updateCredential(credential.username, { active: true }, etag), "We couldn't enable this user.");
+              await guard(updateCredential(credential.username, { active: true }, etag), "We couldn't enable this manager.");
               setNotice(`${credential.username} enabled`);
               load();
             } catch (err) {
@@ -240,17 +241,17 @@ export default function Credentials() {
     },
     {
       key: 'delete',
-      label: 'Remove user',
+      label: 'Remove manager',
       icon: <DeleteOutlined />,
       danger: true,
       onClick: () =>
         setConfirm({
           title: `Remove ${credential.username}?`,
           message: 'They lose access for good, and any scripts using their login stop working. This can’t be undone.',
-          confirmLabel: 'Remove user',
+          confirmLabel: 'Remove manager',
           danger: true,
           run: async () => {
-            await guard(deleteCredential(credential.username, etag), "We couldn't remove this user.");
+            await guard(deleteCredential(credential.username, etag), "We couldn't remove this manager.");
             setNotice(`${credential.username} removed`);
             load();
           }
@@ -274,7 +275,7 @@ export default function Credentials() {
       setNotice(
         err.response?.status === 404
           ? `${listed.username} no longer exists. The list is up to date now.`
-          : getErrorMessage(err, "We couldn't load this user.")
+          : getErrorMessage(err, "We couldn't load this manager.")
       );
       load();
     }
@@ -285,7 +286,7 @@ export default function Credentials() {
       <Grid size={12}>
         <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ justifyContent: 'space-between', alignItems: { sm: 'center' }, gap: 1 }}>
           <Box>
-            <Typography variant="h5">Users</Typography>
+            <Typography variant="h5">Managers</Typography>
             <Typography variant="body2" color="text.secondary">
               People who can sign in to this dashboard and the Publisher API, and what each of them can do
             </Typography>
@@ -296,7 +297,7 @@ export default function Credentials() {
             </Button>
             {canWrite && (
               <Button variant="contained" startIcon={<PlusOutlined />} onClick={() => setForm({ open: true, credential: null })}>
-                Add user
+                Add manager
               </Button>
             )}
           </Stack>
@@ -306,7 +307,7 @@ export default function Credentials() {
       {focusMissing && (
         <Grid size={12}>
           <Alert severity="warning" onClose={() => setSearchParams({}, { replace: true })}>
-            There&apos;s no user called <strong>{focusUser}</strong> any more. They may have been removed or renamed.
+            There&apos;s no manager called <strong>{focusUser}</strong> any more. They may have been removed or renamed.
           </Alert>
         </Grid>
       )}
@@ -314,7 +315,7 @@ export default function Credentials() {
       {!canWrite && (
         <Grid size={12}>
           <Alert severity="info">
-            You can see who has access. To add or change users, ask an administrator for the Manage users permission.
+            You can see who has access. To add or change managers, ask an administrator for the Manage managers permission.
           </Alert>
         </Grid>
       )}

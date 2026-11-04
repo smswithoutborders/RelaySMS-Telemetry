@@ -10,6 +10,7 @@
 
 export const PUBLICATION_STATUS = {
   published: 'Published',
+  rejected: 'Rejected',
   failed: 'Failed'
 };
 
@@ -31,18 +32,20 @@ export const PLATFORMS = {
   bluesky: { name: 'Bluesky', logo: publicFile('Bluesky_Logo.png') },
   mastodon: { name: 'Mastodon', logo: publicFile('mastodon.svg') },
   slack: { name: 'Slack', logo: publicFile('slack.png') },
-  // RelaySMS's own email bridge, so it uses the RelaySMS logo.
   email_bridge: { name: 'Email Bridge', logo: publicFile('RelaySMS-Icon-Default.png') },
-  // RelaySMS's own mail, for offline messages (publisher/publications.py OFFLINE_CONTENT_PLATFORM).
   rmail: { name: 'Rmail', logo: publicFile('RelaySMS-Icon-Default.png') }
 };
 
-// platform_name is null when a publication failed before the platform was known.
-export const NO_PLATFORM = { short: 'Unknown', long: 'Unknown (failed before the platform was known)' };
+// platform_name is null when a publication failed or was rejected before the platform was known.
+export const NO_PLATFORM = { short: 'Unknown', long: 'Unknown (stopped before the platform was known)' };
 
 // failure_reason → friendlier wording. Reasons not listed are shown as the Publisher wrote them.
+// Rejected publications use the same field for why they were refused.
 export const FAILURE_REASONS = {
-  unexpected_error: 'Unexpected error'
+  unexpected_error: 'Unexpected error',
+  protocol_not_allowed: 'Protocol not allowed',
+  offline_tag_missing: 'Offline tag missing',
+  offline_tag_invalid: 'Offline tag invalid'
 };
 
 // ---- Platforms: /v1/platforms (lib_relaysms_payload_specs: V1PayloadsSupportedProtocols, V1ContentCategories) ---- //
@@ -106,11 +109,11 @@ export const CREDENTIAL_STATUS = { active: 'Active', disabled: 'Disabled' };
 export const AUDIT_ACTIONS = {
   'auth.login': { label: 'Signed in', area: 'auth' },
   'auth.logout': { label: 'Signed out', area: 'auth' },
-  'creds.create': { label: 'Added user', area: 'creds' },
-  'creds.update': { label: 'Changed user', area: 'creds' },
+  'creds.create': { label: 'Added manager', area: 'creds' },
+  'creds.update': { label: 'Changed manager', area: 'creds' },
   'creds.reset_password': { label: 'Reset password', area: 'creds' },
-  'creds.revoke_sessions': { label: 'Signed user out everywhere', area: 'creds' },
-  'creds.delete': { label: 'Removed user', area: 'creds' },
+  'creds.revoke_sessions': { label: 'Signed manager out everywhere', area: 'creds' },
+  'creds.delete': { label: 'Removed manager', area: 'creds' },
   'platforms.add': { label: 'Installed platform', area: 'platforms' },
   'platforms.update': { label: 'Updated platform', area: 'platforms' },
   'platforms.remove': { label: 'Removed platform', area: 'platforms' },
@@ -130,7 +133,7 @@ export const FAILED_LOGIN_LABEL = 'Sign-in failed';
 
 export const AUDIT_AREAS = [
   { id: 'auth', label: 'Sign-ins' },
-  { id: 'creds', label: 'Users' },
+  { id: 'creds', label: 'Managers' },
   { id: 'platforms', label: 'Platforms' },
   { id: 'gateway_clients', label: 'Routing numbers' }
 ];

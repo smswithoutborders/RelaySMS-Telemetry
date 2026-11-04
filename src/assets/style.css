@@ -1,3 +1,9 @@
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+.filter-multi .ant-select-selector {
+  max-height: 64px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
